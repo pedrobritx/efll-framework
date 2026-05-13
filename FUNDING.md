@@ -1,3 +1,0 @@
-# Supported funding model platforms
-
-[buy_me_a_coffee] (https://buymeacoffee.com/pedrobritx)
