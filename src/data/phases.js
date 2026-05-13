@@ -1,0 +1,106 @@
+import { Sun, Headphones, Target, PenLine, MessagesSquare, RefreshCw, Tv } from 'lucide-react';
+
+// Default minute allocations (sum to 60). These can be overridden per archetype later.
+// [warm-up, input, focus on form, controlled, communicative, feedback, bridge]
+export const DEFAULT_PHASE_MINUTES = [7, 11, 9, 9, 13, 6, 5];
+
+export const PHASES = [
+  {
+    id: 1, name: 'Warm-up & Schema Activation', time: '5–8 min', defaultMin: 7, icon: Sun,
+    purpose: 'Lower the affective filter; activate prior knowledge and target-language schema; transition learners from L1-dominant cognition.',
+    sla: 'Krashen — affective filter; schema theory',
+    activities: [
+      { name: 'Personal question rotation', best: 'All levels', sla: 'Krashen — low-anxiety input' },
+      { name: 'Vocabulary brainstorm on board', best: 'A1–B1', sla: 'Nation — lexical activation' },
+      { name: '"Two truths and a lie" (level-adapted)', best: 'A2+', sla: 'Norton — identity work' },
+      { name: 'Image / meme prompt: "What\'s happening here?"', best: 'A2+', sla: 'Schema activation' },
+      { name: '30-second free recall of last lesson', best: 'All', sla: 'Spaced retrieval (Schmitt)' },
+      { name: 'Quick poll on unit theme', best: 'All', sla: 'Engagement (Schmitt)' },
+      { name: '"What did you notice in [recommended content]?"', best: 'B1+', sla: "Schmidt's noticing + informal-input bridge" },
+    ],
+  },
+  {
+    id: 2, name: 'Input & Noticing', time: '10–12 min', defaultMin: 11, icon: Headphones,
+    purpose: 'Provide comprehensible input at i+1; engineer noticing of target features.',
+    sla: 'Krashen — comprehensible input; Schmidt — noticing',
+    activities: [
+      { name: 'Authentic video clip (3–5 min, with strategic pausing)', best: 'A2+', sla: 'Krashen — comprehensible input' },
+      { name: 'Reading text with input enhancement (bolded targets)', best: 'A2+', sla: 'Schmidt — typographic noticing' },
+      { name: 'Listening jigsaw (different segments per learner)', best: 'B1+', sla: 'Long — interaction + input' },
+      { name: 'Story-based input (TPRS-style narrative)', best: 'A1–B1', sla: 'Krashen — story listening' },
+      { name: 'Podcast snippet with transcript', best: 'B1+', sla: 'Multimodal input' },
+      { name: 'Teacher narrative with target structures recycled', best: 'All', sla: 'Krashen — modified input' },
+      { name: 'Dictogloss (listen, reconstruct in pairs)', best: 'B1+', sla: 'Swain — noticing + output' },
+    ],
+  },
+  {
+    id: 3, name: 'Focus on Form', time: '8–10 min', defaultMin: 9, icon: Target,
+    purpose: 'Language-focused learning (Nation strand 3); explicit attention to a target feature noticed in Phase 2.',
+    sla: 'Ellis — explicit instruction; Lantolf — concept-based',
+    activities: [
+      { name: 'Inductive rule discovery: "What\'s the pattern?"', best: 'A2+', sla: 'Ellis — explicit instruction' },
+      { name: 'Direct mini-lesson with examples', best: 'A1, complex forms', sla: 'Norris & Ortega — explicit is fine' },
+      { name: 'Concept-based instruction (underlying logic before form)', best: 'B1+', sla: 'Lantolf — SCT' },
+      { name: 'Contrastive analysis with L1 (translanguaging)', best: 'All', sla: 'García & Wei — L1 as resource' },
+      { name: 'Error correction collective: anonymized errors on board', best: 'B1+', sla: 'Lyster & Ranta — prompts' },
+      { name: 'Metalinguistic discussion in L1 or L2', best: 'All', sla: 'Swain — metatalk' },
+    ],
+  },
+  {
+    id: 4, name: 'Controlled Practice', time: '8–10 min', defaultMin: 9, icon: PenLine,
+    purpose: 'Safe hypothesis testing; build accuracy and fluency in the target feature.',
+    sla: 'Swain — hypothesis testing; DeKeyser — automatization',
+    activities: [
+      { name: 'Gap-fill / sentence transformation', best: 'A1–B1', sla: 'Form-focused practice' },
+      { name: 'Sentence-builder dominoes', best: 'A1–B1', sla: 'Engagement (Schmitt)' },
+      { name: 'Drill chains (chained questions around the circle)', best: 'A1–A2', sla: 'Automatization (DeKeyser)' },
+      { name: 'Mingle activity (find someone who…)', best: 'A2+', sla: 'Output + interaction' },
+      { name: 'Information gap (two-way)', best: 'A2+', sla: 'Long — negotiation of meaning' },
+      { name: 'Picture description with target structure', best: 'A2+', sla: 'Pushed output (Swain)' },
+      { name: 'Sentence transformation against time', best: 'B1+', sla: 'Fluency development' },
+    ],
+  },
+  {
+    id: 5, name: 'Communicative Task', time: '12–15 min', defaultMin: 13, icon: MessagesSquare,
+    purpose: 'Genuine task with non-linguistic outcome (Ellis 2003); learners use language as a means to an end.',
+    sla: 'Ellis — TBLT; Long — interaction',
+    activities: [
+      { name: 'Decision-making task (rank, choose, plan)', best: 'A2+', sla: 'Ellis — task with outcome' },
+      { name: 'Problem-solving task (escape room, mystery)', best: 'B1+', sla: 'TBLT' },
+      { name: 'Role-play with non-linguistic goal', best: 'B1+', sla: 'Ellis — real-world task' },
+      { name: 'Opinion gap with required consensus', best: 'B1+', sla: 'Long — interaction' },
+      { name: 'Project micro-task (design, propose, present)', best: 'B1+', sla: 'TBLT — extended task' },
+      { name: 'Mini-presentation with Q&A', best: 'B1+', sla: 'Output + interaction' },
+      { name: 'Debate (structured)', best: 'B2+', sla: 'Argumentation, register' },
+      { name: 'Collaborative writing (Google Docs live)', best: 'B1+', sla: 'Swain — collaborative dialogue' },
+      { name: 'Storytelling with prompts', best: 'A2+', sla: 'Narrative output' },
+    ],
+  },
+  {
+    id: 6, name: 'Feedback & Reflection', time: '5–7 min', defaultMin: 6, icon: RefreshCw,
+    purpose: 'Graduated corrective feedback; metacognitive reflection on learning.',
+    sla: 'Lyster & Ranta — uptake; Aljaafreh & Lantolf — ZPD-calibrated',
+    activities: [
+      { name: 'Reformulation gallery: anonymized errors corrected collectively', best: 'A2+', sla: 'Lyster & Ranta — prompts' },
+      { name: 'Self-correction with recorded output', best: 'B1+', sla: 'Swain — noticing gaps' },
+      { name: 'Peer feedback with rubric', best: 'B1+', sla: 'Sociocultural — peer mediation' },
+      { name: 'Graduated CF in real time (summarized here)', best: 'All', sla: 'Aljaafreh & Lantolf — ZPD' },
+      { name: 'Exit ticket: "One thing I learned / one I\'m unsure about"', best: 'All', sla: 'Metacognition' },
+      { name: 'Recast log (track high-frequency errors weekly)', best: 'All', sla: 'Lyster & Ranta — longitudinal' },
+    ],
+  },
+  {
+    id: 7, name: 'Informal-Input Bridge', time: '3–5 min', defaultMin: 5, icon: Tv,
+    purpose: 'Curricular handoff to informal digital input — the thesis-aligned move that distinguishes this template from generic CLT.',
+    sla: 'Schmidt + Nation (strand 1) + Norton (investment)',
+    activities: [
+      { name: '"This week, watch / listen / read X" with a specific noticing task', best: 'All', sla: 'Schmidt + Nation strand 1' },
+      { name: 'Vocabulary scavenger hunt in recommended content', best: 'A2+', sla: 'Schmitt — engagement' },
+      { name: 'Series club: one episode per week, brief in-class discussion', best: 'B1+', sla: 'Extensive viewing (Krashen)' },
+      { name: 'Podcast journal: short reflection on one episode', best: 'B2+', sla: 'Strand 1 + strand 2' },
+      { name: 'Lyric analysis assignment with a specific song', best: 'A2+', sla: 'Affective + lexical' },
+      { name: '"Find an example of [target form] in real content"', best: 'B1+', sla: 'Noticing in the wild' },
+      { name: 'Recommend-back: learner suggests content to teacher', best: 'B1+', sla: 'Norton — investment, agency' },
+    ],
+  },
+];
