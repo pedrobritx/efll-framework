@@ -1,6 +1,8 @@
-# EFLL · English as a Foreign Language Lesson Framework
+# EFLL Framework
 
-A CEFR-anchored macro grid (6 levels × 6 themes) and a seven-phase micro template for 60-minute lessons, grounded in SLA research from Krashen to Lyster and calibrated for Brazilian EFL classrooms. Pick a level and theme in **Part 02**, an activity per phase in **Part 03**, and **Part 04** assembles the lesson — downloadable as PDF, copyable as Markdown.
+**The English as a Foreign Language Lesson Framework** — a CEFR-anchored macro grid (6 levels × 6 themes) and a seven-phase micro template for 60-minute lessons, grounded in second language acquisition research and calibrated for Brazilian EFL classrooms.
+
+Pick a level and theme in **Part 02**, an activity per phase in **Part 03**, and **Part 04** assembles the lesson — downloadable as PDF, copyable as Markdown. **Part 05** documents the SLA scholarship the framework rests on.
 
 ## Local development
 

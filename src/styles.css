@@ -1093,6 +1093,76 @@ html, body { background: var(--paper); }
   font-size: 14px;
 }
 
+/* ─── PART 5 · REFERENCES ─── */
+.lf-references-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 32px;
+}
+@media (max-width: 700px) {
+  .lf-references-grid { grid-template-columns: 1fr; }
+}
+.lf-ref-group {
+  background: var(--paper-deep);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.lf-ref-group-head { display: flex; flex-direction: column; gap: 6px; }
+.lf-ref-group-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+.lf-ref-group-anchor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+  padding-bottom: 14px;
+  border-bottom: 1px dotted var(--line);
+}
+.lf-ref-list { list-style: none; display: flex; flex-direction: column; gap: 18px; padding: 0; margin: 0; }
+.lf-ref-item {
+  font-family: 'Newsreader', serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  padding-bottom: 16px;
+  border-bottom: 1px dotted rgba(199, 184, 154, 0.5);
+}
+.lf-ref-item:last-child { border-bottom: none; padding-bottom: 0; }
+.lf-ref-citation { color: var(--ink-soft); }
+.lf-ref-author { color: var(--ink); font-weight: 500; }
+.lf-ref-year {
+  color: var(--wine);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.lf-ref-title { font-style: italic; color: var(--ink); }
+.lf-ref-venue { color: var(--ink-mute); font-size: 13px; }
+.lf-ref-note {
+  margin-top: 8px;
+  font-style: italic;
+  color: var(--ink-mute);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.lf-ref-note::before {
+  content: '→ ';
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 500;
+}
+
 /* ─── PRINCIPLES / FOOTER ─── */
 .lf-principles {
   background: var(--wine-deep);
@@ -1160,7 +1230,7 @@ html, body { background: var(--paper); }
 .lf-footer {
   background: var(--ink);
   color: var(--paper-deep);
-  padding: 56px 32px;
+  padding: 56px 32px 48px;
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -1177,10 +1247,43 @@ html, body { background: var(--paper); }
   text-transform: none;
   letter-spacing: -0.02em;
   color: var(--gold);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   display: block;
 }
-.lf-footer-line { color: var(--ink-mute); margin-top: 24px; }
+.lf-footer-sub { color: var(--paper-deep); }
+.lf-footer-line { color: var(--ink-mute); margin-top: 20px; text-transform: none; letter-spacing: 0; font-family: 'Newsreader', serif; font-size: 13px; font-style: italic; }
+
+.lf-footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin: 28px auto 0;
+  padding: 24px 0 4px;
+  border-top: 1px solid rgba(184, 146, 74, 0.18);
+  max-width: 900px;
+}
+.lf-footer-link {
+  color: var(--paper-deep);
+  text-decoration: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border-bottom: 1px solid transparent;
+}
+.lf-footer-link:hover {
+  color: var(--gold);
+  border-bottom-color: rgba(184, 146, 74, 0.4);
+}
+.lf-footer-link svg { opacity: 0.7; }
+.lf-footer-link:hover svg { opacity: 1; }
 
 .lf-ornament {
   text-align: center;
@@ -1235,13 +1338,14 @@ html, body { background: var(--paper); }
 
   /* Hide everything except the composed lesson preview */
   .lf-nav, .lf-grain, .lf-hero,
-  #overview, #macro, #micro,
+  #overview, #macro, #micro, #references,
   .lf-principles, .lf-footer,
   .lf-section-header,
   .lf-compose-actions-bar,
   .lf-compose-example-actions,
   .lf-compose-activity-swap,
-  .lf-ornament {
+  .lf-ornament,
+  .lf-toast {
     display: none !important;
   }
 

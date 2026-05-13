@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Check, Printer, Copy, RotateCcw, Pencil, ArrowDown } from 'lucide-react';
+import { Check, Printer, Copy, RotateCcw, Pencil, ArrowDown, Mail, Linkedin, Github, ExternalLink } from 'lucide-react';
 
 import { THEMES } from './data/themes.js';
 import { LEVELS } from './data/levels.js';
 import { MACRO } from './data/macro.js';
 import { PHASES } from './data/phases.js';
 import { EXAMPLES } from './data/examples.js';
+import { REFERENCE_GROUPS } from './data/references.js';
 
 const STORAGE_KEY = 'lf-selections';
 const SCHEMA_VERSION = 1;
@@ -145,7 +146,7 @@ export default function App() {
       md += `${example}\n\n`;
       md += `> **SLA grounding:** ${activity.sla}\n\n`;
     });
-    md += `\n---\n*Generated with the English with Pedro lesson framework.*\n`;
+    md += `\n---\n*Generated with the EFLL Framework — English as a Foreign Language Lesson Framework — by Pedro Brito.*\n`;
     return md;
   };
 
@@ -210,13 +211,14 @@ export default function App() {
         }}
       >
         <div className="lf-nav-inner">
-          <div className="lf-monogram">EwP<span>·</span>framework</div>
+          <div className="lf-monogram">EFLL<span>·</span>framework</div>
           <div className="lf-nav-links">
             {[
               { id: 'overview', label: '01 Overview' },
               { id: 'macro', label: '02 Macro' },
               { id: 'micro', label: '03 Micro' },
               { id: 'compose', label: '04 Compose' },
+              { id: 'references', label: '05 References' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -232,19 +234,19 @@ export default function App() {
 
       {/* HERO */}
       <header className="lf-hero">
-        <div className="lf-eyebrow">A pedagogical framework · Brazilian EFL · Hybrid digital + formal</div>
+        <div className="lf-eyebrow">EFLLF · A pedagogical framework for Brazilian EFL</div>
         <h1>
-          A lesson plan framework <em>for the streaming era</em>
+          English as a Foreign Language <em>Lesson Framework</em>
         </h1>
         <p className="lf-hero-sub">
-          Two interlocking layers. A <strong>macro</strong> grid of CEFR-anchored thematic units with informal-input
-          bridges built in. A <strong>micro</strong> seven-phase lesson template grounded in SLA research from Krashen
-          to Lyster, calibrated for Brazilian classrooms — binational centers, mass-market franchises, private tutoring,
-          and self-study.
+          A two-layer framework for planning English lessons in Brazilian EFL contexts. The <strong>macro</strong>
+          layer is a CEFR-anchored grid of six thematic units (A1–C2) paired with informal-input recommendations. The
+          <strong> micro</strong> layer is a seven-phase, 60-minute lesson template grounded in second language
+          acquisition research. Designed for binational centers, language franchises, private tutoring, and self-study.
         </p>
         <div className="lf-hero-meta">
           <div className="lf-hero-meta-item"><div>Levels</div><div>A1 → C2 · CEFR Companion Vol.</div></div>
-          <div className="lf-hero-meta-item"><div>Themes</div><div>Six durable, spiraling domains</div></div>
+          <div className="lf-hero-meta-item"><div>Themes</div><div>Six durable, spiralling domains</div></div>
           <div className="lf-hero-meta-item"><div>Lesson template</div><div>Seven phases · 60 minutes</div></div>
           <div className="lf-hero-meta-item"><div>Context</div><div>EFL Brazil · four institutional tracks</div></div>
         </div>
@@ -313,9 +315,9 @@ export default function App() {
             <div className="lf-section-kicker">The macro grid</div>
             <h2>Pick a level, <em>then a theme.</em></h2>
             <p className="lf-section-desc">
-              Choose where your learner lives on the CEFR map (A1 → C2) and which thematic unit you're teaching. Your
-              selections feed directly into the lesson composer at the bottom — the themes spiral, so food at A1 becomes
-              food sustainability at B2 becomes the philosophy of food at C1.
+              Choose a CEFR level (A1–C2) and a thematic unit. Selections feed the lesson composer in Part 04. The
+              six themes spiral across levels — <em>food</em> at A1 becomes <em>food sustainability</em> at B2 becomes
+              <em> the philosophy of food</em> at C1.
             </p>
           </div>
         </div>
@@ -416,8 +418,9 @@ export default function App() {
             <h2>Pick a phase, <em>then an activity.</em></h2>
             <p className="lf-section-desc">
               Step through the seven phases of a 60-minute lesson. For each phase, click an activity card to mark your
-              choice — your selections flow into the lesson composer below. The phases are grounded in SLA research from
-              Krashen to Lyster, and Phase 7 — the informal-input bridge — is the framework's signature move.
+              choice — selections flow into the composer below. The phase sequence is grounded in second language
+              acquisition research; Phase 7 — the informal-input bridge — extends classroom work into the digital
+              content learners already consume.
             </p>
           </div>
         </div>
@@ -531,9 +534,9 @@ export default function App() {
             <div className="lf-section-kicker">The composed lesson</div>
             <h2>Your lesson plan, <em>ready to teach.</em></h2>
             <p className="lf-section-desc">
-              A live preview built from your selections above — level and theme from Part 02, phase activities from
-              Part 03. Each phase carries a concrete prompt from the library; click the pencil to tailor it. When you're
-              ready, download a PDF or copy the plan as Markdown.
+              A live preview assembled from your selections — level and theme from Part 02, phase activities from
+              Part 03. Each phase carries a concrete prompt from the library; click the pencil to edit. When ready,
+              download a PDF or copy the plan as Markdown.
             </p>
           </div>
         </div>
@@ -713,32 +716,105 @@ export default function App() {
       {/* PRINCIPLES */}
       <section className="lf-principles">
         <div className="lf-principles-inner">
-          <div className="lf-principles-tag">Three closing commitments</div>
-          <h2>The framework holds <em>only if</em> these three things hold.</h2>
+          <div className="lf-principles-tag">Three commitments</div>
+          <h2>The framework <em>rests on</em> three commitments.</h2>
 
           <div className="lf-principles-list">
             <div className="lf-principle">
               <h4>Informal input is curricular, not residual.</h4>
-              <p>A lesson that ends without an informal-input bridge has not closed the loop the framework argues for. Phase 7 is non-optional.</p>
+              <p>A lesson that ends without an informal-input bridge hasn't closed the loop the framework argues for. Phase 7 is non-optional.</p>
             </div>
             <div className="lf-principle">
-              <h4>L1 is a tool, not a contaminant.</h4>
+              <h4>L1 is a resource, not a contaminant.</h4>
               <p>Strategic Portuguese in Phases 3 and 6 supports rather than undermines L2 acquisition. Translanguaging is permission, not problem.</p>
             </div>
             <div className="lf-principle">
               <h4>Variability is the norm.</h4>
-              <p>Complex Dynamic Systems Theory means learners will not progress linearly through the macro grid. The framework is a spiral, not a staircase.</p>
+              <p>Complex Dynamic Systems Theory tells us learners don't progress linearly through the macro grid. The framework is a spiral, not a staircase.</p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* PART 5 — REFERENCES */}
+      <section id="references" className="lf-section lf-references">
+        <div className="lf-section-header">
+          <div className="lf-section-num">05</div>
+          <div className="lf-section-title">
+            <div className="lf-section-kicker">The research</div>
+            <h2>Where each move <em>comes from.</em></h2>
+            <p className="lf-section-desc">
+              The framework draws on foundational and contemporary scholarship in second language acquisition. What
+              follows is a curated bibliography organised by the construct each work anchors, with a brief note on
+              where it shows up in the EFLL Framework.
+            </p>
+          </div>
+        </div>
+
+        <div className="lf-references-grid">
+          {REFERENCE_GROUPS.map((group) => (
+            <div key={group.id} className="lf-ref-group">
+              <div className="lf-ref-group-head">
+                <h3 className="lf-ref-group-name">{group.name}</h3>
+                <div className="lf-ref-group-anchor">Anchors · {group.anchor}</div>
+              </div>
+              <ul className="lf-ref-list">
+                {group.items.map((item, i) => (
+                  <li key={i} className="lf-ref-item">
+                    <div className="lf-ref-citation">
+                      <span className="lf-ref-author">{item.authors}</span>
+                      <span className="lf-ref-year"> ({item.year}).</span>{' '}
+                      <em className="lf-ref-title">{item.title}</em>
+                      {item.venue && <span className="lf-ref-venue">. {item.venue}.</span>}
+                    </div>
+                    <div className="lf-ref-note">{item.note}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="lf-ornament">❦ ❦ ❦</div>
+      </section>
+
       {/* FOOTER */}
       <footer className="lf-footer">
         <span className="lf-footer-mono">English with Pedro</span>
-        <div>A framework · For Brazilian EFL · Adult learners · Digital + Formal</div>
+        <div className="lf-footer-sub">A framework · For Brazilian EFL · Adult learners · Digital + Formal</div>
+
+        <nav className="lf-footer-links" aria-label="Author links">
+          <a
+            className="lf-footer-link"
+            href="https://pedrobritx.github.io/EwP/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink size={12} /> English with Pedro
+          </a>
+          <a
+            className="lf-footer-link"
+            href="https://www.linkedin.com/in/pedrobritx/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Linkedin size={12} /> LinkedIn
+          </a>
+          <a
+            className="lf-footer-link"
+            href="https://github.com/pedrobritx"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Github size={12} /> GitHub
+          </a>
+          <a className="lf-footer-link" href="mailto:pedrobritx@gmail.com">
+            <Mail size={12} /> pedrobritx@gmail.com
+          </a>
+        </nav>
+
         <div className="lf-footer-line">
-          Grounded in Krashen · Long · Swain · Vygotsky · Lantolf · Norton · Dörnyei · Schmidt · Lyster · Ellis · Nation · García &amp; Wei · Larsen-Freeman · Paiva
+          © {new Date().getFullYear()} · Pedro Brito · The EFLL Framework is an open framework.
         </div>
       </footer>
 
