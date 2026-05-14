@@ -387,6 +387,12 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
+  const goToPhase = useCallback((id) => {
+    setActivePhase(id);
+    const el = document.getElementById('phase-timeline');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   // ─── DERIVED STATE ──────────────────────────────────────────────────────
   const level = selections.level;
   const theme = selections.theme;
@@ -774,7 +780,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="lf-timeline">
+        <div className="lf-timeline" id="phase-timeline">
           <div className="lf-timeline-track">
             {PHASES.map((phase) => {
               const Icon = phase.icon;
@@ -782,7 +788,7 @@ export default function App() {
                 <button
                   key={phase.id}
                   className={`lf-phase-btn ${activePhase === phase.id ? 'active' : ''} ${hasPhaseSelection(phase.id) ? 'has-selection' : ''}`}
-                  onClick={() => setActivePhase(phase.id)}
+                  onClick={() => goToPhase(phase.id)}
                 >
                   <span className="lf-phase-tick" aria-hidden />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -864,7 +870,7 @@ export default function App() {
                 <button
                   className="lf-detail-cta"
                   style={{ marginTop: 24, color: 'var(--wine)', borderColor: 'var(--wine)' }}
-                  onClick={() => setActivePhase(phaseData.id + 1)}
+                  onClick={() => goToPhase(phaseData.id + 1)}
                 >
                   Next phase <ArrowDown size={12} style={{ transform: 'rotate(-90deg)' }} />
                 </button>
