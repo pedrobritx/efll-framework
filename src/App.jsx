@@ -118,6 +118,281 @@ function EvidenceDigest({ items }) {
   );
 }
 
+// ── Geometry helpers for the Part 01 diagrams ─────────────────────────────
+const polar = (cx, cy, r, deg) => {
+  const rad = (deg * Math.PI) / 180;
+  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+};
+
+// Annular-sector (donut wedge) path.
+const annularSectorPath = (cx, cy, rIn, rOut, startDeg, endDeg) => {
+  const [x1o, y1o] = polar(cx, cy, rOut, startDeg);
+  const [x2o, y2o] = polar(cx, cy, rOut, endDeg);
+  const [x1i, y1i] = polar(cx, cy, rIn, startDeg);
+  const [x2i, y2i] = polar(cx, cy, rIn, endDeg);
+  const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+  return [
+    `M ${x1o.toFixed(2)} ${y1o.toFixed(2)}`,
+    `A ${rOut} ${rOut} 0 ${largeArc} 1 ${x2o.toFixed(2)} ${y2o.toFixed(2)}`,
+    `L ${x2i.toFixed(2)} ${y2i.toFixed(2)}`,
+    `A ${rIn} ${rIn} 0 ${largeArc} 0 ${x1i.toFixed(2)} ${y1i.toFixed(2)}`,
+    'Z',
+  ].join(' ');
+};
+
+// Archimedean spiral path (polyline) — decorative, threads through layers.
+const archimedeanPath = (cx, cy, rStart, rEnd, loops = 6, steps = 480) => {
+  const totalAngle = loops * 2 * Math.PI;
+  const b = (rEnd - rStart) / totalAngle;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * totalAngle;
+    const r = rStart + b * t;
+    const angle = t - Math.PI / 2; // start at 12 o'clock
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    d += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)} `;
+  }
+  return d.trim();
+};
+
+// Wine → gold layer-color ramp (A1 inner → C2 outer).
+const LAYER_COLORS = ['#722F37', '#8E4138', '#A85037', '#B8924A', '#C7A55D', '#D4B47A'];
+
+function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
+  const cx = 250;
+  const cy = 250;
+  const rIn = 70;
+  const rOut = 232;
+  const thickness = (rOut - rIn) / levels.length;
+  const sectorDeg = 360 / themes.length;
+  const selected = themes.find((t) => t.id === selectedId) || themes[0];
+
+  const handleKey = (id) => (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(id);
+    }
+  };
+
+  return (
+    <div className="lf-spiral-wrap">
+      <svg
+        className="lf-spiral-svg"
+        viewBox="0 0 500 500"
+        role="img"
+        aria-label="Macro grid — six themes spiralling across six CEFR levels"
+      >
+        <defs>
+          <radialGradient id="lf-spiral-center-bg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="var(--paper)" />
+            <stop offset="100%" stopColor="var(--paper-deep)" />
+          </radialGradient>
+        </defs>
+
+        {themes.map((theme, ti) => {
+          const isSelected = theme.id === selected.id;
+          const startDeg = -90 + ti * sectorDeg;
+          const endDeg = startDeg + sectorDeg;
+          const midDeg = startDeg + sectorDeg / 2;
+          const [labelX, labelY] = polar(cx, cy, rOut + 22, midDeg);
+          const cosMid = Math.cos((midDeg * Math.PI) / 180);
+          const anchor = cosMid > 0.3 ? 'start' : cosMid < -0.3 ? 'end' : 'middle';
+
+          return (
+            <g
+              key={theme.id}
+              className={`lf-spiral-sector ${isSelected ? 'is-selected' : ''}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select theme: ${theme.name}`}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(theme.id)}
+              onKeyDown={handleKey(theme.id)}
+            >
+              {levels.map((_lvl, k) => {
+                const layerIn = rIn + k * thickness;
+                const layerOut = layerIn + thickness;
+                const d = annularSectorPath(cx, cy, layerIn, layerOut, startDeg, endDeg);
+                const style = isSelected
+                  ? { '--layer-color': LAYER_COLORS[k], '--bloom-delay': `${k * 60}ms` }
+                  : undefined;
+                return (
+                  <path
+                    key={k}
+                    className="lf-spiral-layer"
+                    data-level={k}
+                    d={d}
+                    style={style}
+                  />
+                );
+              })}
+
+              <text
+                className="lf-spiral-label"
+                x={labelX.toFixed(1)}
+                y={labelY.toFixed(1)}
+                textAnchor={anchor}
+                dominantBaseline="middle"
+              >
+                <tspan className="lf-spiral-label-num">{theme.num}</tspan>
+                <tspan dx="6">{theme.name}</tspan>
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Decorative spiral overlay */}
+        <path
+          className="lf-spiral-spiral"
+          d={archimedeanPath(cx, cy, rIn + 4, rOut - 4, 6, 540)}
+        />
+
+        {/* Inner hub circle */}
+        <circle cx={cx} cy={cy} r={rIn - 2} fill="url(#lf-spiral-center-bg)" stroke="var(--line)" strokeWidth="0.6" />
+      </svg>
+
+      <div className="lf-spiral-center" aria-live="polite">
+        <div className="lf-spiral-center-num">{selected.num}</div>
+        <div className="lf-spiral-center-name">{selected.name}</div>
+        <div className="lf-spiral-center-desc">{selected.description}</div>
+        <button
+          type="button"
+          className="lf-overview-cta"
+          onClick={() => onUse(selected.id)}
+          title={`Use ${selected.name} in Part 02`}
+        >
+          Use in Part 02 <ArrowDown size={12} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MicroArc({ phases, selectedId, onSelect, onUse }) {
+  const cx = 250;
+  const cy = 240;
+  const r = 200;
+
+  // Cumulative-minute angles. Phase i starts at the sum of all prior defaultMin.
+  const totalMin = phases.reduce((s, p) => s + p.defaultMin, 0); // 60
+  const cumulative = [];
+  let acc = 0;
+  for (const p of phases) {
+    cumulative.push(acc);
+    acc += p.defaultMin;
+  }
+  const minuteToAngle = (m) => 180 - (m / totalMin) * 180; // 180° at min 0, 0° at min 60
+  const stops = phases.map((p, i) => {
+    const startMin = cumulative[i];
+    const angleDeg = minuteToAngle(startMin);
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return {
+      ...p,
+      angleDeg,
+      x: cx + r * Math.cos(angleRad),
+      y: cy - r * Math.sin(angleRad),
+      startMin,
+    };
+  });
+
+  const selected = stops.find((s) => s.id === selectedId) || stops[0];
+  // Stroke-fill progress from minute 0 → start of selected phase
+  const fillProgress = selected.startMin / totalMin;
+
+  const handleKey = (id) => (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onSelect(id);
+    }
+  };
+
+  return (
+    <div className="lf-arc-wrap">
+      <svg
+        className="lf-arc-svg"
+        viewBox="0 0 500 280"
+        role="img"
+        aria-label="Micro template — seven phases on a 60-minute timeline arc"
+      >
+        <defs>
+          <linearGradient id="lf-arc-gradient" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor="#722F37" />
+            <stop offset="100%" stopColor="#D4B47A" />
+          </linearGradient>
+        </defs>
+
+        {/* Baseline arc */}
+        <path
+          className="lf-arc-baseline"
+          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          pathLength="1000"
+        />
+        {/* Progress fill, using stroke-dasharray + offset */}
+        <path
+          className="lf-arc-fill"
+          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          pathLength="1000"
+          strokeDasharray="1000"
+          strokeDashoffset={(1000 * (1 - fillProgress)).toFixed(1)}
+        />
+
+        {/* Minute markers — 0, 30, 60 */}
+        <text className="lf-arc-tick-label" x={cx - r} y={cy + 28} textAnchor="middle">0 min</text>
+        <text className="lf-arc-tick-label" x={cx} y={cy - r - 12} textAnchor="middle">30 min</text>
+        <text className="lf-arc-tick-label" x={cx + r} y={cy + 28} textAnchor="middle">60 min</text>
+
+        {/* Stops */}
+        {stops.map((s) => {
+          const isSelected = s.id === selected.id;
+          return (
+            <g
+              key={s.id}
+              className={`lf-arc-stop ${isSelected ? 'is-selected' : ''}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select phase ${s.id}: ${s.name}`}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(s.id)}
+              onKeyDown={handleKey(s.id)}
+            >
+              <circle cx={s.x} cy={s.y} r={isSelected ? 18 : 14} />
+              <text
+                x={s.x}
+                y={s.y + 4}
+                textAnchor="middle"
+                className="lf-arc-stop-label"
+              >
+                {s.id}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className="lf-arc-description" aria-live="polite">
+        <div className="lf-arc-desc-meta">
+          <span>Phase {selected.id} of 7</span>
+          <span className="lf-arc-desc-time">· {selected.defaultMin} min · starts at {selected.startMin}'</span>
+        </div>
+        <h4 className="lf-arc-desc-name">{selected.name}</h4>
+        <p className="lf-arc-desc-purpose">{selected.purpose}</p>
+        <div className="lf-arc-desc-sla">
+          <span className="lf-mono">SLA · </span>{selected.sla}
+        </div>
+        <button
+          type="button"
+          className="lf-overview-cta"
+          onClick={() => onUse(selected.id)}
+          title={`Continue to Part 03 with Phase ${selected.id}`}
+        >
+          Continue to Part 03 <ArrowDown size={12} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [selections, setSelections] = useState(loadSelections);
   const [activeSection, setActiveSection] = useState('overview');
@@ -126,6 +401,9 @@ export default function App() {
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
   const [toast, setToast] = useState(null);
+  // Part 01 overview-local selections (independent of the global composer).
+  const [overviewTheme, setOverviewTheme] = useState('identity');
+  const [overviewPhase, setOverviewPhase] = useState(1);
 
   useEffect(() => persistSelections(selections), [selections]);
 
@@ -205,6 +483,22 @@ export default function App() {
     setEditingPhase(null);
     setToast({ kind: 'info', label: 'Selections reset' });
     setTimeout(() => setToast(null), 2200);
+  };
+
+  // ─── PART 01 → COMPOSER PRE-SELECT HANDLERS ─────────────────────────────
+  const useThemeFromOverview = (themeId) => {
+    const t = THEMES.find((x) => x.id === themeId);
+    setSelections((s) => ({ ...s, theme: themeId, level: s.level ?? 'B1' }));
+    setToast({ kind: 'ok', label: `${t?.name ?? 'Theme'} set in Part 02` });
+    setTimeout(() => setToast(null), 2200);
+    scrollTo('macro');
+  };
+
+  const usePhaseFromOverview = (phaseId) => {
+    setActivePhase(phaseId);
+    setToast({ kind: 'ok', label: `Phase ${phaseId} focused in Part 03` });
+    setTimeout(() => setToast(null), 2200);
+    scrollTo('micro');
   };
 
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
@@ -361,37 +655,33 @@ export default function App() {
         <div className="lf-overview">
           <div className="lf-overview-card">
             <div className="lf-overview-tag">Macro · curricular scale</div>
-            <h3>Six themes, six levels, thirty-six cells.</h3>
+            <h3>Six themes, six levels. <em>Spiralling, not stacking.</em></h3>
             <p>
-              Each cell answers: <em>what can a learner do</em> in this domain at this level, and <em>what digital
-              content</em> bridges classroom and life?
+              Each theme deepens through every level. Click a theme to see its rings bloom outward — A1 inner,
+              C2 outer — and read a brief description.
             </p>
-            <ul className="lf-overview-list">
-              <li><span className="lf-mono">I.</span><span>Identity &amp; Belonging</span></li>
-              <li><span className="lf-mono">II.</span><span>Daily Life &amp; Routines</span></li>
-              <li><span className="lf-mono">III.</span><span>Work &amp; Study</span></li>
-              <li><span className="lf-mono">IV.</span><span>Travel &amp; Place</span></li>
-              <li><span className="lf-mono">V.</span><span>Media &amp; Story</span></li>
-              <li><span className="lf-mono">VI.</span><span>Society &amp; Ideas</span></li>
-            </ul>
+            <MacroSpiral
+              themes={THEMES}
+              levels={LEVELS}
+              selectedId={overviewTheme}
+              onSelect={setOverviewTheme}
+              onUse={useThemeFromOverview}
+            />
           </div>
 
           <div className="lf-overview-card micro">
             <div className="lf-overview-tag">Micro · lesson scale</div>
-            <h3>Seven phases, sixty minutes, one outcome.</h3>
+            <h3>Seven phases, sixty minutes. <em>One curved hour.</em></h3>
             <p>
-              Each phase answers: <em>what SLA process</em> are we engineering, and <em>which activities</em> serve it
-              well at this level?
+              A 60-minute lesson curved into a half-clock. Click any stop to see its purpose and SLA grounding; the
+              arc fills wine → gold as the lesson unfolds.
             </p>
-            <ul className="lf-overview-list">
-              <li><span className="lf-mono">i.</span><span>Warm-up &amp; schema activation</span></li>
-              <li><span className="lf-mono">ii.</span><span>Input &amp; noticing</span></li>
-              <li><span className="lf-mono">iii.</span><span>Focus on form</span></li>
-              <li><span className="lf-mono">iv.</span><span>Controlled practice</span></li>
-              <li><span className="lf-mono">v.</span><span>Communicative task</span></li>
-              <li><span className="lf-mono">vi.</span><span>Feedback &amp; reflection</span></li>
-              <li><span className="lf-mono">vii.</span><span>Informal-input bridge</span></li>
-            </ul>
+            <MicroArc
+              phases={PHASES}
+              selectedId={overviewPhase}
+              onSelect={setOverviewPhase}
+              onUse={usePhaseFromOverview}
+            />
           </div>
         </div>
 
