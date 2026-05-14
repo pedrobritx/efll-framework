@@ -326,14 +326,44 @@ html, body { background: var(--paper); }
   overflow: visible;
 }
 
-.lf-spiral-label {
-  font-family: 'Fraunces', serif;
-  font-size: 11px;
-  font-weight: 500;
-  fill: var(--ink-soft);
-  letter-spacing: -0.01em;
+.lf-spiral-wedge {
+  cursor: pointer;
+  outline: none;
+}
+.lf-spiral-layer {
+  fill: var(--paper-deep);
+  stroke: var(--paper);
+  stroke-width: 1;
+  transition: fill 0.25s ease, opacity 0.25s ease;
+}
+.lf-spiral-wedge:hover .lf-spiral-layer { fill: var(--paper-shadow); }
+.lf-spiral-wedge:focus-visible .lf-spiral-layer { stroke: var(--gold); stroke-width: 1.4; }
+.lf-spiral-layer.is-selected {
+  animation: lf-onion-bloom 0.45s ease-out both;
+  animation-delay: calc(var(--layer-index, 0) * 70ms);
+}
+@keyframes lf-onion-bloom {
+  from { opacity: 0.25; }
+  to   { opacity: 1; }
+}
+.lf-spiral-spiral {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.8;
+  opacity: 0.22;
   pointer-events: none;
 }
+
+.lf-spiral-label {
+  font-family: 'Fraunces', serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  fill: var(--ink-soft);
+  letter-spacing: -0.005em;
+  pointer-events: none;
+  user-select: none;
+}
+.lf-spiral-label.is-selected { fill: var(--paper); font-weight: 600; }
 
 .lf-spiral-description {
   margin-top: 12px;
@@ -344,7 +374,7 @@ html, body { background: var(--paper); }
   gap: 8px;
 }
 
-/* ─── PART 01 · INTERACTIVE MICRO ARC ─── */
+/* ─── PART 01 · INTERACTIVE MICRO ARC (CRUST RING) ─── */
 .lf-arc-wrap {
   width: 100%;
   margin-top: 8px;
@@ -358,47 +388,40 @@ html, body { background: var(--paper); }
   overflow: visible;
 }
 
-.lf-arc-baseline {
-  fill: none;
-  stroke: var(--line);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-.lf-arc-fill {
-  fill: none;
-  stroke: url(#lf-arc-gradient);
-  stroke-width: 4;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.45s ease-out;
-}
-
-.lf-arc-stop {
+.lf-arc-segment-group {
   cursor: pointer;
   outline: none;
-  transition: transform 0.2s;
 }
-.lf-arc-stop:hover { transform: scale(1.04); transform-origin: center; }
-.lf-arc-stop circle {
+.lf-arc-segment {
   fill: var(--paper-deep);
-  stroke: var(--wine);
-  stroke-width: 1.5;
-  transition: fill 0.2s, stroke 0.2s, r 0.2s;
+  stroke: var(--paper);
+  stroke-width: 1;
+  transition: fill 0.25s ease, stroke 0.25s ease;
 }
-.lf-arc-stop:focus-visible circle { stroke: var(--gold); stroke-width: 2.5; }
-.lf-arc-stop.is-selected circle {
+.lf-arc-segment-group:hover .lf-arc-segment { fill: var(--paper-shadow); }
+.lf-arc-segment.is-prior {
+  fill: var(--wine-light);
+}
+.lf-arc-segment.is-selected {
   fill: var(--wine-deep);
   stroke: var(--gold);
-  stroke-width: 2.5;
+  stroke-width: 2;
 }
-.lf-arc-stop-label {
+.lf-arc-segment-group:focus-visible .lf-arc-segment {
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+.lf-arc-segment-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   fill: var(--wine);
   pointer-events: none;
   user-select: none;
+  transition: fill 0.25s ease;
 }
-.lf-arc-stop.is-selected .lf-arc-stop-label { fill: var(--paper); }
+.lf-arc-segment-label.is-prior { fill: var(--paper); }
+.lf-arc-segment-label.is-selected { fill: var(--paper); }
 
 .lf-arc-tick-label {
   font-family: 'JetBrains Mono', monospace;

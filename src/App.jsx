@@ -162,20 +162,15 @@ const LAYER_COLORS = ['#722F37', '#8E4138', '#A85037', '#B8924A', '#C7A55D', '#D
 function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
-  const r = 200;
+  const rInner = 64;
+  const rOuter = 218;
+  const layerCount = levels.length; // 6 CEFR layers per wedge
+  const radii = Array.from({ length: layerCount + 1 }, (_, i) =>
+    rInner + ((rOuter - rInner) * i) / layerCount,
+  );
   const selected = themes.find((t) => t.id === selectedId) || themes[0];
 
-  // Place 6 stops evenly around the circle, starting at 12 o'clock
-  const stops = themes.map((theme, i) => {
-    const angleDeg = -90 + i * (360 / themes.length);
-    const angleRad = (angleDeg * Math.PI) / 180;
-    return {
-      ...theme,
-      angleDeg,
-      x: cx + r * Math.cos(angleRad),
-      y: cy + r * Math.sin(angleRad),
-    };
-  });
+  const shortName = (name) => name.split(' & ')[0];
 
   const handleKey = (id) => (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -188,62 +183,57 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
     <div className="lf-spiral-wrap">
       <svg
         className="lf-spiral-svg"
-        viewBox="0 0 500 560"
+        viewBox="0 0 500 500"
         role="img"
-        aria-label="Macro grid — six themes arranged in a circle across six CEFR levels"
+        aria-label="Macro grid — six themes as pizza wedges, each subdivided into six CEFR-level onion rings (A1 inner → C2 outer)"
       >
-        <defs>
-          <linearGradient id="lf-theme-gradient" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#722F37" />
-            <stop offset="100%" stopColor="#D4B47A" />
-          </linearGradient>
-        </defs>
-
-        {/* Baseline circle */}
-        <circle
-          className="lf-arc-baseline"
-          cx={cx} cy={cy} r={r}
-          pathLength="1000"
-          strokeDasharray="12 8"
-        />
-
-        {/* Stops */}
-        {stops.map((s) => {
-          const isSelected = s.id === selected.id;
-          // Position label below circle
-          const labelY = s.y + (isSelected ? 18 : 14) + 16;
+        {themes.map((theme, i) => {
+          const startDeg = -90 + i * 60;
+          const endDeg = startDeg + 60;
+          const midDeg = startDeg + 30;
+          const isSelected = theme.id === selected.id;
+          const [labelX, labelY] = polar(cx, cy, rOuter - 13, midDeg);
           return (
             <g
-              key={s.id}
-              className={`lf-arc-stop ${isSelected ? 'is-selected' : ''}`}
+              key={theme.id}
+              className={`lf-spiral-wedge ${isSelected ? 'is-selected' : ''}`}
               role="button"
               tabIndex={0}
-              aria-label={`Select theme: ${s.name}`}
+              aria-label={`Select theme: ${theme.name}`}
               aria-pressed={isSelected}
-              onClick={() => onSelect(s.id)}
-              onKeyDown={handleKey(s.id)}
+              onClick={() => onSelect(theme.id)}
+              onKeyDown={handleKey(theme.id)}
             >
-              <circle cx={s.x} cy={s.y} r={isSelected ? 18 : 14} />
+              {radii.slice(0, -1).map((rIn, j) => {
+                const rOut = radii[j + 1];
+                const d = annularSectorPath(cx, cy, rIn, rOut, startDeg, endDeg);
+                const style = { '--layer-index': j };
+                if (isSelected) style.fill = LAYER_COLORS[j];
+                return (
+                  <path
+                    key={j}
+                    d={d}
+                    className={`lf-spiral-layer ${isSelected ? 'is-selected' : ''}`}
+                    style={style}
+                  />
+                );
+              })}
               <text
-                x={s.x}
-                y={s.y + 4}
-                textAnchor="middle"
-                className="lf-arc-stop-label"
-              >
-                {s.num}
-              </text>
-              {/* Theme name label positioned below the circle */}
-              <text
-                x={s.x}
+                x={labelX}
                 y={labelY}
                 textAnchor="middle"
-                className="lf-spiral-label"
+                dominantBaseline="central"
+                className={`lf-spiral-label ${isSelected ? 'is-selected' : ''}`}
               >
-                {s.name}
+                {shortName(theme.name)}
               </text>
             </g>
           );
         })}
+        <path
+          className="lf-spiral-spiral"
+          d={archimedeanPath(cx, cy, rInner + 2, rOuter - 2, 6, 600)}
+        />
       </svg>
 
       <div className="lf-spiral-description" aria-live="polite">
@@ -268,33 +258,23 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
 function MicroArc({ phases, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
-  const r = 200;
-
-  // Cumulative-minute angles. Phase i starts at the sum of all prior defaultMin.
+  const rInner = 192;
+  const rOuter = 228;
   const totalMin = phases.reduce((s, p) => s + p.defaultMin, 0); // 60
-  const cumulative = [];
+
   let acc = 0;
-  for (const p of phases) {
-    cumulative.push(acc);
+  const segments = phases.map((p) => {
+    const startMin = acc;
     acc += p.defaultMin;
-  }
-  const minuteToAngle = (m) => 90 - (m / totalMin) * 360; // 90° at min 0, -270° at min 60
-  const stops = phases.map((p, i) => {
-    const startMin = cumulative[i];
-    const angleDeg = minuteToAngle(startMin);
-    const angleRad = (angleDeg * Math.PI) / 180;
-    return {
-      ...p,
-      angleDeg,
-      x: cx + r * Math.cos(angleRad),
-      y: cy - r * Math.sin(angleRad),
-      startMin,
-    };
+    const endMin = acc;
+    const startDeg = -90 + (startMin / totalMin) * 360;
+    const endDeg = -90 + (endMin / totalMin) * 360;
+    const midDeg = (startDeg + endDeg) / 2;
+    const [labelX, labelY] = polar(cx, cy, (rInner + rOuter) / 2, midDeg);
+    return { ...p, startMin, endMin, startDeg, endDeg, labelX, labelY };
   });
 
-  const selected = stops.find((s) => s.id === selectedId) || stops[0];
-  // Stroke-fill progress from minute 0 → start of selected phase
-  const fillProgress = selected.startMin / totalMin;
+  const selected = segments.find((s) => s.id === selectedId) || segments[0];
 
   const handleKey = (id) => (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -309,60 +289,49 @@ function MicroArc({ phases, selectedId, onSelect, onUse }) {
         className="lf-arc-svg"
         viewBox="0 0 500 500"
         role="img"
-        aria-label="Micro template — seven phases on a 60-minute clock face"
+        aria-label="Micro template — seven phases as a clickable crust ring, each segment sized in proportion to its minute allocation across 60 minutes"
       >
-        <defs>
-          <linearGradient id="lf-arc-gradient" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#722F37" />
-            <stop offset="100%" stopColor="#D4B47A" />
-          </linearGradient>
-        </defs>
-
-        {/* Baseline circle */}
-        <circle
-          className="lf-arc-baseline"
-          cx={cx} cy={cy} r={r}
-          pathLength="1000"
-          transform={`rotate(-90 ${cx} ${cy})`}
-        />
-        {/* Progress fill, using stroke-dasharray + offset */}
-        <circle
-          className="lf-arc-fill"
-          cx={cx} cy={cy} r={r}
-          pathLength="1000"
-          strokeDasharray="1000"
-          strokeDashoffset={(1000 * (1 - fillProgress)).toFixed(1)}
-          transform={`rotate(-90 ${cx} ${cy})`}
-        />
-
         {/* Minute markers */}
-        <text className="lf-arc-tick-label" x={cx} y={cy - r - 20} textAnchor="middle">0 / 60 min</text>
-        <text className="lf-arc-tick-label" x={cx + r + 30} y={cy + 4} textAnchor="middle">15 min</text>
-        <text className="lf-arc-tick-label" x={cx} y={cy + r + 28} textAnchor="middle">30 min</text>
-        <text className="lf-arc-tick-label" x={cx - r - 30} y={cy + 4} textAnchor="middle">45 min</text>
+        <text className="lf-arc-tick-label" x={cx} y={cy - rOuter - 18} textAnchor="middle">0 / 60'</text>
+        <text className="lf-arc-tick-label" x={cx + rOuter + 22} y={cy + 4} textAnchor="middle">15'</text>
+        <text className="lf-arc-tick-label" x={cx} y={cy + rOuter + 26} textAnchor="middle">30'</text>
+        <text className="lf-arc-tick-label" x={cx - rOuter - 22} y={cy + 4} textAnchor="middle">45'</text>
 
-        {/* Stops */}
-        {stops.map((s) => {
-          const isSelected = s.id === selected.id;
+        {/* Crust segments */}
+        {segments.map((seg) => {
+          const isSelected = seg.id === selected.id;
+          const isPrior = seg.id < selected.id;
+          const d = annularSectorPath(cx, cy, rInner, rOuter, seg.startDeg, seg.endDeg);
+          const segClass = [
+            'lf-arc-segment',
+            isSelected ? 'is-selected' : '',
+            isPrior ? 'is-prior' : '',
+          ].filter(Boolean).join(' ');
+          const labelClass = [
+            'lf-arc-segment-label',
+            isSelected ? 'is-selected' : '',
+            isPrior ? 'is-prior' : '',
+          ].filter(Boolean).join(' ');
           return (
             <g
-              key={s.id}
-              className={`lf-arc-stop ${isSelected ? 'is-selected' : ''}`}
+              key={seg.id}
+              className="lf-arc-segment-group"
               role="button"
               tabIndex={0}
-              aria-label={`Select phase ${s.id}: ${s.name}`}
+              aria-label={`Select phase ${seg.id}: ${seg.name} — ${seg.defaultMin} minutes`}
               aria-pressed={isSelected}
-              onClick={() => onSelect(s.id)}
-              onKeyDown={handleKey(s.id)}
+              onClick={() => onSelect(seg.id)}
+              onKeyDown={handleKey(seg.id)}
             >
-              <circle cx={s.x} cy={s.y} r={isSelected ? 18 : 14} />
+              <path d={d} className={segClass} />
               <text
-                x={s.x}
-                y={s.y + 4}
+                x={seg.labelX}
+                y={seg.labelY}
                 textAnchor="middle"
-                className="lf-arc-stop-label"
+                dominantBaseline="central"
+                className={labelClass}
               >
-                {s.id}
+                {seg.id}
               </text>
             </g>
           );
