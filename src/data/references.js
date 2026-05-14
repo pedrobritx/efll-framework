@@ -1,11 +1,15 @@
-// SLA reference groups for Part 05 of the EFLL Framework.
-// Each entry: { authors, year, title, venue?, anchor (one-line: where it shows up in the framework) }.
+// SLA reference groups for the references section of the EFLL Framework.
+// Each entry: { authors, year, title, venue?, anchors[] (where the construct shows up in the framework) }.
+// Anchor kinds: 'phase' (id 1–7), 'principle' (id 1–3), 'section' (id matches DOM section id).
 
 export const REFERENCE_GROUPS = [
   {
     id: 'input',
     name: 'Input & Comprehension',
-    anchor: 'Phase 2 · informal-input bridge',
+    anchors: [
+      { kind: 'phase', id: 2, label: 'informal-input bridge' },
+      { kind: 'phase', id: 7 },
+    ],
     items: [
       {
         authors: 'Krashen, S. D.',
@@ -33,7 +37,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'interaction',
     name: 'Interaction & Negotiation',
-    anchor: 'Phase 4 · Phase 5',
+    anchors: [
+      { kind: 'phase', id: 4 },
+      { kind: 'phase', id: 5 },
+    ],
     items: [
       {
         authors: 'Long, M. H.',
@@ -54,7 +61,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'output',
     name: 'Output & Pushed Production',
-    anchor: 'Phase 4 · Phase 5',
+    anchors: [
+      { kind: 'phase', id: 4 },
+      { kind: 'phase', id: 5 },
+    ],
     items: [
       {
         authors: 'Swain, M.',
@@ -75,7 +85,11 @@ export const REFERENCE_GROUPS = [
   {
     id: 'sociocultural',
     name: 'Sociocultural Theory',
-    anchor: 'Phase 3 · Phase 6 · L1 as resource',
+    anchors: [
+      { kind: 'phase', id: 3 },
+      { kind: 'phase', id: 6 },
+      { kind: 'principle', id: 2, label: 'L1 as resource' },
+    ],
     items: [
       {
         authors: 'Vygotsky, L. S.',
@@ -103,7 +117,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'identity',
     name: 'Identity, Investment & Motivation',
-    anchor: 'Phase 1 · Phase 7',
+    anchors: [
+      { kind: 'phase', id: 1 },
+      { kind: 'phase', id: 7 },
+    ],
     items: [
       {
         authors: 'Norton Peirce, B.',
@@ -138,7 +155,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'noticing',
     name: 'Noticing & Attention',
-    anchor: 'Phase 2 · Phase 3',
+    anchors: [
+      { kind: 'phase', id: 2 },
+      { kind: 'phase', id: 3 },
+    ],
     items: [
       {
         authors: 'Schmidt, R. W.',
@@ -152,7 +172,9 @@ export const REFERENCE_GROUPS = [
   {
     id: 'feedback',
     name: 'Corrective Feedback',
-    anchor: 'Phase 6',
+    anchors: [
+      { kind: 'phase', id: 6 },
+    ],
     items: [
       {
         authors: 'Lyster, R., & Ranta, L.',
@@ -180,7 +202,9 @@ export const REFERENCE_GROUPS = [
   {
     id: 'instruction',
     name: 'Instructed SLA · Implicit / Explicit',
-    anchor: 'Phase 3',
+    anchors: [
+      { kind: 'phase', id: 3 },
+    ],
     items: [
       {
         authors: 'Ellis, R.',
@@ -208,7 +232,9 @@ export const REFERENCE_GROUPS = [
   {
     id: 'vocabulary',
     name: 'Vocabulary & The Four Strands',
-    anchor: 'Macro grid · all phases',
+    anchors: [
+      { kind: 'section', id: 'macro', label: 'macro grid' },
+    ],
     items: [
       {
         authors: 'Nation, I. S. P.',
@@ -229,7 +255,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'translanguaging',
     name: 'Translanguaging & The Multilingual Turn',
-    anchor: 'Principle 02 · Phase 3',
+    anchors: [
+      { kind: 'principle', id: 2, label: 'L1 as resource' },
+      { kind: 'phase', id: 3 },
+    ],
     items: [
       {
         authors: 'García, O., & Wei, L.',
@@ -250,7 +279,10 @@ export const REFERENCE_GROUPS = [
   {
     id: 'cdst',
     name: 'Complex Dynamic Systems',
-    anchor: 'Principle 03 · spiral macro grid',
+    anchors: [
+      { kind: 'principle', id: 3, label: 'variability is the norm' },
+      { kind: 'section', id: 'macro', label: 'macro grid' },
+    ],
     items: [
       {
         authors: 'Larsen-Freeman, D.',
@@ -271,7 +303,9 @@ export const REFERENCE_GROUPS = [
   {
     id: 'tblt',
     name: 'Task-Based Language Teaching',
-    anchor: 'Phase 5',
+    anchors: [
+      { kind: 'phase', id: 5 },
+    ],
     items: [
       {
         authors: 'Ellis, R.',
@@ -297,3 +331,21 @@ export const REFERENCE_GROUPS = [
     ],
   },
 ];
+
+// Inverted index: for a given concept anchor (kind+id), list the reference group ids that point to it.
+// Built once at module load so consumers can read it without recomputation.
+export const REFS_BY_ANCHOR = (() => {
+  const map = new Map();
+  for (const group of REFERENCE_GROUPS) {
+    for (const a of group.anchors) {
+      const key = `${a.kind}:${a.id}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(group.id);
+    }
+  }
+  return map;
+})();
+
+export function refsForAnchor(kind, id) {
+  return REFS_BY_ANCHOR.get(`${kind}:${id}`) ?? [];
+}

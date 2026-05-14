@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import {
   AlertTriangle,
   ArrowDown,
+  ArrowLeft,
+  ArrowUpRight,
   BookOpen,
   Check,
   Copy,
@@ -20,8 +22,65 @@ import { LEVELS } from './data/levels.js';
 import { MACRO } from './data/macro.js';
 import { PHASES } from './data/phases.js';
 import { EXAMPLES } from './data/examples.js';
-import { REFERENCE_GROUPS } from './data/references.js';
+import { REFERENCE_GROUPS, refsForAnchor } from './data/references.js';
 import { getEvidenceForSelection } from './data/evidence.js';
+
+// ── Cross-reference plumbing ──────────────────────────────────────────────
+// Lets a user jump from a reference to a concept (or vice-versa) and walk back.
+const XRefContext = createContext(null);
+
+const PRINCIPLE_NAMES = {
+  1: 'informal input',
+  2: 'L1 as resource',
+  3: 'variability',
+};
+
+function refGroupName(id) {
+  const g = REFERENCE_GROUPS.find((x) => x.id === id);
+  return g?.name ?? id;
+}
+
+function anchorLabel(a) {
+  if (a.label) return a.label;
+  if (a.kind === 'phase') return `Phase ${a.id}`;
+  if (a.kind === 'principle') return `Principle: ${PRINCIPLE_NAMES[a.id] ?? a.id}`;
+  if (a.kind === 'section') return a.id;
+  return String(a.id);
+}
+
+function XRefPill({ kind, id, label, fromLabel, targetGroupId }) {
+  const xref = useContext(XRefContext);
+  if (!xref) return null;
+  const onClick = () => xref.jumpTo({ kind, id, fromLabel, targetGroupId });
+  return (
+    <button
+      type="button"
+      className="lf-xref-pill"
+      onClick={onClick}
+      title={`Jump to ${label}`}
+    >
+      <span>{label}</span>
+      <ArrowUpRight size={11} aria-hidden />
+    </button>
+  );
+}
+
+function XRefBackPill() {
+  const xref = useContext(XRefContext);
+  if (!xref || xref.stack.length === 0) return null;
+  const top = xref.stack[xref.stack.length - 1];
+  return (
+    <button
+      type="button"
+      className="lf-xref-back-pill"
+      onClick={xref.popXref}
+      title="Back to where you jumped from"
+    >
+      <ArrowLeft size={13} aria-hidden />
+      <span>Back to <strong>{top.fromLabel}</strong></span>
+    </button>
+  );
+}
 
 const STORAGE_KEY = 'lf-selections';
 const SCHEMA_VERSION = 1;
@@ -246,9 +305,9 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
           type="button"
           className="lf-overview-cta"
           onClick={() => onUse(selected.id)}
-          title={`Use ${selected.name} in Part 02`}
+          title={`Use ${selected.name} in macro`}
         >
-          Use in Part 02 <ArrowDown size={12} />
+          Use in macro <ArrowDown size={12} />
         </button>
       </div>
     </div>
@@ -352,9 +411,9 @@ function MicroArc({ phases, selectedId, onSelect, onUse }) {
           type="button"
           className="lf-overview-cta"
           onClick={() => onUse(selected.id)}
-          title={`Continue to Part 03 with Phase ${selected.id}`}
+          title={`Use Phase ${selected.id} in micro`}
         >
-          Continue to Part 03 <ArrowDown size={12} />
+          Use in micro <ArrowDown size={12} />
         </button>
       </div>
     </div>
@@ -372,6 +431,10 @@ export default function App() {
   // Part 01 overview-local selections (independent of the global composer).
   const [overviewTheme, setOverviewTheme] = useState('identity');
   const [overviewPhase, setOverviewPhase] = useState(1);
+  // Cross-reference jump history — pushed on jumpTo, popped on back-pill click.
+  const [xrefStack, setXrefStack] = useState([]);
+  // Transient highlight for a jump target (phase id, principle id, or ref group id).
+  const [highlight, setHighlight] = useState(null); // { kind, id }
 
   useEffect(() => persistSelections(selections), [selections]);
 
@@ -392,6 +455,49 @@ export default function App() {
     const el = document.getElementById('phase-timeline');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
+
+  // ─── CROSS-REFERENCE JUMPS ───────────────────────────────────────────────
+  const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
+    setXrefStack((s) => [
+      ...s,
+      { fromLabel, scrollY: window.scrollY, restorePhase: activePhase },
+    ]);
+
+    let targetEl = null;
+    if (kind === 'phase') {
+      setActivePhase(id);
+      targetEl = document.getElementById('phase-timeline');
+      setHighlight({ kind: 'phase', id });
+    } else if (kind === 'principle') {
+      targetEl = document.getElementById(`principle-${id}`);
+      setHighlight({ kind: 'principle', id });
+    } else if (kind === 'section') {
+      const groupId = targetGroupId;
+      targetEl = groupId
+        ? document.getElementById(`ref-${groupId}`)
+        : document.getElementById(id);
+      if (groupId) setHighlight({ kind: 'ref', id: groupId });
+    }
+    if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => setHighlight(null), 2200);
+    }
+  }, [activePhase]);
+
+  const popXref = useCallback(() => {
+    setXrefStack((s) => {
+      if (!s.length) return s;
+      const entry = s[s.length - 1];
+      if (typeof entry.restorePhase === 'number') setActivePhase(entry.restorePhase);
+      window.scrollTo({ top: entry.scrollY, behavior: 'smooth' });
+      return s.slice(0, -1);
+    });
+  }, []);
+
+  const xrefValue = useMemo(
+    () => ({ stack: xrefStack, jumpTo, popXref }),
+    [xrefStack, jumpTo, popXref],
+  );
 
   // ─── DERIVED STATE ──────────────────────────────────────────────────────
   const level = selections.level;
@@ -463,14 +569,14 @@ export default function App() {
   const useThemeFromOverview = (themeId) => {
     const t = THEMES.find((x) => x.id === themeId);
     setSelections((s) => ({ ...s, theme: themeId, level: s.level ?? 'B1' }));
-    setToast({ kind: 'ok', label: `${t?.name ?? 'Theme'} set in Part 02` });
+    setToast({ kind: 'ok', label: `${t?.name ?? 'Theme'} set in macro` });
     setTimeout(() => setToast(null), 2200);
     scrollTo('macro');
   };
 
   const usePhaseFromOverview = (phaseId) => {
     setActivePhase(phaseId);
-    setToast({ kind: 'ok', label: `Phase ${phaseId} focused in Part 03` });
+    setToast({ kind: 'ok', label: `Phase ${phaseId} focused in micro` });
     setTimeout(() => setToast(null), 2200);
     scrollTo('micro');
   };
@@ -557,6 +663,7 @@ export default function App() {
 
   // ─── RENDER ─────────────────────────────────────────────────────────────
   return (
+    <XRefContext.Provider value={xrefValue}>
     <div className="lf-root">
       <div className="lf-grain" />
 
@@ -573,11 +680,11 @@ export default function App() {
           <div className="lf-monogram">EFLL<span>·</span>framework</div>
           <div className="lf-nav-links">
             {[
-              { id: 'overview', label: '01 Overview' },
-              { id: 'macro', label: '02 Macro' },
-              { id: 'micro', label: '03 Micro' },
-              { id: 'compose', label: '04 Compose' },
-              { id: 'references', label: '05 References' },
+              { id: 'overview', label: 'overview' },
+              { id: 'macro', label: 'macro' },
+              { id: 'micro', label: 'micro' },
+              { id: 'compose', label: 'compose' },
+              { id: 'references', label: 'references' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -670,7 +777,7 @@ export default function App() {
             <div className="lf-section-kicker">The macro grid</div>
             <h2>Pick a level, <em>then a theme.</em></h2>
             <p className="lf-section-desc">
-              Choose a CEFR level (A1–C2) and a thematic unit. Selections feed the lesson composer in Part 04. The
+              Choose a CEFR level (A1–C2) and a thematic unit. Selections feed the lesson composer in compose. The
               six themes spiral across levels — <em>food</em> at A1 becomes <em>food sustainability</em> at B2 becomes
               <em> the philosophy of food</em> at C1.
             </p>
@@ -756,7 +863,7 @@ export default function App() {
             </div>
 
             <button className="lf-detail-cta" onClick={() => scrollTo('micro')}>
-              Continue to phase &amp; activity selection <ArrowDown size={12} />
+              Continue to micro <ArrowDown size={12} />
             </button>
           </div>
         )}
@@ -780,13 +887,17 @@ export default function App() {
           </div>
         </div>
 
-        <div className="lf-timeline" id="phase-timeline">
+        <div
+          className={`lf-timeline ${highlight?.kind === 'phase' ? 'is-highlight' : ''}`}
+          id="phase-timeline"
+        >
           <div className="lf-timeline-track">
             {PHASES.map((phase) => {
               const Icon = phase.icon;
               return (
                 <button
                   key={phase.id}
+                  id={`phase-${phase.id}`}
                   className={`lf-phase-btn ${activePhase === phase.id ? 'active' : ''} ${hasPhaseSelection(phase.id) ? 'has-selection' : ''}`}
                   onClick={() => goToPhase(phase.id)}
                 >
@@ -820,6 +931,21 @@ export default function App() {
                   <div className="lf-phase-detail-time">{phaseData.time} · Phase {phaseData.id} of 7</div>
                   <p className="lf-phase-purpose" style={{ marginTop: 16 }}>{phaseData.purpose}</p>
                   <div className="lf-phase-sla">SLA grounding · {phaseData.sla}</div>
+                  {refsForAnchor('phase', phaseData.id).length > 0 && (
+                    <div className="lf-phase-xrefs">
+                      <span className="lf-phase-xrefs-label">Research ·</span>
+                      {refsForAnchor('phase', phaseData.id).map((gid) => (
+                        <XRefPill
+                          key={gid}
+                          kind="section"
+                          id="references"
+                          label={refGroupName(gid)}
+                          fromLabel={`Phase ${phaseData.id} · ${phaseData.name}`}
+                          targetGroupId={gid}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -899,8 +1025,8 @@ export default function App() {
             <div className="lf-section-kicker">The composed lesson</div>
             <h2>Your lesson plan, <em>ready to teach.</em></h2>
             <p className="lf-section-desc">
-              A live preview assembled from your selections — level and theme from Part 02, phase activities from
-              Part 03. Each phase carries a concrete prompt from the library; click the pencil to edit. When ready,
+              A live preview assembled from your selections — level and theme from macro, phase activities from
+              micro. Each phase carries a concrete prompt from the library; click the pencil to edit. When ready,
               download a PDF or copy the plan as Markdown.
             </p>
           </div>
@@ -909,7 +1035,7 @@ export default function App() {
         {!hasMacro && (
           <div className="lf-compose-empty">
             <strong>Nothing to compose yet</strong>
-            Pick a <em>level</em> and a <em>theme</em> in Part 02, then choose an activity for each phase in Part 03.
+            Pick a <em>level</em> and a <em>theme</em> in macro, then choose an activity for each phase in micro.
             Your lesson will assemble itself here.
           </div>
         )}
@@ -1052,6 +1178,22 @@ export default function App() {
                       </div>
 
                       <EvidenceDigest items={evidenceItems} />
+
+                      {refsForAnchor('phase', phase.id).length > 0 && (
+                        <div className="lf-compose-xrefs">
+                          <span className="lf-compose-xrefs-label">Research grounding ·</span>
+                          {refsForAnchor('phase', phase.id).map((gid) => (
+                            <XRefPill
+                              key={gid}
+                              kind="section"
+                              id="references"
+                              label={refGroupName(gid)}
+                              fromLabel={`Phase ${phase.id} · ${phase.name}`}
+                              targetGroupId={gid}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -1064,7 +1206,7 @@ export default function App() {
                 <span className="lf-compose-actions-note">
                   {allPhasesPicked
                     ? 'All seven phases set. Ready to export.'
-                    : 'Tip: pick an activity for each phase in Part 03 to lock the plan.'}
+                    : 'Tip: pick an activity for each phase in micro to lock the plan.'}
                 </span>
               </div>
               <button className="lf-btn lf-btn-ghost" onClick={resetAll} title="Clear all selections">
@@ -1088,17 +1230,20 @@ export default function App() {
           <h2>The framework <em>rests on</em> three commitments.</h2>
 
           <div className="lf-principles-list">
-            <div className="lf-principle">
+            <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 1 ? 'is-highlight' : ''}`} id="principle-1">
               <h4>Informal input is curricular, not residual.</h4>
               <p>A lesson that ends without an informal-input bridge hasn't closed the loop the framework argues for. Phase 7 is non-optional.</p>
+              <XRefPill kind="section" id="references" label="research · informal input" fromLabel="Principle: informal input" targetGroupId="input" />
             </div>
-            <div className="lf-principle">
+            <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 2 ? 'is-highlight' : ''}`} id="principle-2">
               <h4>L1 is a resource, not a contaminant.</h4>
               <p>Strategic Portuguese in Phases 3 and 6 supports rather than undermines L2 acquisition. Translanguaging is permission, not problem.</p>
+              <XRefPill kind="section" id="references" label="research · translanguaging" fromLabel="Principle: L1 as resource" targetGroupId="translanguaging" />
             </div>
-            <div className="lf-principle">
+            <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 3 ? 'is-highlight' : ''}`} id="principle-3">
               <h4>Variability is the norm.</h4>
               <p>Complex Dynamic Systems Theory tells us learners don't progress linearly through the macro grid. The framework is a spiral, not a staircase.</p>
+              <XRefPill kind="section" id="references" label="research · complex dynamic systems" fromLabel="Principle: variability" targetGroupId="cdst" />
             </div>
           </div>
         </div>
@@ -1121,10 +1266,25 @@ export default function App() {
 
         <div className="lf-references-grid">
           {REFERENCE_GROUPS.map((group) => (
-            <div key={group.id} className="lf-ref-group">
+            <div
+              key={group.id}
+              id={`ref-${group.id}`}
+              className={`lf-ref-group ${highlight?.kind === 'ref' && highlight.id === group.id ? 'is-highlight' : ''}`}
+            >
               <div className="lf-ref-group-head">
                 <h3 className="lf-ref-group-name">{group.name}</h3>
-                <div className="lf-ref-group-anchor">Anchors · {group.anchor}</div>
+                <div className="lf-ref-group-anchor">
+                  <span className="lf-ref-group-anchor-label">Jump to ·</span>
+                  {group.anchors.map((a, i) => (
+                    <XRefPill
+                      key={`${a.kind}-${a.id}-${i}`}
+                      kind={a.kind}
+                      id={a.id}
+                      label={anchorLabel(a)}
+                      fromLabel={group.name}
+                    />
+                  ))}
+                </div>
               </div>
               <ul className="lf-ref-list">
                 {group.items.map((item, i) => (
@@ -1191,6 +1351,9 @@ export default function App() {
           <Check size={14} /> {toast.label}
         </div>
       )}
+
+      <XRefBackPill />
     </div>
+    </XRefContext.Provider>
   );
 }
