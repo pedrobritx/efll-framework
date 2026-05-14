@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Check, Printer, Copy, RotateCcw, Pencil, ArrowDown, Mail, Linkedin, Github, ExternalLink } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowDown,
+  BookOpen,
+  Check,
+  Copy,
+  ExternalLink,
+  Github,
+  Lightbulb,
+  Linkedin,
+  Mail,
+  Pencil,
+  Printer,
+  RotateCcw,
+} from 'lucide-react';
 
 import { THEMES } from './data/themes.js';
 import { LEVELS } from './data/levels.js';
@@ -7,6 +21,7 @@ import { MACRO } from './data/macro.js';
 import { PHASES } from './data/phases.js';
 import { EXAMPLES } from './data/examples.js';
 import { REFERENCE_GROUPS } from './data/references.js';
+import { getEvidenceForSelection } from './data/evidence.js';
 
 const STORAGE_KEY = 'lf-selections';
 const SCHEMA_VERSION = 1;
@@ -37,6 +52,70 @@ function persistSelections(value) {
   } catch {
     /* private-mode / quota — ignore */
   }
+}
+
+function EvidenceItem({ item }) {
+  return (
+    <div className="lf-evidence-item">
+      <div className="lf-evidence-source">
+        <div className="lf-evidence-construct">{item.construct}</div>
+        <div className="lf-evidence-citation">{item.citation}</div>
+      </div>
+      <div className="lf-evidence-notes">
+        <p>
+          <Lightbulb size={14} aria-hidden />
+          <span>{item.implication}</span>
+        </p>
+        <p>
+          <AlertTriangle size={14} aria-hidden />
+          <span>{item.limitation}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function EvidencePanel({ items, context }) {
+  if (!items.length) return null;
+
+  return (
+    <aside className="lf-evidence-panel" aria-live="polite">
+      <div className="lf-evidence-head">
+        <div className="lf-evidence-kicker">
+          <BookOpen size={14} aria-hidden />
+          Live evidence layer
+        </div>
+        <div>
+          <h4>Why this works</h4>
+          <p>{context}</p>
+        </div>
+      </div>
+      <div className="lf-evidence-list">
+        {items.map((item) => (
+          <EvidenceItem key={`${item.construct}-${item.citation}`} item={item} />
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function EvidenceDigest({ items }) {
+  const digestItems = items.slice(0, 2);
+  if (!digestItems.length) return null;
+
+  return (
+    <div className="lf-compose-evidence">
+      <div className="lf-compose-evidence-label">Evidence note</div>
+      {digestItems.map((item) => (
+        <div key={`${item.construct}-${item.citation}`} className="lf-compose-evidence-item">
+          <strong>{item.construct}</strong>
+          <span>{item.citation}</span>
+          <p>{item.implication}</p>
+          <p className="lf-compose-evidence-caveat">Caveat: {item.limitation}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function App() {
@@ -74,6 +153,12 @@ export default function App() {
   const selectedActivityIdx = (phaseId) => selections.phaseActivities[phaseId] ?? 0;
   const hasPhaseSelection = (phaseId) => selections.phaseActivities[phaseId] !== undefined;
   const allPhasesPicked = PHASES.every((p) => hasPhaseSelection(p.id));
+  const activeActivityIdx = phaseData ? selectedActivityIdx(phaseData.id) : 0;
+  const activeActivity = phaseData?.activities[activeActivityIdx] || null;
+  const activeEvidence = useMemo(
+    () => getEvidenceForSelection(phaseData, activeActivity),
+    [phaseData, activeActivity]
+  );
 
   const getExample = useCallback(
     (phaseId) => {
@@ -141,10 +226,16 @@ export default function App() {
       const actIdx = selectedActivityIdx(phase.id);
       const activity = phase.activities[actIdx];
       const example = getExample(phase.id);
+      const evidenceItems = getEvidenceForSelection(phase, activity).slice(0, 2);
       md += `### Phase ${phase.id} — ${phase.name}\n`;
       md += `*${phase.defaultMin} min · ${activity.name}*\n\n`;
       md += `${example}\n\n`;
       md += `> **SLA grounding:** ${activity.sla}\n\n`;
+      if (evidenceItems.length) {
+        md += `> **Evidence:** ${evidenceItems.map((item) => `${item.construct} (${item.citation})`).join('; ')}\n`;
+        md += `> **Classroom implication:** ${evidenceItems.map((item) => item.implication).join(' ')}\n`;
+        md += `> **Caveat:** ${evidenceItems.map((item) => item.limitation).join(' ')}\n\n`;
+      }
     });
     md += `\n---\n*Generated with the EFLL Framework — English as a Foreign Language Lesson Framework — by Pedro Brito.*\n`;
     return md;
@@ -501,6 +592,11 @@ export default function App() {
                 })}
               </div>
 
+              <EvidencePanel
+                items={activeEvidence}
+                context={`Phase ${phaseData.id}: ${phaseData.name} · ${activeActivity?.name || 'Select an activity'}`}
+              />
+
               {phaseData.id < 7 && (
                 <button
                   className="lf-detail-cta"
@@ -592,6 +688,7 @@ export default function App() {
                 const isEditing = editingPhase === phase.id;
                 const isCustom = selections.editedExamples[phase.id] !== undefined;
                 const example = getExample(phase.id);
+                const evidenceItems = getEvidenceForSelection(phase, activity);
 
                 return (
                   <div key={phase.id} className="lf-compose-phase">
@@ -684,6 +781,8 @@ export default function App() {
                       <div className="lf-compose-sla">
                         <span className="lf-mono">SLA grounding ·</span> {activity.sla}
                       </div>
+
+                      <EvidenceDigest items={evidenceItems} />
                     </div>
                   </div>
                 );
