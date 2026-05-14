@@ -840,7 +840,7 @@ export default function App() {
                 {phaseData.activities.map((act, i) => {
                   const isSelected = selectedActivityIdx(phaseData.id) === i && hasPhaseSelection(phaseData.id);
                   const ActIcon = phaseData.icon;
-                  const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][i] || String(i + 1);
+                  const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][i] || String(i + 1);
                   return (
                     <button
                       key={i}
