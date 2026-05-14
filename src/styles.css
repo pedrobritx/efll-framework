@@ -650,13 +650,9 @@ html, body { background: var(--paper); }
     grid-template-columns: 1fr;
     gap: 18px;
   }
-  .lf-phase-detail-num { font-size: 56px; }
-  .lf-phase-purpose { font-size: 16px; }
 }
 @media (max-width: 420px) {
   .lf-phase-detail { padding: 20px 14px; }
-  .lf-phase-detail-num { font-size: 44px; }
-  .lf-phase-detail-title { font-size: 24px; }
 }
 .lf-phase-detail-num {
   font-family: 'Fraunces', serif;
@@ -717,10 +713,13 @@ html, body { background: var(--paper); }
   }
   .lf-phase-breadcrumb .sep { display: none; }
   .lf-phase-breadcrumb > * { flex: 0 1 auto; }
-  .lf-phase-detail-title {
-    font-size: 28px;
-    overflow-wrap: anywhere;
-  }
+  .lf-phase-detail-title { font-size: 28px; overflow-wrap: anywhere; }
+  .lf-phase-detail-num { font-size: 56px; }
+  .lf-phase-purpose { font-size: 16px; }
+}
+@media (max-width: 420px) {
+  .lf-phase-detail-num { font-size: 44px; }
+  .lf-phase-detail-title { font-size: 24px; }
 }
 .lf-phase-breadcrumb strong { color: var(--wine); font-weight: 500; }
 .lf-phase-breadcrumb span.sep { color: var(--line); }
