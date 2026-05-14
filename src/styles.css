@@ -316,9 +316,8 @@ html, body { background: var(--paper); }
 .lf-spiral-wrap {
   position: relative;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   margin: 8px auto 0;
-  aspect-ratio: 1 / 1;
 }
 .lf-spiral-svg {
   display: block;
@@ -327,88 +326,22 @@ html, body { background: var(--paper); }
   overflow: visible;
 }
 
-.lf-spiral-sector {
-  cursor: pointer;
-  outline: none;
-}
-.lf-spiral-sector:focus-visible .lf-spiral-layer:last-of-type {
-  stroke: var(--gold);
-  stroke-width: 2;
-}
-
-.lf-spiral-layer {
-  fill: var(--paper-deep);
-  stroke: var(--line);
-  stroke-width: 0.6;
-  transition: fill 0.4s ease-out, opacity 0.3s ease-out;
-  transition-delay: 0s;
-}
-.lf-spiral-sector:hover .lf-spiral-layer {
-  fill: var(--paper-shadow);
-}
-.lf-spiral-sector.is-selected .lf-spiral-layer {
-  fill: var(--layer-color, var(--wine));
-  transition-delay: var(--bloom-delay, 0s);
-  stroke: rgba(255, 255, 255, 0.18);
-}
-
-.lf-spiral-spiral {
-  fill: none;
-  stroke: var(--gold);
-  stroke-width: 1.2;
-  opacity: 0.28;
-  pointer-events: none;
-}
-
 .lf-spiral-label {
   font-family: 'Fraunces', serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   fill: var(--ink-soft);
   letter-spacing: -0.01em;
   pointer-events: none;
 }
-.lf-spiral-label-num {
-  font-style: italic;
-  fill: var(--wine);
-  font-size: 11px;
-}
-.lf-spiral-sector.is-selected .lf-spiral-label { fill: var(--wine-deep); font-weight: 600; }
 
-.lf-spiral-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 38%;
-  text-align: center;
-  pointer-events: none;
-}
-.lf-spiral-center > * { pointer-events: auto; }
-.lf-spiral-center-num {
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 22px;
-  color: var(--wine);
-  margin-bottom: 4px;
-}
-.lf-spiral-center-name {
-  font-family: 'Fraunces', serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 1.15;
-  color: var(--ink);
-  letter-spacing: -0.015em;
-  margin-bottom: 8px;
-}
-.lf-spiral-center-desc {
-  font-family: 'Newsreader', serif;
-  font-style: italic;
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: var(--ink-soft);
-  margin-bottom: 14px;
+.lf-spiral-description {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px dotted var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ─── PART 01 · INTERACTIVE MICRO ARC ─── */
@@ -545,11 +478,7 @@ html, body { background: var(--paper); }
   color: var(--paper);
   border-color: var(--wine-deep);
 }
-.lf-spiral-center .lf-overview-cta {
-  align-self: center;
-  padding: 6px 10px;
-  font-size: 9.5px;
-}
+
 
 /* ─── MACRO GRID (Part 2) ─── */
 .lf-macro-controls {

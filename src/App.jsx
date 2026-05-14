@@ -162,11 +162,20 @@ const LAYER_COLORS = ['#722F37', '#8E4138', '#A85037', '#B8924A', '#C7A55D', '#D
 function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
-  const rIn = 96;
-  const rOut = 164;
-  const thickness = (rOut - rIn) / levels.length;
-  const sectorDeg = 360 / themes.length;
+  const r = 200;
   const selected = themes.find((t) => t.id === selectedId) || themes[0];
+
+  // Place 6 stops evenly around the circle, starting at 12 o'clock
+  const stops = themes.map((theme, i) => {
+    const angleDeg = -90 + i * (360 / themes.length);
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return {
+      ...theme,
+      angleDeg,
+      x: cx + r * Math.cos(angleRad),
+      y: cy + r * Math.sin(angleRad),
+    };
+  });
 
   const handleKey = (id) => (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -179,83 +188,70 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
     <div className="lf-spiral-wrap">
       <svg
         className="lf-spiral-svg"
-        viewBox="0 0 500 500"
+        viewBox="0 0 500 560"
         role="img"
-        aria-label="Macro grid — six themes spiralling across six CEFR levels"
+        aria-label="Macro grid — six themes arranged in a circle across six CEFR levels"
       >
         <defs>
-          <radialGradient id="lf-spiral-center-bg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--paper)" />
-            <stop offset="100%" stopColor="var(--paper-deep)" />
-          </radialGradient>
+          <linearGradient id="lf-theme-gradient" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#722F37" />
+            <stop offset="100%" stopColor="#D4B47A" />
+          </linearGradient>
         </defs>
 
-        {themes.map((theme, ti) => {
-          const isSelected = theme.id === selected.id;
-          const startDeg = -90 + ti * sectorDeg;
-          const endDeg = startDeg + sectorDeg;
-          const midDeg = startDeg + sectorDeg / 2;
-          const [labelX, labelY] = polar(cx, cy, rOut + 22, midDeg);
-          const cosMid = Math.cos((midDeg * Math.PI) / 180);
-          const anchor = cosMid > 0.3 ? 'start' : cosMid < -0.3 ? 'end' : 'middle';
+        {/* Baseline circle */}
+        <circle
+          className="lf-arc-baseline"
+          cx={cx} cy={cy} r={r}
+          pathLength="1000"
+          strokeDasharray="12 8"
+        />
 
+        {/* Stops */}
+        {stops.map((s) => {
+          const isSelected = s.id === selected.id;
+          // Position label below circle
+          const labelY = s.y + (isSelected ? 18 : 14) + 16;
           return (
             <g
-              key={theme.id}
-              className={`lf-spiral-sector ${isSelected ? 'is-selected' : ''}`}
+              key={s.id}
+              className={`lf-arc-stop ${isSelected ? 'is-selected' : ''}`}
               role="button"
               tabIndex={0}
-              aria-label={`Select theme: ${theme.name}`}
+              aria-label={`Select theme: ${s.name}`}
               aria-pressed={isSelected}
-              onClick={() => onSelect(theme.id)}
-              onKeyDown={handleKey(theme.id)}
+              onClick={() => onSelect(s.id)}
+              onKeyDown={handleKey(s.id)}
             >
-              {levels.map((_lvl, k) => {
-                const layerIn = rIn + k * thickness;
-                const layerOut = layerIn + thickness;
-                const d = annularSectorPath(cx, cy, layerIn, layerOut, startDeg, endDeg);
-                const style = isSelected
-                  ? { '--layer-color': LAYER_COLORS[k], '--bloom-delay': `${k * 60}ms` }
-                  : undefined;
-                return (
-                  <path
-                    key={k}
-                    className="lf-spiral-layer"
-                    data-level={k}
-                    d={d}
-                    style={style}
-                  />
-                );
-              })}
-
+              <circle cx={s.x} cy={s.y} r={isSelected ? 18 : 14} />
               <text
-                className="lf-spiral-label"
-                x={labelX.toFixed(1)}
-                y={labelY.toFixed(1)}
-                textAnchor={anchor}
-                dominantBaseline="middle"
+                x={s.x}
+                y={s.y + 4}
+                textAnchor="middle"
+                className="lf-arc-stop-label"
               >
-                <tspan className="lf-spiral-label-num">{theme.num}</tspan>
-                <tspan dx="6">{theme.name}</tspan>
+                {s.num}
+              </text>
+              {/* Theme name label positioned below the circle */}
+              <text
+                x={s.x}
+                y={labelY}
+                textAnchor="middle"
+                className="lf-spiral-label"
+              >
+                {s.name}
               </text>
             </g>
           );
         })}
-
-        {/* Decorative spiral overlay */}
-        <path
-          className="lf-spiral-spiral"
-          d={archimedeanPath(cx, cy, rIn + 4, rOut - 4, 6, 540)}
-        />
-
-        {/* Inner hub circle */}
-        <circle cx={cx} cy={cy} r={rIn - 2} fill="url(#lf-spiral-center-bg)" stroke="var(--line)" strokeWidth="0.6" />
       </svg>
 
-      <div className="lf-spiral-center" aria-live="polite">
-        <div className="lf-spiral-center-num">{selected.num}</div>
-        <div className="lf-spiral-center-name">{selected.name}</div>
-        <div className="lf-spiral-center-desc">{selected.description}</div>
+      <div className="lf-spiral-description" aria-live="polite">
+        <div className="lf-arc-desc-meta">
+          <span>Theme {selected.num} of VI</span>
+        </div>
+        <h4 className="lf-arc-desc-name">{selected.name}</h4>
+        <p className="lf-arc-desc-purpose">{selected.description}</p>
         <button
           type="button"
           className="lf-overview-cta"
