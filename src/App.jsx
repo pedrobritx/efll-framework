@@ -271,7 +271,7 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
 
 function MicroArc({ phases, selectedId, onSelect, onUse }) {
   const cx = 250;
-  const cy = 240;
+  const cy = 250;
   const r = 200;
 
   // Cumulative-minute angles. Phase i starts at the sum of all prior defaultMin.
@@ -282,7 +282,7 @@ function MicroArc({ phases, selectedId, onSelect, onUse }) {
     cumulative.push(acc);
     acc += p.defaultMin;
   }
-  const minuteToAngle = (m) => 180 - (m / totalMin) * 180; // 180° at min 0, 0° at min 60
+  const minuteToAngle = (m) => 90 - (m / totalMin) * 360; // 90° at min 0, -270° at min 60
   const stops = phases.map((p, i) => {
     const startMin = cumulative[i];
     const angleDeg = minuteToAngle(startMin);
@@ -311,36 +311,39 @@ function MicroArc({ phases, selectedId, onSelect, onUse }) {
     <div className="lf-arc-wrap">
       <svg
         className="lf-arc-svg"
-        viewBox="0 0 500 280"
+        viewBox="0 0 500 500"
         role="img"
-        aria-label="Micro template — seven phases on a 60-minute timeline arc"
+        aria-label="Micro template — seven phases on a 60-minute clock face"
       >
         <defs>
-          <linearGradient id="lf-arc-gradient" x1="0" x2="1" y1="0" y2="0">
+          <linearGradient id="lf-arc-gradient" x1="0" x2="1" y1="0" y2="1">
             <stop offset="0%" stopColor="#722F37" />
             <stop offset="100%" stopColor="#D4B47A" />
           </linearGradient>
         </defs>
 
-        {/* Baseline arc */}
-        <path
+        {/* Baseline circle */}
+        <circle
           className="lf-arc-baseline"
-          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          cx={cx} cy={cy} r={r}
           pathLength="1000"
+          transform={`rotate(-90 ${cx} ${cy})`}
         />
         {/* Progress fill, using stroke-dasharray + offset */}
-        <path
+        <circle
           className="lf-arc-fill"
-          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          cx={cx} cy={cy} r={r}
           pathLength="1000"
           strokeDasharray="1000"
           strokeDashoffset={(1000 * (1 - fillProgress)).toFixed(1)}
+          transform={`rotate(-90 ${cx} ${cy})`}
         />
 
-        {/* Minute markers — 0, 30, 60 */}
-        <text className="lf-arc-tick-label" x={cx - r} y={cy + 28} textAnchor="middle">0 min</text>
-        <text className="lf-arc-tick-label" x={cx} y={cy - r - 12} textAnchor="middle">30 min</text>
-        <text className="lf-arc-tick-label" x={cx + r} y={cy + 28} textAnchor="middle">60 min</text>
+        {/* Minute markers */}
+        <text className="lf-arc-tick-label" x={cx} y={cy - r - 20} textAnchor="middle">0 / 60 min</text>
+        <text className="lf-arc-tick-label" x={cx + r + 30} y={cy + 4} textAnchor="middle">15 min</text>
+        <text className="lf-arc-tick-label" x={cx} y={cy + r + 28} textAnchor="middle">30 min</text>
+        <text className="lf-arc-tick-label" x={cx - r - 30} y={cy + 4} textAnchor="middle">45 min</text>
 
         {/* Stops */}
         {stops.map((s) => {
@@ -671,9 +674,9 @@ export default function App() {
 
           <div className="lf-overview-card micro">
             <div className="lf-overview-tag">Micro · lesson scale</div>
-            <h3>Seven phases, sixty minutes. <em>One curved hour.</em></h3>
+            <h3>Seven phases, sixty minutes. <em>One full hour.</em></h3>
             <p>
-              A 60-minute lesson curved into a half-clock. Click any stop to see its purpose and SLA grounding; the
+              A 60-minute lesson curved into a full clock face. Click any stop to see its purpose and SLA grounding; the
               arc fills wine → gold as the lesson unfolds.
             </p>
             <MicroArc
