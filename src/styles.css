@@ -18,7 +18,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 img, svg, video { max-width: 100%; height: auto; }
 
-html, body { background: var(--paper); }
+html, body { background: var(--paper); overflow-x: clip; }
 
 .lf-root {
   background: var(--paper);
@@ -28,7 +28,6 @@ html, body { background: var(--paper); }
   line-height: 1.55;
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
 }
 
 .lf-root::before {
