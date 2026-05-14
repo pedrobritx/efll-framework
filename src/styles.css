@@ -716,8 +716,23 @@ html, body { background: var(--paper); }
   color: var(--paper);
 }
 .lf-activity-card.selected .lf-activity-name { color: var(--paper); }
-.lf-activity-card.selected .lf-activity-meta { color: var(--gold-soft); border-top-color: rgba(184, 146, 74, 0.3); }
+.lf-activity-card.selected .lf-activity-num { color: var(--gold-soft); }
+.lf-activity-card.selected .lf-activity-icon { color: var(--gold); }
+.lf-activity-card.selected .lf-activity-descriptor { color: var(--paper-shadow); }
 .lf-activity-card.selected .lf-activity-best { color: var(--gold); }
+.lf-activity-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.lf-activity-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--wine);
+  letter-spacing: 0.04em;
+}
+.lf-activity-icon { color: var(--wine); opacity: 0.85; }
 .lf-activity-name {
   font-family: 'Fraunces', serif;
   font-weight: 500;
@@ -726,20 +741,22 @@ html, body { background: var(--paper); }
   letter-spacing: -0.01em;
   color: var(--ink);
 }
-.lf-activity-meta {
+.lf-activity-descriptor {
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px dotted var(--line);
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-mute);
+  font-style: italic;
+  line-height: 1.4;
+}
+.lf-activity-best {
+  color: var(--wine);
+  font-weight: 500;
+  font-style: normal;
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: var(--ink-mute);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-.lf-activity-best { color: var(--wine); font-weight: 500; }
 
 .lf-activity-check {
   position: absolute;

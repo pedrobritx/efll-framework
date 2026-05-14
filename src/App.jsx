@@ -575,6 +575,8 @@ export default function App() {
               <div className="lf-activities-grid">
                 {phaseData.activities.map((act, i) => {
                   const isSelected = selectedActivityIdx(phaseData.id) === i && hasPhaseSelection(phaseData.id);
+                  const ActIcon = phaseData.icon;
+                  const numeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][i] || String(i + 1);
                   return (
                     <button
                       key={i}
@@ -582,10 +584,13 @@ export default function App() {
                       onClick={() => setPhaseActivity(phaseData.id, i)}
                     >
                       <span className="lf-activity-check" aria-hidden><Check size={12} /></span>
+                      <div className="lf-activity-head">
+                        <span className="lf-activity-num">{numeral}</span>
+                        <ActIcon size={18} className="lf-activity-icon" />
+                      </div>
                       <div className="lf-activity-name">{act.name}</div>
-                      <div className="lf-activity-meta">
-                        <span className="lf-activity-best">{act.best}</span>
-                        <span>{act.sla}</span>
+                      <div className="lf-activity-descriptor">
+                        <span className="lf-activity-best">{act.best}</span> · {act.sla}
                       </div>
                     </button>
                   );
