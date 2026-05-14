@@ -162,8 +162,8 @@ const LAYER_COLORS = ['#722F37', '#8E4138', '#A85037', '#B8924A', '#C7A55D', '#D
 function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
-  const rIn = 70;
-  const rOut = 232;
+  const rIn = 96;
+  const rOut = 164;
   const thickness = (rOut - rIn) / levels.length;
   const sectorDeg = 360 / themes.length;
   const selected = themes.find((t) => t.id === selectedId) || themes[0];
