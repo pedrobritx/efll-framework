@@ -16,6 +16,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+img, svg, video { max-width: 100%; height: auto; }
 
 html, body { background: var(--paper); }
 
@@ -100,6 +101,32 @@ html, body { background: var(--paper); }
 .lf-nav-link:hover, .lf-nav-link.active {
   color: var(--wine-deep);
   border-bottom-color: var(--wine-deep);
+}
+@media (max-width: 640px) {
+  .lf-nav { padding: 12px 0; }
+  .lf-nav-inner {
+    padding: 0 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .lf-monogram { font-size: 18px; }
+  .lf-nav-links {
+    gap: 14px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lf-nav-links::-webkit-scrollbar { display: none; }
+  .lf-nav-link { padding: 4px 0; white-space: nowrap; }
+}
+@media (max-width: 420px) {
+  .lf-monogram { font-size: 16px; }
+  .lf-nav-links { font-size: 9px; gap: 12px; }
 }
 
 /* ─── HERO ─── */
@@ -618,10 +645,14 @@ html, body { background: var(--paper); }
   border-bottom: 1px solid var(--line);
 }
 @media (max-width: 600px) {
+  .lf-phase-detail { padding: 24px 16px; }
   .lf-phase-detail-header {
     grid-template-columns: 1fr;
     gap: 18px;
   }
+}
+@media (max-width: 420px) {
+  .lf-phase-detail { padding: 20px 14px; }
 }
 .lf-phase-detail-num {
   font-family: 'Fraunces', serif;
@@ -675,12 +706,20 @@ html, body { background: var(--paper); }
 @media (max-width: 600px) {
   .lf-phase-breadcrumb {
     flex-wrap: wrap;
-    gap: 8px 10px;
-  }
-  .lf-phase-detail-title {
-    font-size: 32px;
+    gap: 6px 10px;
+    font-size: 9px;
+    letter-spacing: 0.12em;
     overflow-wrap: anywhere;
   }
+  .lf-phase-breadcrumb .sep { display: none; }
+  .lf-phase-breadcrumb > * { flex: 0 1 auto; }
+  .lf-phase-detail-title { font-size: 28px; overflow-wrap: anywhere; }
+  .lf-phase-detail-num { font-size: 56px; }
+  .lf-phase-purpose { font-size: 16px; }
+}
+@media (max-width: 420px) {
+  .lf-phase-detail-num { font-size: 44px; }
+  .lf-phase-detail-title { font-size: 24px; }
 }
 .lf-phase-breadcrumb strong { color: var(--wine); font-weight: 500; }
 .lf-phase-breadcrumb span.sep { color: var(--line); }
@@ -1050,6 +1089,7 @@ html, body { background: var(--paper); }
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
+.lf-compose-activity-row > div { min-width: 0; flex: 1 1 200px; }
 .lf-compose-activity-row-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -1063,6 +1103,8 @@ html, body { background: var(--paper); }
   font-size: 18px;
   color: var(--ink);
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 }
 .lf-compose-activity-swap {
   font-family: 'JetBrains Mono', monospace;
@@ -1080,6 +1122,17 @@ html, body { background: var(--paper); }
   padding-right: 26px;
 }
 .lf-compose-activity-swap:hover { border-color: var(--wine); color: var(--wine); }
+.lf-compose-activity-swap {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .lf-compose-activity-row { gap: 10px; }
+  .lf-compose-activity-name { font-size: 16px; }
+  .lf-compose-activity-swap { width: 100%; }
+}
 
 .lf-compose-example-block {
   background: var(--paper);
