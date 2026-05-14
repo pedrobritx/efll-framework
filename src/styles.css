@@ -746,7 +746,10 @@ html, body { background: var(--paper); overflow-x: clip; }
 }
 
 /* ─── MICRO (Part 3) ─── */
-.lf-timeline { margin-top: 32px; }
+.lf-timeline {
+  margin-top: 32px;
+  scroll-margin-top: 96px;
+}
 .lf-timeline-track {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
