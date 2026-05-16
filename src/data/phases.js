@@ -17,6 +17,7 @@ export const PHASES = [
       { name: '30-second free recall of last lesson', best: 'All', sla: 'Spaced retrieval (Schmitt)' },
       { name: 'Quick poll on unit theme', best: 'All', sla: 'Engagement (Schmitt)' },
       { name: '"What did you notice in [recommended content]?"', best: 'B1+', sla: "Schmidt's noticing + informal-input bridge" },
+      { name: 'Visualise your future English-using self in [specific scenario]', best: 'All', sla: 'Dörnyei — Ideal L2 Self' },
     ],
   },
   {
@@ -31,6 +32,7 @@ export const PHASES = [
       { name: 'Podcast snippet with transcript', best: 'B1+', sla: 'Multimodal input' },
       { name: 'Teacher narrative with target structures recycled', best: 'All', sla: 'Krashen — modified input' },
       { name: 'Dictogloss (listen, reconstruct in pairs)', best: 'B1+', sla: 'Swain — noticing + output' },
+      { name: 'Input flood: 8–10 instances of [target form] across [3 short texts]', best: 'A2+', sla: 'Schmidt — frequency-driven noticing; Nguyen & Doan — adaptive input' },
     ],
   },
   {
@@ -44,6 +46,8 @@ export const PHASES = [
       { name: 'Contrastive analysis with L1 (translanguaging)', best: 'All', sla: 'García & Wei — L1 as resource' },
       { name: 'Error correction collective: anonymized errors on board', best: 'B1+', sla: 'Lyster & Ranta — prompts' },
       { name: 'Metalinguistic discussion in L1 or L2', best: 'All', sla: 'Swain — metatalk' },
+      { name: 'Processing instruction: choose the meaning, not the form, for [10 sentences with the target structure]', best: 'A2+', sla: 'VanPatten / Ellis — input processing' },
+      { name: 'Reformulation: rewrite [a short learner-produced text] in target-like English, then compare', best: 'B1+', sla: 'Swain 2005 — noticing the gap' },
     ],
   },
   {
@@ -58,6 +62,7 @@ export const PHASES = [
       { name: 'Information gap (two-way)', best: 'A2+', sla: 'Long — negotiation of meaning' },
       { name: 'Picture description with target structure', best: 'A2+', sla: 'Pushed output (Swain)' },
       { name: 'Sentence transformation against time', best: 'B1+', sla: 'Fluency development' },
+      { name: '4/3/2 fluency task on [familiar topic]: same monologue, 4 min then 3 min then 2 min, rotating partners', best: 'A2+', sla: 'Nation — fluency development strand' },
     ],
   },
   {
@@ -74,6 +79,9 @@ export const PHASES = [
       { name: 'Debate (structured)', best: 'B2+', sla: 'Argumentation, register' },
       { name: 'Collaborative writing (Google Docs live)', best: 'B1+', sla: 'Swain — collaborative dialogue' },
       { name: 'Storytelling with prompts', best: 'A2+', sla: 'Narrative output' },
+      { name: 'Information-gap jigsaw: each learner holds [one piece of a story / dataset / map]; reconstruct the whole together', best: 'A2+', sla: 'Long — negotiation of meaning; Mackey & Goo — d ≈ 1.09' },
+      { name: 'Real-world simulation: [book a flight / handle a customer complaint / negotiate a price] with required outcome', best: 'B1+', sla: 'Ellis 2003 — task with non-linguistic outcome; Bryfonski & McKay 2019' },
+      { name: 'Dynamic-assessment task: learner attempts [open task]; teacher mediates only when stuck, withdrawing support as learner regains autonomy', best: 'A2+', sla: 'Aljaafreh & Lantolf — ZPD-graduated mediation' },
     ],
   },
   {
@@ -87,6 +95,8 @@ export const PHASES = [
       { name: 'Graduated CF in real time (summarized here)', best: 'All', sla: 'Aljaafreh & Lantolf — ZPD' },
       { name: 'Exit ticket: "One thing I learned / one I\'m unsure about"', best: 'All', sla: 'Metacognition' },
       { name: 'Recast log (track high-frequency errors weekly)', best: 'All', sla: 'Lyster & Ranta — longitudinal' },
+      { name: 'Focused written CF on [one target form] in a written task', best: 'A2+', sla: 'Sheen 2007; Li 2010 — explicit focused CF' },
+      { name: 'Goal-revision moment: "What\'s one thing I want to do differently in [the next lesson / this week\'s informal input]?"', best: 'All', sla: 'Dörnyei — L2 Learning Experience; Al-Hoorie — bridging intention and action' },
     ],
   },
   {
@@ -101,6 +111,7 @@ export const PHASES = [
       { name: 'Lyric analysis assignment with a specific song', best: 'A2+', sla: 'Affective + lexical' },
       { name: '"Find an example of [target form] in real content"', best: 'B1+', sla: 'Noticing in the wild' },
       { name: 'Recommend-back: learner suggests content to teacher', best: 'B1+', sla: 'Norton — investment, agency' },
+      { name: 'Sustained silent reading / free voluntary listening: 10 minutes of [self-chosen content] this week, no task', best: 'A2+', sla: 'Krashen 2004 — Power of Reading; FVR' },
     ],
   },
 ];
