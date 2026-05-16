@@ -1,0 +1,242 @@
+/* ─── MACRO GRID (Part 02) ─── */
+.lf-macro-controls {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border: 1px solid var(--line);
+  overflow-x: auto;
+  background: var(--paper-deep);
+}
+.lf-level-btn {
+  flex: 1;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: all 0.2s;
+  min-width: 140px;
+  position: relative;
+}
+.lf-level-btn:last-child { border-right: none; }
+.lf-level-btn:hover { background: var(--paper-shadow); }
+.lf-level-btn.active {
+  background: var(--wine-deep);
+  color: var(--paper);
+}
+.lf-level-btn .lf-level-label {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.lf-level-btn .lf-level-name {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.lf-macro-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+@media (max-width: 900px) { .lf-macro-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .lf-macro-grid { grid-template-columns: 1fr; } }
+.lf-cell {
+  background: var(--paper-deep);
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  border: none;
+  font: inherit;
+  color: inherit;
+}
+.lf-cell:hover {
+  background: var(--paper);
+  transform: translateY(-2px);
+}
+.lf-cell.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lf-cell-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--wine);
+  letter-spacing: 0.04em;
+}
+.lf-cell.active .lf-cell-num { color: var(--gold-soft); }
+.lf-cell-icon { color: var(--wine); opacity: 0.85; }
+.lf-cell.active .lf-cell-icon { color: var(--gold); }
+.lf-cell-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+.lf-cell-preview {
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+.lf-cell.active .lf-cell-preview { color: var(--paper-shadow); }
+
+/* Detail panel */
+.lf-detail {
+  margin-top: 32px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.lf-detail::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(184, 146, 74, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.lf-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(184, 146, 74, 0.3);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.lf-detail-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+}
+.lf-detail-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold-soft);
+}
+.lf-detail-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+}
+@media (max-width: 800px) {
+  .lf-detail { padding: 36px 24px; }
+  .lf-detail-body { grid-template-columns: 1fr; gap: 40px; }
+}
+.lf-detail-section h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px dotted rgba(184, 146, 74, 0.4);
+}
+.lf-cando-list { list-style: none; }
+.lf-cando-list li {
+  padding: 12px 0;
+  font-family: 'Newsreader', serif;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--paper);
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+.lf-cando-list li::before {
+  content: '"I can';
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.lf-cando-list li::after { content: '"'; color: var(--gold); }
+.lf-bridge-list { list-style: none; }
+.lf-bridge-list li {
+  padding: 12px 0;
+  border-bottom: 1px dotted rgba(184, 146, 74, 0.2);
+  font-size: 16px;
+  color: var(--paper);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.lf-bridge-list li:last-child { border-bottom: none; }
+.lf-bridge-list li::before { content: '☞'; color: var(--gold); font-size: 14px; }
+
+.lf-strands {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(184, 146, 74, 0.3);
+}
+.lf-strands-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.lf-strands-bar {
+  display: flex;
+  height: 32px;
+  background: rgba(184, 146, 74, 0.1);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+}
+.lf-strand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  transition: flex 0.4s;
+}
+
+/* Jump-to-composer link */
+.lf-detail-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  cursor: pointer;
+  background: none;
+  border: 1px solid rgba(184, 146, 74, 0.4);
+  padding: 10px 16px;
+  transition: all 0.2s;
+}
+.lf-detail-cta:hover {
+  background: rgba(184, 146, 74, 0.12);
+  border-color: var(--gold);
+  color: var(--paper);
+}

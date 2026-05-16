@@ -1,0 +1,16 @@
+/* ─── DESIGN TOKENS ─── */
+:root {
+  --paper: #F2EBDD;
+  --paper-deep: #E8DFCB;
+  --paper-shadow: #DCD0B8;
+  --ink: #1A1612;
+  --ink-soft: #3D342C;
+  --ink-mute: #6B5F52;
+  --wine: #722F37;
+  --wine-deep: #4F1A1F;
+  --wine-light: #A04C53;
+  --gold: #B8924A;
+  --gold-soft: #D4B47A;
+  --sage: #5E6B52;
+  --line: #C7B89A;
+}

@@ -1,0 +1,35 @@
+/* ─── BUTTONS ─── */
+.lf-icon-btn { width: 28px; height: 28px; padding: 0; background: transparent; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+.lf-icon-btn:hover { border-color: var(--wine); color: var(--wine); background: var(--paper-shadow); }
+.lf-icon-btn-primary { background: var(--wine); color: var(--paper); border-color: var(--wine); }
+.lf-icon-btn-primary:hover { background: var(--wine-deep); color: var(--paper); }
+.lf-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 22px; border: 1px solid var(--wine); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--wine); white-space: nowrap; }
+.lf-btn:hover { transform: translateY(-1px); }
+.lf-btn-primary { background: var(--wine-deep); color: var(--paper); border-color: var(--wine-deep); }
+.lf-btn-primary:hover { background: var(--ink); border-color: var(--ink); }
+.lf-btn-secondary { background: var(--paper); color: var(--wine); }
+.lf-btn-secondary:hover { background: var(--paper-shadow); }
+.lf-btn-ghost { border-color: var(--line); color: var(--ink-mute); }
+.lf-btn-ghost:hover { color: var(--wine); border-color: var(--wine); }
+
+/* Action bar */
+.lf-compose-actions-bar { margin-top: 40px; padding: 32px; background: var(--paper-deep); border: 1px solid var(--line); display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
+.lf-compose-actions-bar .lf-actions-spacer { flex: 1; min-width: 0; }
+.lf-compose-actions-note { font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-mute); font-size: 14px; }
+
+/* Ornament */
+.lf-ornament { text-align: center; font-family: 'Fraunces', serif; font-size: 32px; color: var(--gold); margin: 24px 0; letter-spacing: 0.6em; opacity: 0.7; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes lf-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.lf-hero h1, .lf-hero-sub, .lf-hero-meta, .lf-eyebrow { animation: lf-fade-up 0.8s ease-out backwards; }
+.lf-eyebrow { animation-delay: 0s; }
+.lf-hero h1 { animation-delay: 0.1s; }
+.lf-hero-sub { animation-delay: 0.3s; }
+.lf-hero-meta { animation-delay: 0.45s; }
+
+/* Toast */
+.lf-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 14px 22px; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; z-index: 1000; display: flex; align-items: center; gap: 10px; border-left: 3px solid var(--gold); animation: lf-fade-up 0.3s ease-out; }

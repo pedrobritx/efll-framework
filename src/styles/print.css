@@ -1,0 +1,40 @@
+/* ─── PRINT STYLESHEET ─── */
+@media print {
+  @page { size: A4; margin: 16mm 14mm; }
+  html, body, .lf-root { background: var(--paper) !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  .lf-nav, .lf-grain, .lf-hero, #overview, #macro, #micro, #references, .lf-principles, .lf-footer, .lf-section-header, .lf-compose-actions-bar, .lf-compose-example-actions, .lf-compose-activity-swap, .lf-ornament, .lf-toast { display: none !important; }
+  .lf-section, .lf-compose { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+  .lf-compose-context { grid-template-columns: 1fr 1fr 1fr !important; gap: 0 !important; background: var(--line) !important; border: 1px solid var(--line) !important; margin-bottom: 18px !important; page-break-inside: avoid; }
+  .lf-compose-context-col { background: var(--paper) !important; padding: 16px 18px !important; }
+  .lf-compose-context-label { color: var(--wine) !important; font-size: 8.5pt !important; margin-bottom: 8px !important; }
+  .lf-compose-context-archetype { font-size: 14pt !important; color: var(--ink) !important; margin-bottom: 4px !important; }
+  .lf-compose-context-archetype-focus { font-size: 10pt !important; color: var(--ink-soft) !important; }
+  .lf-compose-cando li, .lf-compose-bridge li { font-size: 9.5pt !important; color: var(--ink-soft) !important; padding: 3px 0 !important; }
+  .lf-compose-plan-header { border-bottom: 2px solid var(--ink) !important; margin-bottom: 14px !important; padding-bottom: 10px !important; }
+  .lf-compose-plan-title { font-size: 20pt !important; color: var(--ink) !important; }
+  .lf-compose-plan-total { font-size: 16pt !important; color: var(--wine) !important; }
+  .lf-compose-plan-eyebrow { font-size: 8.5pt !important; color: var(--wine) !important; }
+  .lf-compose-phase { background: var(--paper-deep) !important; border: 1px solid var(--line) !important; border-left: 3px solid var(--wine) !important; padding: 14px 18px !important; margin-bottom: 8px !important; page-break-inside: avoid; break-inside: avoid; }
+  .lf-compose-phase-head { grid-template-columns: 50px 1fr !important; gap: 16px !important; margin-bottom: 10px !important; padding-bottom: 8px !important; border-bottom: 1px dotted var(--line) !important; }
+  .lf-compose-phase-num { font-size: 30pt !important; color: var(--wine) !important; }
+  .lf-compose-phase-title { font-size: 13pt !important; color: var(--ink) !important; }
+  .lf-compose-phase-time { font-size: 9pt !important; background: var(--paper) !important; border: 1px solid var(--wine) !important; color: var(--wine) !important; padding: 3px 9px !important; }
+  .lf-compose-phase-icon { color: var(--wine) !important; }
+  .lf-compose-activity-row { margin-bottom: 8px !important; }
+  .lf-compose-activity-row-label { font-size: 8pt !important; color: var(--ink-mute) !important; }
+  .lf-compose-activity-name { font-size: 11pt !important; color: var(--ink) !important; }
+  .lf-compose-example-block { background: var(--paper) !important; border: 1px solid var(--line) !important; border-left: 2px solid var(--gold) !important; padding: 8px 14px !important; margin-bottom: 8px !important; }
+  .lf-compose-example-label { color: var(--gold) !important; font-size: 8pt !important; margin-bottom: 6px !important; }
+  .lf-compose-example-text { font-size: 10.5pt !important; color: var(--ink) !important; line-height: 1.5 !important; }
+  .lf-compose-sla { font-size: 9pt !important; color: var(--ink-mute) !important; }
+  .lf-compose-sla .lf-mono { color: var(--wine) !important; font-size: 8pt !important; }
+  .lf-compose-evidence { margin-top: 6px !important; padding-top: 6px !important; border-top: 1px dotted var(--line) !important; page-break-inside: avoid; break-inside: avoid; }
+  .lf-compose-evidence-label { font-size: 7.5pt !important; color: var(--wine) !important; margin-bottom: 4px !important; }
+  .lf-compose-evidence-item { display: block !important; padding: 4px 0 !important; border-top: 1px solid rgba(199, 184, 154, 0.45) !important; }
+  .lf-compose-evidence-item:first-of-type { border-top: none !important; }
+  .lf-compose-evidence-item strong { font-size: 9pt !important; color: var(--ink) !important; margin-right: 6px !important; }
+  .lf-compose-evidence-item span { font-size: 7.5pt !important; color: var(--wine) !important; }
+  .lf-compose-evidence-item p { font-size: 8.5pt !important; color: var(--ink-soft) !important; line-height: 1.35 !important; margin-top: 2px !important; }
+  .lf-compose-plan::after { content: "Generated with the English with Pedro lesson framework."; display: block; margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-size: 9.5pt; color: var(--wine); text-align: center; }
+}

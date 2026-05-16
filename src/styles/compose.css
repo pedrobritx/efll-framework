@@ -1,0 +1,46 @@
+/* ─── COMPOSE (Part 04) ─── */
+.lf-compose-empty { background: var(--paper-deep); border: 1px dashed var(--line); padding: 56px 32px; text-align: center; color: var(--ink-mute); font-family: 'Fraunces', serif; font-style: italic; font-size: 20px; }
+.lf-compose-empty strong { display: block; font-style: normal; font-weight: 500; color: var(--wine); font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px; }
+.lf-compose-context { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 32px; }
+@media (max-width: 900px) { .lf-compose-context { grid-template-columns: 1fr; } }
+.lf-compose-context-col { background: var(--paper); padding: 28px 24px; }
+.lf-compose-context-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--wine); margin-bottom: 16px; }
+.lf-compose-context-archetype { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.02em; margin-bottom: 8px; color: var(--ink); }
+.lf-compose-context-archetype-focus { font-style: italic; color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
+.lf-compose-cando, .lf-compose-bridge { list-style: none; padding: 0; margin: 0; }
+.lf-compose-cando li { padding: 6px 0; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+.lf-compose-cando li::before { content: '"I can '; font-family: 'Fraunces', serif; font-style: italic; color: var(--wine); }
+.lf-compose-cando li::after { content: '."'; color: var(--wine); }
+.lf-compose-bridge li { padding: 6px 0; font-size: 14px; line-height: 1.5; color: var(--ink-soft); display: flex; gap: 10px; align-items: baseline; }
+.lf-compose-bridge li::before { content: '☞'; color: var(--gold); flex-shrink: 0; }
+.lf-compose-plan-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); gap: 24px; flex-wrap: wrap; }
+.lf-compose-plan-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--wine); margin-bottom: 8px; }
+.lf-compose-plan-title { font-family: 'Fraunces', serif; font-weight: 400; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.025em; color: var(--ink); line-height: 1.05; }
+.lf-compose-plan-total { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 32px; color: var(--wine); letter-spacing: -0.02em; }
+.lf-compose-phase { background: var(--paper-deep); border: 1px solid var(--line); border-left: 4px solid var(--wine); padding: 32px; margin-bottom: 12px; position: relative; }
+@media (max-width: 700px) { .lf-compose-phase { padding: 24px 20px; } }
+.lf-compose-phase-head { display: grid; grid-template-columns: 80px 1fr; gap: 24px; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dotted var(--line); }
+@media (max-width: 600px) { .lf-compose-phase-head { grid-template-columns: 60px 1fr; gap: 16px; } }
+.lf-compose-phase-num { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 48px; line-height: 1; color: var(--wine); letter-spacing: -0.03em; }
+@media (max-width: 600px) { .lf-compose-phase-num { font-size: 36px; } }
+.lf-compose-phase-meta { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.lf-compose-phase-title-row { display: flex; align-items: center; gap: 12px; }
+.lf-compose-phase-icon { color: var(--wine); }
+.lf-compose-phase-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); }
+.lf-compose-phase-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--wine); text-transform: uppercase; letter-spacing: 0.14em; padding: 6px 12px; background: var(--paper-shadow); border-radius: 2px; }
+.lf-compose-activity-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.lf-compose-activity-row > div { min-width: 0; flex: 1 1 200px; }
+.lf-compose-activity-row-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-mute); }
+.lf-compose-activity-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; color: var(--ink); letter-spacing: -0.01em; overflow-wrap: anywhere; line-height: 1.25; }
+.lf-compose-activity-swap { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px 6px 12px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23722F37' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; max-width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+.lf-compose-activity-swap:hover { border-color: var(--wine); color: var(--wine); }
+@media (max-width: 600px) { .lf-compose-activity-row { gap: 10px; } .lf-compose-activity-name { font-size: 16px; } .lf-compose-activity-swap { width: 100%; } }
+.lf-compose-example-block { background: var(--paper); border: 1px solid var(--line); padding: 20px; margin-bottom: 16px; }
+.lf-compose-example-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--wine); }
+.lf-custom-tag { color: var(--gold); font-style: italic; margin-left: 4px; text-transform: none; font-size: 11px; letter-spacing: 0.04em; }
+.lf-compose-example-actions { display: flex; gap: 4px; }
+.lf-compose-example-text { font-family: 'Newsreader', serif; font-size: 17px; line-height: 1.55; color: var(--ink); }
+.lf-compose-example-edit { width: 100%; font-family: 'Newsreader', serif; font-size: 17px; line-height: 1.55; color: var(--ink); background: var(--paper-deep); border: 1px solid var(--wine); padding: 12px; resize: vertical; min-height: 100px; outline: none; }
+.lf-compose-example-edit:focus { border-color: var(--wine-deep); }
+.lf-compose-sla { font-family: 'Newsreader', serif; font-size: 13px; color: var(--ink-mute); font-style: italic; padding-top: 8px; }
+.lf-compose-sla .lf-mono { font-style: normal; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--wine); margin-right: 4px; }
