@@ -22,6 +22,7 @@ import { LEVELS } from './data/levels.js';
 import { MACRO } from './data/macro.js';
 import { PHASES } from './data/phases.js';
 import { EXAMPLES } from './data/examples.js';
+import { getHandout } from './data/handouts.js';
 import { REFERENCE_GROUPS, refsForAnchor } from './data/references.js';
 import { getEvidenceForSelection } from './data/evidence.js';
 
@@ -428,6 +429,8 @@ export default function App() {
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
   const [toast, setToast] = useState(null);
+  // Which tab is active in Part 04 — view state only, not persisted.
+  const [composeTab, setComposeTab] = useState('plan'); // 'plan' | 'handout'
   // Part 01 overview-local selections (independent of the global composer).
   const [overviewTheme, setOverviewTheme] = useState('identity');
   const [overviewPhase, setOverviewPhase] = useState(1);
@@ -615,16 +618,40 @@ export default function App() {
     return md;
   };
 
+  // ─── EXPORT: HANDOUT MARKDOWN ───────────────────────────────────────────
+  const buildHandoutMarkdown = () => {
+    if (!hasMacro) return '';
+    let md = `# Student handout — ${themeData.name}\n\n`;
+    md += `**Level:** ${level} · ${levelData.name}\n`;
+    md += `**Date:** _________________________\n\n`;
+    md += `## By the end of this lesson, you'll be able to\n\n`;
+    macroCell.cando.forEach((c) => {
+      md += `- ${c.charAt(0).toUpperCase() + c.slice(1)}.\n`;
+    });
+    md += `\n---\n\n`;
+    PHASES.forEach((phase) => {
+      const actIdx = selectedActivityIdx(phase.id);
+      const activity = phase.activities[actIdx];
+      const task = getHandout(level, theme, phase.id, actIdx);
+      md += `### Phase ${phase.id} — ${phase.name} (${phase.defaultMin} min)\n`;
+      md += `**${activity.name}**\n\n`;
+      md += `**Your task:** ${task}\n\n`;
+    });
+    md += `\n---\n*English with Pedro · lesson handout.*\n`;
+    return md;
+  };
+
   const handleCopyMarkdown = async () => {
-    const md = buildMarkdown();
+    const md = composeTab === 'handout' ? buildHandoutMarkdown() : buildMarkdown();
     if (!md) {
       setToast({ kind: 'warn', label: 'Pick a level and theme first' });
       setTimeout(() => setToast(null), 2200);
       return;
     }
+    const okLabel = composeTab === 'handout' ? 'Copied handout' : 'Copied as Markdown';
     try {
       await navigator.clipboard.writeText(md);
-      setToast({ kind: 'ok', label: 'Copied as Markdown' });
+      setToast({ kind: 'ok', label: okLabel });
     } catch {
       const ta = document.createElement('textarea');
       ta.value = md;
@@ -632,7 +659,7 @@ export default function App() {
       ta.select();
       try {
         document.execCommand('copy');
-        setToast({ kind: 'ok', label: 'Copied as Markdown' });
+        setToast({ kind: 'ok', label: okLabel });
       } catch {
         setToast({ kind: 'warn', label: 'Copy failed' });
       }
@@ -655,6 +682,15 @@ export default function App() {
     } catch {
       /* ignore */
     }
+    // Toggle a body class so the print stylesheet can show only the handout
+    // when it's the active tab, or only the lesson plan otherwise.
+    const isHandout = composeTab === 'handout';
+    if (isHandout) document.body.classList.add('lf-print-handout');
+    const cleanup = () => {
+      document.body.classList.remove('lf-print-handout');
+      window.removeEventListener('afterprint', cleanup);
+    };
+    if (isHandout) window.addEventListener('afterprint', cleanup);
     window.print();
   };
 
@@ -1065,7 +1101,28 @@ export default function App() {
               </div>
             </div>
 
+            {/* TABS */}
+            <div className="lf-compose-tabs" role="tablist" aria-label="Compose view">
+              <button
+                role="tab"
+                aria-selected={composeTab === 'plan'}
+                className={`lf-compose-tab ${composeTab === 'plan' ? 'is-active' : ''}`}
+                onClick={() => setComposeTab('plan')}
+              >
+                Lesson plan
+              </button>
+              <button
+                role="tab"
+                aria-selected={composeTab === 'handout'}
+                className={`lf-compose-tab ${composeTab === 'handout' ? 'is-active' : ''}`}
+                onClick={() => setComposeTab('handout')}
+              >
+                Student handout
+              </button>
+            </div>
+
             {/* LESSON PLAN */}
+            {composeTab === 'plan' && (
             <div className="lf-compose-plan">
               <div className="lf-compose-plan-header">
                 <div>
@@ -1199,6 +1256,64 @@ export default function App() {
                 );
               })}
             </div>
+            )}
+
+            {/* STUDENT HANDOUT */}
+            {composeTab === 'handout' && (
+            <div className="lf-handout">
+              <div className="lf-handout-header">
+                <div className="lf-handout-eyebrow">Student handout</div>
+                <h3 className="lf-handout-title">{themeData.name}</h3>
+                <div className="lf-handout-meta">
+                  <span className="lf-handout-level">{level} · {levelData.name}</span>
+                  <span className="lf-handout-sep">·</span>
+                  <span className="lf-handout-date">Date: <span className="lf-handout-date-line">&nbsp;</span></span>
+                  <span className="lf-handout-sep">·</span>
+                  <span className="lf-handout-name">Name: <span className="lf-handout-date-line">&nbsp;</span></span>
+                </div>
+              </div>
+
+              <div className="lf-handout-cando-block">
+                <div className="lf-handout-cando-label">By the end of this lesson, you'll be able to</div>
+                <ul className="lf-handout-cando">
+                  {macroCell.cando.map((c, i) => (
+                    <li key={i}>{c.charAt(0).toUpperCase() + c.slice(1)}.</li>
+                  ))}
+                </ul>
+              </div>
+
+              {PHASES.map((phase) => {
+                const actIdx = selectedActivityIdx(phase.id);
+                const activity = phase.activities[actIdx];
+                const task = getHandout(level, theme, phase.id, actIdx);
+
+                return (
+                  <div key={phase.id} className="lf-handout-phase">
+                    <div className="lf-handout-phase-head">
+                      <span className="lf-handout-phase-num">
+                        {phase.id < 10 ? `0${phase.id}` : phase.id}
+                      </span>
+                      <div className="lf-handout-phase-titles">
+                        <div className="lf-handout-phase-title">{phase.name}</div>
+                        <div className="lf-handout-phase-activity">{activity.name}</div>
+                      </div>
+                      <div className="lf-handout-phase-time">{phase.defaultMin} min</div>
+                    </div>
+                    <div className="lf-handout-task-block">
+                      <div className="lf-handout-task-label">Your task</div>
+                      <div className="lf-handout-task">
+                        {task || <em className="lf-handout-task-empty">Task to be added for this activity.</em>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="lf-handout-footer">
+                English with Pedro · lesson handout
+              </div>
+            </div>
+            )}
 
             {/* ACTION BAR */}
             <div className="lf-compose-actions-bar">

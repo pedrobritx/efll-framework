@@ -751,20 +751,24 @@ html, body { background: var(--paper); overflow-x: clip; }
   scroll-margin-top: 96px;
 }
 .lf-timeline-track {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  display: flex;
+  gap: 0;
   margin-bottom: 48px;
   position: relative;
-}
-@media (max-width: 900px) { .lf-timeline-track { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 500px) { .lf-timeline-track { grid-template-columns: 1fr; } }
-.lf-phase-btn {
-  background: var(--paper-deep);
   border: 1px solid var(--line);
+  background: var(--paper-deep);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.lf-phase-btn {
+  flex: 0 0 auto;
+  min-width: 180px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
   padding: 24px 16px;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: background 0.2s;
   text-align: left;
   font: inherit;
   color: inherit;
@@ -773,15 +777,13 @@ html, body { background: var(--paper); overflow-x: clip; }
   display: flex;
   flex-direction: column;
   gap: 12px;
+  scroll-snap-align: start;
 }
-.lf-phase-btn:hover {
-  border-color: var(--wine);
-  transform: translateY(-2px);
-}
+.lf-phase-btn:last-child { border-right: none; }
+.lf-phase-btn:hover { background: var(--paper-shadow); }
 .lf-phase-btn.active {
   background: var(--wine-deep);
   color: var(--paper);
-  border-color: var(--wine-deep);
 }
 .lf-phase-num {
   font-family: 'Fraunces', serif;
@@ -1880,7 +1882,227 @@ html, body { background: var(--paper); overflow-x: clip; }
   animation: lf-fade-up 0.3s ease-out;
 }
 
-/* ─── PRINT STYLESHEET ─── */
+/* ─── COMPOSE TABS (Part 04) — mirrors .lf-macro-controls + .lf-level-btn ─── */
+.lf-compose-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+  overflow-x: auto;
+}
+.lf-compose-tab {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: all 0.2s;
+}
+.lf-compose-tab:last-child { border-right: none; }
+.lf-compose-tab:hover { background: var(--paper-shadow); }
+.lf-compose-tab.is-active {
+  background: var(--wine-deep);
+  color: var(--paper);
+}
+@media (max-width: 600px) {
+  .lf-compose-tab { padding: 12px 14px; font-size: 10px; }
+}
+
+/* ─── STUDENT HANDOUT (Part 04, handout tab) ─── */
+.lf-handout {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 40px 48px;
+  position: relative;
+}
+@media (max-width: 700px) { .lf-handout { padding: 28px 22px; } }
+
+.lf-handout-header {
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--ink);
+}
+.lf-handout-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--wine);
+  margin-bottom: 10px;
+}
+.lf-handout-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(26px, 3.6vw, 38px);
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+.lf-handout-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: baseline;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.lf-handout-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--wine);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lf-handout-sep { color: var(--gold); }
+.lf-handout-date,
+.lf-handout-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.lf-handout-date-line {
+  flex: 1;
+  border-bottom: 1px solid var(--ink-mute);
+  min-height: 1em;
+  min-width: 100px;
+}
+
+.lf-handout-cando-block {
+  background: var(--paper-deep);
+  border-left: 3px solid var(--gold);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+}
+.lf-handout-cando-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--wine);
+  margin-bottom: 12px;
+}
+.lf-handout-cando {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lf-handout-cando li {
+  padding: 6px 0 6px 22px;
+  position: relative;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.lf-handout-cando li::before {
+  content: '☐';
+  position: absolute;
+  left: 0;
+  color: var(--wine);
+  font-size: 14px;
+}
+
+.lf-handout-phase {
+  padding: 22px 0;
+  border-bottom: 1px dotted var(--line);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.lf-handout-phase:last-of-type { border-bottom: none; }
+
+.lf-handout-phase-head {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 18px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+@media (max-width: 600px) {
+  .lf-handout-phase-head { grid-template-columns: 44px 1fr auto; gap: 12px; }
+}
+.lf-handout-phase-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--wine);
+  letter-spacing: -0.03em;
+}
+.lf-handout-phase-titles { min-width: 0; }
+.lf-handout-phase-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.lf-handout-phase-activity {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+}
+.lf-handout-phase-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  padding: 3px 9px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.lf-handout-task-block {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--gold);
+  padding: 14px 20px;
+  margin-left: 74px;
+}
+@media (max-width: 600px) { .lf-handout-task-block { margin-left: 0; } }
+.lf-handout-task-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.lf-handout-task {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.lf-handout-task-empty { color: var(--ink-mute); }
+
+.lf-handout-footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--wine);
+  text-align: center;
+}
+
 @media print {
   @page { size: A4; margin: 16mm 14mm; }
 
@@ -1892,6 +2114,7 @@ html, body { background: var(--paper); overflow-x: clip; }
   #overview, #macro, #micro, #references,
   .lf-principles, .lf-footer,
   .lf-section-header,
+  .lf-compose-tabs,
   .lf-compose-actions-bar,
   .lf-compose-example-actions,
   .lf-compose-activity-swap,
@@ -1903,6 +2126,42 @@ html, body { background: var(--paper); overflow-x: clip; }
   .lf-toast {
     display: none !important;
   }
+
+  /* When printing the handout, also hide the context strip; when printing
+     the lesson plan, keep the context strip visible (default). */
+  body.lf-print-handout .lf-compose-context { display: none !important; }
+
+  /* Handout print styling */
+  .lf-handout {
+    background: var(--paper) !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .lf-handout-header { padding-bottom: 14px !important; margin-bottom: 18px !important; }
+  .lf-handout-title { font-size: 22pt !important; }
+  .lf-handout-eyebrow { font-size: 8.5pt !important; }
+  .lf-handout-level { font-size: 9pt !important; }
+  .lf-handout-meta { font-size: 10pt !important; }
+  .lf-handout-cando-block {
+    background: var(--paper-deep) !important;
+    padding: 14px 18px !important;
+    margin-bottom: 18px !important;
+    page-break-inside: avoid;
+  }
+  .lf-handout-cando-label { font-size: 8.5pt !important; }
+  .lf-handout-cando li { font-size: 10.5pt !important; padding: 4px 0 4px 18px !important; }
+  .lf-handout-phase { padding: 14px 0 !important; }
+  .lf-handout-phase-num { font-size: 26pt !important; }
+  .lf-handout-phase-title { font-size: 13pt !important; }
+  .lf-handout-phase-activity { font-size: 10pt !important; }
+  .lf-handout-phase-time {
+    font-size: 8.5pt !important;
+    padding: 2px 7px !important;
+  }
+  .lf-handout-task-block { padding: 10px 14px !important; margin-left: 56px !important; }
+  .lf-handout-task-label { font-size: 7.5pt !important; }
+  .lf-handout-task { font-size: 11pt !important; line-height: 1.55 !important; }
+  .lf-handout-footer { font-size: 9pt !important; margin-top: 16px !important; }
 
   /* Section: edge-to-edge */
   .lf-section, .lf-compose {
