@@ -89,9 +89,9 @@ export default function MacroSpiral({ themes, levels, selectedId, onSelect, onUs
           type="button"
           className="lf-overview-cta"
           onClick={() => onUse(selected.id)}
-          title={`Use ${selected.name} in Part 02`}
+          title={`Use ${selected.name} in macro`}
         >
-          Use in Part 02 <ArrowDown size={12} />
+          Use in macro <ArrowDown size={12} />
         </button>
       </div>
     </div>

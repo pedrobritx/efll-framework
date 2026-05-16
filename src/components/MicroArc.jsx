@@ -99,9 +99,9 @@ export default function MicroArc({ phases, selectedId, onSelect, onUse }) {
           type="button"
           className="lf-overview-cta"
           onClick={() => onUse(selected.id)}
-          title={`Continue to Part 03 with Phase ${selected.id}`}
+          title={`Use Phase ${selected.id} in micro`}
         >
-          Continue to Part 03 <ArrowDown size={12} />
+          Use in micro <ArrowDown size={12} />
         </button>
       </div>
     </div>
