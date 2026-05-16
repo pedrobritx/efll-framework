@@ -1,0 +1,17 @@
+/* ─── REFERENCES (Part 05) ─── */
+.lf-references-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 32px; }
+@media (max-width: 700px) { .lf-references-grid { grid-template-columns: 1fr; } }
+.lf-ref-group { background: var(--paper-deep); padding: 32px 28px; display: flex; flex-direction: column; gap: 18px; }
+.lf-ref-group-head { display: flex; flex-direction: column; gap: 6px; }
+.lf-ref-group-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15; }
+.lf-ref-group-anchor { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--wine); padding-bottom: 14px; border-bottom: 1px dotted var(--line); }
+.lf-ref-list { list-style: none; display: flex; flex-direction: column; gap: 18px; padding: 0; margin: 0; }
+.lf-ref-item { font-family: 'Newsreader', serif; font-size: 14px; line-height: 1.55; color: var(--ink-soft); padding-bottom: 16px; border-bottom: 1px dotted rgba(199, 184, 154, 0.5); }
+.lf-ref-item:last-child { border-bottom: none; padding-bottom: 0; }
+.lf-ref-citation { color: var(--ink-soft); }
+.lf-ref-author { color: var(--ink); font-weight: 500; }
+.lf-ref-year { color: var(--wine); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.lf-ref-title { font-style: italic; color: var(--ink); }
+.lf-ref-venue { color: var(--ink-mute); font-size: 13px; }
+.lf-ref-note { margin-top: 8px; font-style: italic; color: var(--ink-mute); font-size: 13px; line-height: 1.5; }
+.lf-ref-note::before { content: '→ '; color: var(--gold); font-style: normal; font-weight: 500; }

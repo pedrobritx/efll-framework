@@ -1,0 +1,22 @@
+/* ─── PRINCIPLES / FOOTER ─── */
+.lf-principles { background: var(--wine-deep); color: var(--paper); padding: 100px 32px; position: relative; z-index: 2; }
+.lf-principles-inner { max-width: 1400px; margin: 0 auto; }
+.lf-principles-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-soft); margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+.lf-principles-tag::before { content: ''; width: 40px; height: 1px; background: var(--gold-soft); }
+.lf-principles h2 { font-family: 'Fraunces', serif; font-weight: 400; font-size: clamp(36px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 64px; max-width: 900px; }
+.lf-principles h2 em { font-style: italic; color: var(--gold-soft); }
+.lf-principles-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 56px; counter-reset: principle; }
+.lf-principle { counter-increment: principle; padding-top: 32px; border-top: 1px solid rgba(184, 146, 74, 0.3); }
+.lf-principle::before { content: counter(principle, decimal-leading-zero); font-family: 'Fraunces', serif; font-style: italic; font-size: 36px; color: var(--gold-soft); display: block; margin-bottom: 16px; }
+.lf-principle h4 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.02em; margin-bottom: 12px; }
+.lf-principle p { color: var(--paper-deep); font-size: 16px; line-height: 1.65; }
+
+.lf-footer { background: var(--ink); color: var(--paper-deep); padding: 56px 32px 48px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; position: relative; z-index: 2; }
+.lf-footer-mono { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 48px; text-transform: none; letter-spacing: -0.02em; color: var(--gold); margin-bottom: 12px; display: block; }
+.lf-footer-sub { color: var(--paper-deep); }
+.lf-footer-line { color: var(--ink-mute); margin-top: 20px; text-transform: none; letter-spacing: 0; font-family: 'Newsreader', serif; font-size: 13px; font-style: italic; }
+.lf-footer-links { display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; margin: 28px auto 0; padding: 24px 0 4px; border-top: 1px solid rgba(184, 146, 74, 0.18); max-width: 900px; }
+.lf-footer-link { color: var(--paper-deep); text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; transition: color 0.2s; display: inline-flex; align-items: center; gap: 8px; padding: 6px 2px; border-bottom: 1px solid transparent; }
+.lf-footer-link:hover { color: var(--gold); border-bottom-color: rgba(184, 146, 74, 0.4); }
+.lf-footer-link svg { opacity: 0.7; }
+.lf-footer-link:hover svg { opacity: 1; }

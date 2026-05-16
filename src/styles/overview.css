@@ -1,0 +1,248 @@
+/* ─── OVERVIEW DIAGRAM (Part 01) ─── */
+.lf-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 48px;
+}
+@media (max-width: 800px) { .lf-overview { grid-template-columns: 1fr; } }
+.lf-overview-card {
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  padding: 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.lf-overview-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: var(--wine);
+}
+.lf-overview-card.micro::before { background: var(--gold); }
+.lf-overview-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--wine);
+  margin-bottom: 16px;
+}
+.lf-overview-card.micro .lf-overview-tag { color: var(--gold); }
+.lf-overview-card h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.lf-overview-card p { color: var(--ink-soft); margin-bottom: 16px; }
+.lf-overview-card > p { margin-bottom: 24px; }
+.lf-overview-list { list-style: none; margin-top: 24px; }
+.lf-overview-list li {
+  padding: 10px 0;
+  border-bottom: 1px dotted var(--line);
+  color: var(--ink-soft);
+  font-size: 15px;
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+.lf-overview-list li:last-child { border-bottom: none; }
+.lf-overview-list .lf-mono {
+  color: var(--wine);
+  font-size: 11px;
+  min-width: 60px;
+}
+
+/* ─── INTERACTIVE MACRO SPIRAL ─── */
+.lf-spiral-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 8px auto 0;
+}
+.lf-spiral-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.lf-spiral-wedge {
+  cursor: pointer;
+  outline: none;
+}
+.lf-spiral-layer {
+  fill: var(--paper-deep);
+  stroke: var(--paper);
+  stroke-width: 1;
+  transition: fill 0.25s ease, opacity 0.25s ease;
+}
+.lf-spiral-wedge:hover .lf-spiral-layer { fill: var(--paper-shadow); }
+.lf-spiral-wedge:focus-visible .lf-spiral-layer { stroke: var(--gold); stroke-width: 1.4; }
+.lf-spiral-layer.is-selected {
+  animation: lf-onion-bloom 0.45s ease-out both;
+  animation-delay: calc(var(--layer-index, 0) * 70ms);
+}
+@keyframes lf-onion-bloom {
+  from { opacity: 0.25; }
+  to   { opacity: 1; }
+}
+.lf-spiral-spiral {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.8;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.lf-spiral-label {
+  font-family: 'Fraunces', serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  fill: var(--ink-soft);
+  letter-spacing: -0.005em;
+  pointer-events: none;
+  user-select: none;
+}
+.lf-spiral-label.is-selected { fill: var(--paper); font-weight: 600; }
+
+.lf-spiral-description {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px dotted var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── INTERACTIVE MICRO ARC (CRUST RING) ─── */
+.lf-arc-wrap {
+  width: 100%;
+  margin-top: 8px;
+}
+.lf-arc-svg {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.lf-arc-segment-group {
+  cursor: pointer;
+  outline: none;
+}
+.lf-arc-segment {
+  fill: var(--paper-deep);
+  stroke: var(--paper);
+  stroke-width: 1;
+  transition: fill 0.25s ease, stroke 0.25s ease;
+}
+.lf-arc-segment-group:hover .lf-arc-segment { fill: var(--paper-shadow); }
+.lf-arc-segment.is-prior {
+  fill: var(--wine-light);
+}
+.lf-arc-segment.is-selected {
+  fill: var(--wine-deep);
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+.lf-arc-segment-group:focus-visible .lf-arc-segment {
+  stroke: var(--gold);
+  stroke-width: 2;
+}
+.lf-arc-segment-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--wine);
+  pointer-events: none;
+  user-select: none;
+  transition: fill 0.25s ease;
+}
+.lf-arc-segment-label.is-prior { fill: var(--paper); }
+.lf-arc-segment-label.is-selected { fill: var(--paper); }
+
+.lf-arc-tick-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  fill: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.lf-arc-description {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px dotted var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lf-arc-desc-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.lf-arc-desc-time { color: var(--ink-mute); }
+.lf-arc-desc-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.lf-arc-desc-purpose {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.lf-arc-desc-sla {
+  font-family: 'Newsreader', serif;
+  font-size: 13px;
+  color: var(--ink-mute);
+}
+.lf-arc-desc-sla .lf-mono {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+}
+
+/* Overview CTA — reused on both diagrams */
+.lf-overview-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+  background: transparent;
+  border: 1px solid var(--wine);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.lf-overview-cta:hover {
+  background: var(--wine-deep);
+  color: var(--paper);
+  border-color: var(--wine-deep);
+}

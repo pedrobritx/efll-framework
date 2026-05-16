@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  AlertTriangle,
   ArrowDown,
-  BookOpen,
   Check,
   Copy,
   ExternalLink,
   Github,
-  Lightbulb,
   Linkedin,
   Mail,
   Pencil,
@@ -23,346 +20,26 @@ import { EXAMPLES } from './data/examples.js';
 import { REFERENCE_GROUPS } from './data/references.js';
 import { getEvidenceForSelection } from './data/evidence.js';
 
-const STORAGE_KEY = 'lf-selections';
-const SCHEMA_VERSION = 1;
+import EvidencePanel from './components/EvidencePanel.jsx';
+import EvidenceDigest from './components/EvidenceDigest.jsx';
+import MacroSpiral from './components/MacroSpiral.jsx';
+import MicroArc from './components/MicroArc.jsx';
+import { useSelections } from './hooks/useSelections.js';
+import { buildMarkdown } from './utils/exportMarkdown.js';
 
-const defaultSelections = {
-  schemaVersion: SCHEMA_VERSION,
-  level: null,
-  theme: null,
-  phaseActivities: {}, // { [phaseId]: activityIndex }
-  editedExamples: {},  // { [phaseId]: customString }
-};
-
-function loadSelections() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultSelections;
-    const parsed = JSON.parse(raw);
-    if (parsed.schemaVersion !== SCHEMA_VERSION) return defaultSelections;
-    return { ...defaultSelections, ...parsed };
-  } catch {
-    return defaultSelections;
-  }
-}
-
-function persistSelections(value) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch {
-    /* private-mode / quota — ignore */
-  }
-}
-
-function EvidenceItem({ item }) {
-  return (
-    <div className="lf-evidence-item">
-      <div className="lf-evidence-source">
-        <div className="lf-evidence-construct">{item.construct}</div>
-        <div className="lf-evidence-citation">{item.citation}</div>
-      </div>
-      <div className="lf-evidence-notes">
-        <p>
-          <Lightbulb size={14} aria-hidden />
-          <span>{item.implication}</span>
-        </p>
-        <p>
-          <AlertTriangle size={14} aria-hidden />
-          <span>{item.limitation}</span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function EvidencePanel({ items, context }) {
-  if (!items.length) return null;
-
-  return (
-    <aside className="lf-evidence-panel" aria-live="polite">
-      <div className="lf-evidence-head">
-        <div className="lf-evidence-kicker">
-          <BookOpen size={14} aria-hidden />
-          Live evidence layer
-        </div>
-        <div>
-          <h4>Why this works</h4>
-          <p>{context}</p>
-        </div>
-      </div>
-      <div className="lf-evidence-list">
-        {items.map((item) => (
-          <EvidenceItem key={`${item.construct}-${item.citation}`} item={item} />
-        ))}
-      </div>
-    </aside>
-  );
-}
-
-function EvidenceDigest({ items }) {
-  const digestItems = items.slice(0, 2);
-  if (!digestItems.length) return null;
-
-  return (
-    <div className="lf-compose-evidence">
-      <div className="lf-compose-evidence-label">Evidence note</div>
-      {digestItems.map((item) => (
-        <div key={`${item.construct}-${item.citation}`} className="lf-compose-evidence-item">
-          <strong>{item.construct}</strong>
-          <span>{item.citation}</span>
-          <p>{item.implication}</p>
-          <p className="lf-compose-evidence-caveat">Caveat: {item.limitation}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── Geometry helpers for the Part 01 diagrams ─────────────────────────────
-const polar = (cx, cy, r, deg) => {
-  const rad = (deg * Math.PI) / 180;
-  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
-};
-
-// Annular-sector (donut wedge) path.
-const annularSectorPath = (cx, cy, rIn, rOut, startDeg, endDeg) => {
-  const [x1o, y1o] = polar(cx, cy, rOut, startDeg);
-  const [x2o, y2o] = polar(cx, cy, rOut, endDeg);
-  const [x1i, y1i] = polar(cx, cy, rIn, startDeg);
-  const [x2i, y2i] = polar(cx, cy, rIn, endDeg);
-  const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  return [
-    `M ${x1o.toFixed(2)} ${y1o.toFixed(2)}`,
-    `A ${rOut} ${rOut} 0 ${largeArc} 1 ${x2o.toFixed(2)} ${y2o.toFixed(2)}`,
-    `L ${x2i.toFixed(2)} ${y2i.toFixed(2)}`,
-    `A ${rIn} ${rIn} 0 ${largeArc} 0 ${x1i.toFixed(2)} ${y1i.toFixed(2)}`,
-    'Z',
-  ].join(' ');
-};
-
-// Archimedean spiral path (polyline) — decorative, threads through layers.
-const archimedeanPath = (cx, cy, rStart, rEnd, loops = 6, steps = 480) => {
-  const totalAngle = loops * 2 * Math.PI;
-  const b = (rEnd - rStart) / totalAngle;
-  let d = '';
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps) * totalAngle;
-    const r = rStart + b * t;
-    const angle = t - Math.PI / 2; // start at 12 o'clock
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
-    d += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)} `;
-  }
-  return d.trim();
-};
-
-// Wine → gold layer-color ramp (A1 inner → C2 outer).
-const LAYER_COLORS = ['#722F37', '#8E4138', '#A85037', '#B8924A', '#C7A55D', '#D4B47A'];
-
-function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
-  const cx = 250;
-  const cy = 250;
-  const rInner = 64;
-  const rOuter = 218;
-  const layerCount = levels.length; // 6 CEFR layers per wedge
-  const radii = Array.from({ length: layerCount + 1 }, (_, i) =>
-    rInner + ((rOuter - rInner) * i) / layerCount,
-  );
-  const selected = themes.find((t) => t.id === selectedId) || themes[0];
-
-  const shortName = (name) => name.split(' & ')[0];
-
-  const handleKey = (id) => (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onSelect(id);
-    }
-  };
-
-  return (
-    <div className="lf-spiral-wrap">
-      <svg
-        className="lf-spiral-svg"
-        viewBox="0 0 500 500"
-        role="img"
-        aria-label="Macro grid — six themes as pizza wedges, each subdivided into six CEFR-level onion rings (A1 inner → C2 outer)"
-      >
-        {themes.map((theme, i) => {
-          const startDeg = -90 + i * 60;
-          const endDeg = startDeg + 60;
-          const midDeg = startDeg + 30;
-          const isSelected = theme.id === selected.id;
-          const [labelX, labelY] = polar(cx, cy, rOuter - 13, midDeg);
-          return (
-            <g
-              key={theme.id}
-              className={`lf-spiral-wedge ${isSelected ? 'is-selected' : ''}`}
-              role="button"
-              tabIndex={0}
-              aria-label={`Select theme: ${theme.name}`}
-              aria-pressed={isSelected}
-              onClick={() => onSelect(theme.id)}
-              onKeyDown={handleKey(theme.id)}
-            >
-              {radii.slice(0, -1).map((rIn, j) => {
-                const rOut = radii[j + 1];
-                const d = annularSectorPath(cx, cy, rIn, rOut, startDeg, endDeg);
-                const style = { '--layer-index': j };
-                if (isSelected) style.fill = LAYER_COLORS[j];
-                return (
-                  <path
-                    key={j}
-                    d={d}
-                    className={`lf-spiral-layer ${isSelected ? 'is-selected' : ''}`}
-                    style={style}
-                  />
-                );
-              })}
-              <text
-                x={labelX}
-                y={labelY}
-                textAnchor="middle"
-                dominantBaseline="central"
-                className={`lf-spiral-label ${isSelected ? 'is-selected' : ''}`}
-              >
-                {shortName(theme.name)}
-              </text>
-            </g>
-          );
-        })}
-        <path
-          className="lf-spiral-spiral"
-          d={archimedeanPath(cx, cy, rInner + 2, rOuter - 2, 6, 600)}
-        />
-      </svg>
-
-      <div className="lf-spiral-description" aria-live="polite">
-        <div className="lf-arc-desc-meta">
-          <span>Theme {selected.num} of VI</span>
-        </div>
-        <h4 className="lf-arc-desc-name">{selected.name}</h4>
-        <p className="lf-arc-desc-purpose">{selected.description}</p>
-        <button
-          type="button"
-          className="lf-overview-cta"
-          onClick={() => onUse(selected.id)}
-          title={`Use ${selected.name} in Part 02`}
-        >
-          Use in Part 02 <ArrowDown size={12} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function MicroArc({ phases, selectedId, onSelect, onUse }) {
-  const cx = 250;
-  const cy = 250;
-  const rInner = 192;
-  const rOuter = 228;
-  const totalMin = phases.reduce((s, p) => s + p.defaultMin, 0); // 60
-
-  let acc = 0;
-  const segments = phases.map((p) => {
-    const startMin = acc;
-    acc += p.defaultMin;
-    const endMin = acc;
-    const startDeg = -90 + (startMin / totalMin) * 360;
-    const endDeg = -90 + (endMin / totalMin) * 360;
-    const midDeg = (startDeg + endDeg) / 2;
-    const [labelX, labelY] = polar(cx, cy, (rInner + rOuter) / 2, midDeg);
-    return { ...p, startMin, endMin, startDeg, endDeg, labelX, labelY };
-  });
-
-  const selected = segments.find((s) => s.id === selectedId) || segments[0];
-
-  const handleKey = (id) => (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onSelect(id);
-    }
-  };
-
-  return (
-    <div className="lf-arc-wrap">
-      <svg
-        className="lf-arc-svg"
-        viewBox="0 0 500 500"
-        role="img"
-        aria-label="Micro template — seven phases as a clickable crust ring, each segment sized in proportion to its minute allocation across 60 minutes"
-      >
-        {/* Minute markers */}
-        <text className="lf-arc-tick-label" x={cx} y={cy - rOuter - 18} textAnchor="middle">0 / 60'</text>
-        <text className="lf-arc-tick-label" x={cx + rOuter + 22} y={cy + 4} textAnchor="middle">15'</text>
-        <text className="lf-arc-tick-label" x={cx} y={cy + rOuter + 26} textAnchor="middle">30'</text>
-        <text className="lf-arc-tick-label" x={cx - rOuter - 22} y={cy + 4} textAnchor="middle">45'</text>
-
-        {/* Crust segments */}
-        {segments.map((seg) => {
-          const isSelected = seg.id === selected.id;
-          const isPrior = seg.id < selected.id;
-          const d = annularSectorPath(cx, cy, rInner, rOuter, seg.startDeg, seg.endDeg);
-          const segClass = [
-            'lf-arc-segment',
-            isSelected ? 'is-selected' : '',
-            isPrior ? 'is-prior' : '',
-          ].filter(Boolean).join(' ');
-          const labelClass = [
-            'lf-arc-segment-label',
-            isSelected ? 'is-selected' : '',
-            isPrior ? 'is-prior' : '',
-          ].filter(Boolean).join(' ');
-          return (
-            <g
-              key={seg.id}
-              className="lf-arc-segment-group"
-              role="button"
-              tabIndex={0}
-              aria-label={`Select phase ${seg.id}: ${seg.name} — ${seg.defaultMin} minutes`}
-              aria-pressed={isSelected}
-              onClick={() => onSelect(seg.id)}
-              onKeyDown={handleKey(seg.id)}
-            >
-              <path d={d} className={segClass} />
-              <text
-                x={seg.labelX}
-                y={seg.labelY}
-                textAnchor="middle"
-                dominantBaseline="central"
-                className={labelClass}
-              >
-                {seg.id}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-
-      <div className="lf-arc-description" aria-live="polite">
-        <div className="lf-arc-desc-meta">
-          <span>Phase {selected.id} of 7</span>
-          <span className="lf-arc-desc-time">· {selected.defaultMin} min · starts at {selected.startMin}'</span>
-        </div>
-        <h4 className="lf-arc-desc-name">{selected.name}</h4>
-        <p className="lf-arc-desc-purpose">{selected.purpose}</p>
-        <div className="lf-arc-desc-sla">
-          <span className="lf-mono">SLA · </span>{selected.sla}
-        </div>
-        <button
-          type="button"
-          className="lf-overview-cta"
-          onClick={() => onUse(selected.id)}
-          title={`Continue to Part 03 with Phase ${selected.id}`}
-        >
-          Continue to Part 03 <ArrowDown size={12} />
-        </button>
-      </div>
-    </div>
-  );
-}
+// Components, hooks, and utilities are now imported from dedicated modules.
+// Original inline definitions have been extracted to:
+//   - src/components/EvidenceItem.jsx
+//   - src/components/EvidencePanel.jsx
+//   - src/components/EvidenceDigest.jsx
+//   - src/components/MacroSpiral.jsx
+//   - src/components/MicroArc.jsx
+//   - src/hooks/useSelections.js
+//   - src/utils/geometry.js
+//   - src/utils/exportMarkdown.js
 
 export default function App() {
-  const [selections, setSelections] = useState(loadSelections);
+  const [selections, setSelections, defaultSelections] = useSelections();
   const [activeSection, setActiveSection] = useState('overview');
   const [activePhase, setActivePhase] = useState(1);
   const [scrolled, setScrolled] = useState(false);
@@ -372,8 +49,6 @@ export default function App() {
   // Part 01 overview-local selections (independent of the global composer).
   const [overviewTheme, setOverviewTheme] = useState('identity');
   const [overviewPhase, setOverviewPhase] = useState(1);
-
-  useEffect(() => persistSelections(selections), [selections]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 80);
@@ -470,41 +145,13 @@ export default function App() {
   };
 
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
-  const buildMarkdown = () => {
+  const getMarkdown = () => {
     if (!hasMacro) return '';
-    let md = `# Lesson Plan — ${themeData.name}\n\n`;
-    md += `**Level:** ${level} · ${levelData.name}\n`;
-    md += `**Unit:** ${themeData.num}. ${themeData.name}\n\n`;
-    md += `## Can-do outcomes\n\n`;
-    macroCell.cando.forEach((c) => {
-      md += `- I can ${c}.\n`;
-    });
-    md += `\n## Informal-input bridge\n\n`;
-    macroCell.bridge.forEach((b) => {
-      md += `- ${b}\n`;
-    });
-    md += `\n---\n\n## Lesson plan (60 min)\n\n`;
-    PHASES.forEach((phase) => {
-      const actIdx = selectedActivityIdx(phase.id);
-      const activity = phase.activities[actIdx];
-      const example = getExample(phase.id);
-      const evidenceItems = getEvidenceForSelection(phase, activity).slice(0, 2);
-      md += `### Phase ${phase.id} — ${phase.name}\n`;
-      md += `*${phase.defaultMin} min · ${activity.name}*\n\n`;
-      md += `${example}\n\n`;
-      md += `> **SLA grounding:** ${activity.sla}\n\n`;
-      if (evidenceItems.length) {
-        md += `> **Evidence:** ${evidenceItems.map((item) => `${item.construct} (${item.citation})`).join('; ')}\n`;
-        md += `> **Classroom implication:** ${evidenceItems.map((item) => item.implication).join(' ')}\n`;
-        md += `> **Caveat:** ${evidenceItems.map((item) => item.limitation).join(' ')}\n\n`;
-      }
-    });
-    md += `\n---\n*Generated with the EFLL Framework — English as a Foreign Language Lesson Framework — by Pedro Brito.*\n`;
-    return md;
+    return buildMarkdown({ themeData, levelData, level, macroCell, getExample, selectedActivityIdx });
   };
 
   const handleCopyMarkdown = async () => {
-    const md = buildMarkdown();
+    const md = getMarkdown();
     if (!md) {
       setToast({ kind: 'warn', label: 'Pick a level and theme first' });
       setTimeout(() => setToast(null), 2200);

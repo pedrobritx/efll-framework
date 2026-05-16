@@ -1,0 +1,50 @@
+/* ─── SECTION ─── */
+.lf-section {
+  padding: 100px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+.lf-section-header {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 32px;
+  margin-bottom: 72px;
+  align-items: start;
+}
+.lf-section-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 80px;
+  line-height: 0.9;
+  color: var(--wine);
+}
+.lf-section-title h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.lf-section-title h2 em {
+  font-style: italic;
+  color: var(--wine);
+}
+.lf-section-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--wine);
+  margin-bottom: 16px;
+}
+.lf-section-desc {
+  max-width: 720px;
+  color: var(--ink-soft);
+  font-size: 18px;
+  line-height: 1.65;
+}
