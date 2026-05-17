@@ -32,9 +32,255 @@
 .lf-compose-activity-row > div { min-width: 0; flex: 1 1 200px; }
 .lf-compose-activity-row-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-mute); }
 .lf-compose-activity-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; color: var(--ink); letter-spacing: -0.01em; overflow-wrap: anywhere; line-height: 1.25; }
-.lf-compose-activity-swap { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px 6px 12px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23722F37' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; max-width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-.lf-compose-activity-swap:hover { border-color: var(--wine); color: var(--wine); }
-@media (max-width: 600px) { .lf-compose-activity-row { gap: 10px; } .lf-compose-activity-name { font-size: 16px; } .lf-compose-activity-swap { width: 100%; } }
+.lf-compose-activity-swap-wrap { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); padding: 6px 26px 6px 12px; cursor: pointer; background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23722F37' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; transition: border-color 0.2s, color 0.2s; }
+.lf-compose-activity-swap-wrap:hover { border-color: var(--wine); color: var(--wine); }
+.lf-compose-activity-swap-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; pointer-events: none; white-space: nowrap; }
+.lf-compose-activity-swap { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font: inherit; border: none; background: transparent; appearance: none; -webkit-appearance: none; }
+@media (max-width: 600px) { .lf-compose-activity-row { gap: 10px; } .lf-compose-activity-name { font-size: 16px; } .lf-compose-activity-swap-wrap { width: 100%; justify-content: center; } }
+
+/* ─── COMPOSE TABS — mirrors .lf-macro-controls + .lf-level-btn ─── */
+.lf-compose-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  border: 1px solid var(--line);
+  background: var(--paper-deep);
+  overflow-x: auto;
+}
+.lf-compose-tab {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: all 0.2s;
+}
+.lf-compose-tab:last-child { border-right: none; }
+.lf-compose-tab:hover { background: var(--paper-shadow); }
+.lf-compose-tab.is-active {
+  background: var(--wine-deep);
+  color: var(--paper);
+}
+@media (max-width: 600px) {
+  .lf-compose-tab { padding: 12px 14px; font-size: 10px; }
+}
+
+/* ─── STUDENT HANDOUT (handout tab) ─── */
+.lf-handout {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 40px 48px;
+  position: relative;
+}
+@media (max-width: 700px) { .lf-handout { padding: 28px 22px; } }
+
+.lf-handout-header {
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--ink);
+}
+.lf-handout-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--wine);
+  margin-bottom: 10px;
+}
+.lf-handout-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(26px, 3.6vw, 38px);
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+.lf-handout-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: baseline;
+  margin-top: 14px;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.lf-handout-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--wine);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lf-handout-sep { color: var(--gold); }
+.lf-handout-date,
+.lf-handout-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.lf-handout-date-line {
+  display: inline-block;
+  width: 160px;
+  border-bottom: 1px solid var(--ink-mute);
+  min-height: 1em;
+}
+@media (max-width: 600px) {
+  .lf-handout-date,
+  .lf-handout-name { flex: 1 1 100%; }
+  .lf-handout-date-line { flex: 1; width: auto; }
+}
+
+.lf-handout-cando-block {
+  background: var(--paper-deep);
+  border-left: 3px solid var(--gold);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+}
+.lf-handout-cando-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--wine);
+  margin-bottom: 12px;
+}
+.lf-handout-cando {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lf-handout-cando li {
+  padding: 6px 0 6px 22px;
+  position: relative;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.lf-handout-cando li::before {
+  content: '☐';
+  position: absolute;
+  left: 0;
+  color: var(--wine);
+  font-size: 14px;
+}
+
+.lf-handout-phase {
+  padding: 22px 0;
+  border-bottom: 1px dotted var(--line);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.lf-handout-phase:last-of-type { border-bottom: none; }
+
+.lf-handout-phase-head {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  gap: 14px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+@media (max-width: 600px) {
+  .lf-handout-phase-head { grid-template-columns: 40px 1fr auto; gap: 10px; }
+}
+.lf-handout-phase-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--wine);
+  letter-spacing: -0.03em;
+}
+.lf-handout-phase-titles { min-width: 0; }
+.lf-handout-phase-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.lf-handout-phase-activity {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+}
+.lf-handout-phase-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  padding: 3px 9px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.lf-handout-task-block {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--gold);
+  padding: 14px 20px;
+  margin-left: 74px;
+}
+@media (max-width: 600px) { .lf-handout-task-block { margin-left: 0; } }
+.lf-handout-task-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.lf-handout-task-actions { display: flex; gap: 4px; }
+.lf-handout-task {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.lf-handout-task-edit {
+  width: 100%;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1px solid var(--wine);
+  padding: 12px;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+}
+.lf-handout-task-edit:focus { border-color: var(--wine-deep); }
+.lf-handout-task-empty { color: var(--ink-mute); }
+
+.lf-handout-footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--wine);
+  text-align: center;
+}
 .lf-compose-example-block { background: var(--paper); border: 1px solid var(--line); padding: 20px; margin-bottom: 16px; }
 .lf-compose-example-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--wine); }
 .lf-custom-tag { color: var(--gold); font-style: italic; margin-left: 4px; text-transform: none; font-size: 11px; letter-spacing: 0.04em; }

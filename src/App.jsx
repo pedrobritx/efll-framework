@@ -96,6 +96,8 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
+  const [editingHandoutPhase, setEditingHandoutPhase] = useState(null);
+  const [handoutDraftText, setHandoutDraftText] = useState('');
   const [toast, setToast] = useState(null);
   // Which tab is active in Part 04 — view state only, not persisted.
   const [composeTab, setComposeTab] = useState('plan'); // 'plan' | 'handout'
@@ -129,7 +131,7 @@ export default function App() {
   const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
     setXrefStack((s) => [
       ...s,
-      { fromLabel, scrollY: window.scrollY, restorePhase: activePhase },
+      { fromLabel, scrollY: window.scrollY, restorePhase: activePhase, restoreTab: composeTab },
     ]);
 
     let targetEl = null;
@@ -151,13 +153,14 @@ export default function App() {
     if (typeof window !== 'undefined') {
       window.setTimeout(() => setHighlight(null), 2200);
     }
-  }, [activePhase]);
+  }, [activePhase, composeTab]);
 
   const popXref = useCallback(() => {
     setXrefStack((s) => {
       if (!s.length) return s;
       const entry = s[s.length - 1];
       if (typeof entry.restorePhase === 'number') setActivePhase(entry.restorePhase);
+      if (entry.restoreTab) setComposeTab(entry.restoreTab);
       window.scrollTo({ top: entry.scrollY, behavior: 'smooth' });
       return s.slice(0, -1);
     });
@@ -196,6 +199,15 @@ export default function App() {
     [selections.editedExamples, level, theme]
   );
 
+  const getHandoutText = useCallback(
+    (phaseId, activityIdx) => {
+      if (selections.editedHandouts[phaseId] !== undefined) return selections.editedHandouts[phaseId];
+      if (!level || !theme) return '';
+      return getHandout(level, theme, phaseId, activityIdx) || '';
+    },
+    [selections.editedHandouts, level, theme]
+  );
+
   // ─── ACTIONS ────────────────────────────────────────────────────────────
   const setLevel = (id) => setSelections((s) => ({ ...s, level: id }));
   const setTheme = (id) => setSelections((s) => ({ ...s, theme: id }));
@@ -226,10 +238,34 @@ export default function App() {
       delete next[phaseId];
       return { ...s, editedExamples: next };
     });
+
+  const startHandoutEdit = (phaseId, activityIdx) => {
+    setHandoutDraftText(getHandoutText(phaseId, activityIdx));
+    setEditingHandoutPhase(phaseId);
+  };
+  const saveHandoutEdit = (phaseId) => {
+    setSelections((s) => ({
+      ...s,
+      editedHandouts: { ...s.editedHandouts, [phaseId]: handoutDraftText },
+    }));
+    setEditingHandoutPhase(null);
+  };
+  const cancelHandoutEdit = () => {
+    setEditingHandoutPhase(null);
+    setHandoutDraftText('');
+  };
+  const resetHandout = (phaseId) =>
+    setSelections((s) => {
+      const next = { ...s.editedHandouts };
+      delete next[phaseId];
+      return { ...s, editedHandouts: next };
+    });
+
   const resetAll = () => {
     setSelections(defaultSelections);
     setActivePhase(1);
     setEditingPhase(null);
+    setEditingHandoutPhase(null);
     setToast({ kind: 'info', label: 'Selections reset' });
     setTimeout(() => setToast(null), 2200);
   };
@@ -270,7 +306,7 @@ export default function App() {
     PHASES.forEach((phase) => {
       const actIdx = selectedActivityIdx(phase.id);
       const activity = phase.activities[actIdx];
-      const task = getHandout(level, theme, phase.id, actIdx);
+      const task = getHandoutText(phase.id, actIdx);
       md += `### Phase ${phase.id} — ${phase.name} (${phase.defaultMin} min)\n`;
       md += `**${activity.name}**\n\n`;
       md += `**Your task:** ${task}\n\n`;
@@ -801,16 +837,19 @@ export default function App() {
                           <div className="lf-compose-activity-row-label">Activity</div>
                           <div className="lf-compose-activity-name">{activity.name}</div>
                         </div>
-                        <select
-                          className="lf-compose-activity-swap"
-                          value={actIdx}
-                          onChange={(e) => setPhaseActivity(phase.id, Number(e.target.value))}
-                          title="Swap activity"
-                        >
-                          {phase.activities.map((a, i) => (
-                            <option key={i} value={i}>{a.name}</option>
-                          ))}
-                        </select>
+                        <label className="lf-compose-activity-swap-wrap" title="Swap activity">
+                          <span className="lf-compose-activity-swap-label">Swap activity</span>
+                          <select
+                            className="lf-compose-activity-swap"
+                            value={actIdx}
+                            onChange={(e) => setPhaseActivity(phase.id, Number(e.target.value))}
+                            aria-label="Swap activity"
+                          >
+                            {phase.activities.map((a, i) => (
+                              <option key={i} value={i}>{a.name}</option>
+                            ))}
+                          </select>
+                        </label>
                       </div>
 
                       <div className="lf-compose-example-block">
@@ -872,7 +911,36 @@ export default function App() {
                         <span className="lf-mono">SLA grounding ·</span> {activity.sla}
                       </div>
 
-                      <EvidenceDigest items={evidenceItems} />
+                      <EvidenceDigest
+                        items={evidenceItems}
+                        renderRefLink={(item) =>
+                          item.groupId ? (
+                            <XRefPill
+                              kind="section"
+                              id="references"
+                              label={refGroupName(item.groupId)}
+                              fromLabel={`Compose · Phase ${phase.id} ${phase.name}`}
+                              targetGroupId={item.groupId}
+                            />
+                          ) : null
+                        }
+                      />
+
+                      <div className="lf-compose-xrefs">
+                        <span className="lf-compose-xrefs-label">Trace ·</span>
+                        <XRefPill
+                          kind="phase"
+                          id={phase.id}
+                          label={`Phase ${phase.id} in micro`}
+                          fromLabel={`Compose · Phase ${phase.id} ${phase.name}`}
+                        />
+                        <XRefPill
+                          kind="section"
+                          id="macro"
+                          label={`${themeData.name} in macro`}
+                          fromLabel={`Compose · Phase ${phase.id} ${phase.name}`}
+                        />
+                      </div>
 
                       {refsForAnchor('phase', phase.id).length > 0 && (
                         <div className="lf-compose-xrefs">
@@ -883,7 +951,7 @@ export default function App() {
                               kind="section"
                               id="references"
                               label={refGroupName(gid)}
-                              fromLabel={`Phase ${phase.id} · ${phase.name}`}
+                              fromLabel={`Compose · Phase ${phase.id} ${phase.name}`}
                               targetGroupId={gid}
                             />
                           ))}
@@ -923,7 +991,9 @@ export default function App() {
               {PHASES.map((phase) => {
                 const actIdx = selectedActivityIdx(phase.id);
                 const activity = phase.activities[actIdx];
-                const task = getHandout(level, theme, phase.id, actIdx);
+                const task = getHandoutText(phase.id, actIdx);
+                const isEditingHandout = editingHandoutPhase === phase.id;
+                const isCustomHandout = selections.editedHandouts[phase.id] !== undefined;
 
                 return (
                   <div key={phase.id} className="lf-handout-phase">
@@ -938,10 +1008,59 @@ export default function App() {
                       <div className="lf-handout-phase-time">{phase.defaultMin} min</div>
                     </div>
                     <div className="lf-handout-task-block">
-                      <div className="lf-handout-task-label">Your task</div>
-                      <div className="lf-handout-task">
-                        {task || <em className="lf-handout-task-empty">Task to be added for this activity.</em>}
+                      <div className="lf-handout-task-label">
+                        <span>Your task {isCustomHandout && <em className="lf-mono lf-custom-tag">· custom</em>}</span>
+                        {!isEditingHandout ? (
+                          <div className="lf-handout-task-actions">
+                            {isCustomHandout && (
+                              <button
+                                className="lf-icon-btn"
+                                onClick={() => resetHandout(phase.id)}
+                                title="Reset to library default"
+                              >
+                                <RotateCcw size={13} />
+                              </button>
+                            )}
+                            <button
+                              className="lf-icon-btn"
+                              onClick={() => startHandoutEdit(phase.id, actIdx)}
+                              title="Edit task"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="lf-handout-task-actions">
+                            <button
+                              className="lf-icon-btn"
+                              onClick={cancelHandoutEdit}
+                              title="Cancel"
+                            >
+                              ✕
+                            </button>
+                            <button
+                              className="lf-icon-btn lf-icon-btn-primary"
+                              onClick={() => saveHandoutEdit(phase.id)}
+                              title="Save"
+                            >
+                              <Check size={13} />
+                            </button>
+                          </div>
+                        )}
                       </div>
+                      {isEditingHandout ? (
+                        <textarea
+                          className="lf-handout-task-edit"
+                          value={handoutDraftText}
+                          onChange={(e) => setHandoutDraftText(e.target.value)}
+                          autoFocus
+                          rows={4}
+                        />
+                      ) : (
+                        <div className="lf-handout-task">
+                          {task || <em className="lf-handout-task-empty">Task to be added for this activity.</em>}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
