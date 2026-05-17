@@ -1,38 +1,27 @@
-/* ─── CROSS-REFERENCE (ANCHOR) PILLS ─── */
+/* ─── CROSS-REFERENCE PILLS ─── */
 .lf-xref-pill {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+  font-size: 10.5px;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
   color: var(--wine);
   background: var(--paper);
-  border: 1px solid var(--wine);
-  border-radius: 2px;
-  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px 4px 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
   font-weight: 500;
-}
-.lf-xref-pill::before {
-  content: '→';
-  font-family: 'Fraunces', serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 13px;
-  line-height: 1;
-  color: var(--gold);
-  letter-spacing: 0;
-  transition: color 0.14s ease;
 }
 .lf-xref-pill:hover {
   background: var(--wine);
+  border-color: var(--wine);
   color: var(--paper);
   transform: translateY(-1px);
 }
-.lf-xref-pill:hover::before { color: var(--gold-soft); }
 .lf-xref-pill:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
@@ -75,26 +64,18 @@
   opacity: 0.7;
 }
 
-/* Evidence-item inline ref pill (Part 04 evidence digest) */
-.lf-evidence-ref-pill {
-  margin-left: 8px;
-  vertical-align: baseline;
-}
-
 /* Principle xref pill — sits on the dark wine bg, invert palette */
 .lf-principle .lf-xref-pill {
   margin-top: 14px;
   background: transparent;
-  border-color: rgba(232, 210, 162, 0.5);
+  border-color: rgba(232, 210, 162, 0.4);
   color: var(--gold-soft);
 }
-.lf-principle .lf-xref-pill::before { color: var(--gold-soft); }
 .lf-principle .lf-xref-pill:hover {
   background: var(--gold-soft);
   border-color: var(--gold-soft);
   color: var(--wine-deep);
 }
-.lf-principle .lf-xref-pill:hover::before { color: var(--wine-deep); }
 
 /* Floating back-pill */
 .lf-xref-back-pill {
@@ -104,12 +85,11 @@
   z-index: 50;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.03em;
   color: var(--paper);
   background: var(--wine);
   border: 1px solid var(--wine-deep);
-  border-radius: 2px;
+  border-radius: 999px;
   padding: 10px 16px 10px 14px;
   display: inline-flex;
   align-items: center;
@@ -124,13 +104,10 @@
   transform: translateY(-1px);
 }
 .lf-xref-back-pill strong {
-  font-weight: 500;
+  font-weight: 600;
   font-family: 'Fraunces', serif;
   font-style: italic;
-  text-transform: none;
-  font-size: 14px;
-  letter-spacing: 0;
-  color: var(--gold-soft);
+  letter-spacing: 0.01em;
 }
 
 /* Transient highlight ring on jump targets */
