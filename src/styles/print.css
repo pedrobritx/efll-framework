@@ -3,7 +3,26 @@
   @page { size: A4; margin: 16mm 14mm; }
   html, body, .lf-root { background: var(--paper) !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .lf-nav, .lf-grain, .lf-hero, #overview, #macro, #micro, #references, .lf-principles, .lf-footer, .lf-section-header, .lf-compose-actions-bar, .lf-compose-example-actions, .lf-compose-activity-swap, .lf-ornament, .lf-toast { display: none !important; }
+  .lf-nav, .lf-grain, .lf-hero, #overview, #macro, #micro, #references, .lf-principles, .lf-footer, .lf-section-header, .lf-compose-tabs, .lf-compose-actions-bar, .lf-compose-example-actions, .lf-compose-activity-swap-wrap, .lf-compose-xrefs, .lf-phase-xrefs, .lf-xref-pill, .lf-xref-back-pill, .lf-handout-task-actions, .lf-ornament, .lf-toast { display: none !important; }
+  body.lf-print-handout .lf-compose-context { display: none !important; }
+  .lf-handout { background: var(--paper) !important; border: none !important; padding: 0 !important; }
+  .lf-handout-header { padding-bottom: 14px !important; margin-bottom: 18px !important; }
+  .lf-handout-title { font-size: 22pt !important; }
+  .lf-handout-eyebrow { font-size: 8.5pt !important; }
+  .lf-handout-level { font-size: 9pt !important; }
+  .lf-handout-meta { font-size: 10pt !important; }
+  .lf-handout-cando-block { background: var(--paper-deep) !important; padding: 14px 18px !important; margin-bottom: 18px !important; page-break-inside: avoid; }
+  .lf-handout-cando-label { font-size: 8.5pt !important; }
+  .lf-handout-cando li { font-size: 10.5pt !important; padding: 4px 0 4px 18px !important; }
+  .lf-handout-phase { padding: 14px 0 !important; }
+  .lf-handout-phase-num { font-size: 26pt !important; }
+  .lf-handout-phase-title { font-size: 13pt !important; }
+  .lf-handout-phase-activity { font-size: 10pt !important; }
+  .lf-handout-phase-time { font-size: 8.5pt !important; padding: 2px 7px !important; }
+  .lf-handout-task-block { padding: 10px 14px !important; margin-left: 56px !important; }
+  .lf-handout-task-label { font-size: 7.5pt !important; }
+  .lf-handout-task { font-size: 11pt !important; line-height: 1.55 !important; }
+  .lf-handout-footer { font-size: 9pt !important; margin-top: 16px !important; }
   .lf-section, .lf-compose { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
   .lf-compose-context { grid-template-columns: 1fr 1fr 1fr !important; gap: 0 !important; background: var(--line) !important; border: 1px solid var(--line) !important; margin-bottom: 18px !important; page-break-inside: avoid; }
   .lf-compose-context-col { background: var(--paper) !important; padding: 16px 18px !important; }
