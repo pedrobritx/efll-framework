@@ -19,11 +19,9 @@ import {
   LEVELS,
   MACRO,
   PHASES,
-  EXAMPLES,
   REFERENCE_GROUPS,
   getEvidenceForSelection,
 } from './data/index.js';
-import { getHandout } from './data/handouts.js';
 import { refsForAnchor } from './data/references.js';
 import { useSelections } from './hooks/useSelections.js';
 import { buildMarkdown } from './utils/exportMarkdown.js';
@@ -108,11 +106,45 @@ export default function App() {
   const [xrefStack, setXrefStack] = useState([]);
   // Transient highlight for a jump target (phase id, principle id, or ref group id).
   const [highlight, setHighlight] = useState(null); // { kind, id }
+  // Heavy data modules (examples ~32 KB, handouts ~280 KB) are split out of the
+  // initial bundle and fetched on idle so first paint stays light. By the time
+  // the user navigates to the compose section they're already resident.
+  const [examplesMod, setExamplesMod] = useState(null);
+  const [handoutsMod, setHandoutsMod] = useState(null);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 80);
+    let cancelled = false;
+    const load = () => {
+      import('./data/examples.js').then((m) => { if (!cancelled) setExamplesMod(m); });
+      import('./data/handouts.js').then((m) => { if (!cancelled) setHandoutsMod(m); });
+    };
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      const handle = window.requestIdleCallback(load, { timeout: 1500 });
+      return () => {
+        cancelled = true;
+        if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(handle);
+      };
+    }
+    const t = setTimeout(load, 200);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, []);
+
+  useEffect(() => {
+    let frame = 0;
+    let ticking = false;
+    const handler = () => {
+      if (ticking) return;
+      ticking = true;
+      frame = window.requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 80);
+        ticking = false;
+      });
+    };
     window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
+    return () => {
+      window.removeEventListener('scroll', handler);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const scrollTo = useCallback((id) => {
@@ -180,6 +212,13 @@ export default function App() {
   const hasMacro = Boolean(level && theme && macroCell);
 
   const phaseData = useMemo(() => PHASES.find((p) => p.id === activePhase), [activePhase]);
+  // refsForAnchor is pure over (kind, id) and called multiple times per phase
+  // in render (micro detail + compose plan). Precompute once.
+  const refsByPhase = useMemo(() => {
+    const map = new Map();
+    for (const p of PHASES) map.set(p.id, refsForAnchor('phase', p.id));
+    return map;
+  }, []);
   const selectedActivityIdx = (phaseId) => selections.phaseActivities[phaseId] ?? 0;
   const hasPhaseSelection = (phaseId) => selections.phaseActivities[phaseId] !== undefined;
   const allPhasesPicked = PHASES.every((p) => hasPhaseSelection(p.id));
@@ -193,19 +232,19 @@ export default function App() {
   const getExample = useCallback(
     (phaseId) => {
       if (selections.editedExamples[phaseId] !== undefined) return selections.editedExamples[phaseId];
-      if (!level || !theme) return '';
-      return EXAMPLES[level]?.[theme]?.[phaseId] || '';
+      if (!level || !theme || !examplesMod) return '';
+      return examplesMod.EXAMPLES[level]?.[theme]?.[phaseId] || '';
     },
-    [selections.editedExamples, level, theme]
+    [selections.editedExamples, level, theme, examplesMod]
   );
 
   const getHandoutText = useCallback(
     (phaseId, activityIdx) => {
       if (selections.editedHandouts[phaseId] !== undefined) return selections.editedHandouts[phaseId];
-      if (!level || !theme) return '';
-      return getHandout(level, theme, phaseId, activityIdx) || '';
+      if (!level || !theme || !handoutsMod) return '';
+      return handoutsMod.getHandout(level, theme, phaseId, activityIdx) || '';
     },
-    [selections.editedHandouts, level, theme]
+    [selections.editedHandouts, level, theme, handoutsMod]
   );
 
   // ─── ACTIONS ────────────────────────────────────────────────────────────
@@ -271,20 +310,22 @@ export default function App() {
   };
 
   // ─── PART 01 → COMPOSER PRE-SELECT HANDLERS ─────────────────────────────
-  const useThemeFromOverview = (themeId) => {
+  // useCallback so the memoised MacroSpiral / MicroArc components don't
+  // re-render on unrelated parent state changes.
+  const useThemeFromOverview = useCallback((themeId) => {
     const t = THEMES.find((x) => x.id === themeId);
     setSelections((s) => ({ ...s, theme: themeId, level: s.level ?? 'B1' }));
     setToast({ kind: 'ok', label: `${t?.name ?? 'Theme'} set in macro` });
     setTimeout(() => setToast(null), 2200);
     scrollTo('macro');
-  };
+  }, [setSelections, scrollTo]);
 
-  const usePhaseFromOverview = (phaseId) => {
+  const usePhaseFromOverview = useCallback((phaseId) => {
     setActivePhase(phaseId);
     setToast({ kind: 'ok', label: `Phase ${phaseId} focused in micro` });
     setTimeout(() => setToast(null), 2200);
     scrollTo('micro');
-  };
+  }, [scrollTo]);
 
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
   const getMarkdown = () => {
@@ -641,10 +682,10 @@ export default function App() {
                     <div className="lf-phase-detail-time">{phaseData.time} · Phase {phaseData.id} of 7</div>
                     <p className="lf-phase-purpose" style={{ marginTop: 16 }}>{phaseData.purpose}</p>
                     <div className="lf-phase-sla">SLA grounding · {phaseData.sla}</div>
-                    {refsForAnchor('phase', phaseData.id).length > 0 && (
+                    {(refsByPhase.get(phaseData.id) ?? []).length > 0 && (
                       <div className="lf-phase-xrefs">
                         <span className="lf-phase-xrefs-label">Research ·</span>
-                        {refsForAnchor('phase', phaseData.id).map((gid) => (
+                        {(refsByPhase.get(phaseData.id) ?? []).map((gid) => (
                           <XRefPill
                             key={gid}
                             kind="section"
@@ -942,10 +983,10 @@ export default function App() {
                             />
                           </div>
 
-                          {refsForAnchor('phase', phase.id).length > 0 && (
+                          {(refsByPhase.get(phase.id) ?? []).length > 0 && (
                             <div className="lf-compose-xrefs">
                               <span className="lf-compose-xrefs-label">Research grounding ·</span>
-                              {refsForAnchor('phase', phase.id).map((gid) => (
+                              {(refsByPhase.get(phase.id) ?? []).map((gid) => (
                                 <XRefPill
                                   key={gid}
                                   kind="section"
@@ -1129,11 +1170,9 @@ export default function App() {
               <div className="lf-section-kicker">The research</div>
               <h2>Where each move <em>comes from.</em></h2>
               <p className="lf-section-desc">
-                <p>
-                  Each phase in the micro lesson is grounded in second language acquisition principles. Click an
-                  author or key term in this panel to jump to the bibliography, where you can trace the research
-                  and see exactly where it shows up in the EFL Lesson Framework.
-                </p>
+                Each phase in the micro lesson is grounded in second language acquisition principles. Click an
+                author or key term in this panel to jump to the bibliography, where you can trace the research
+                and see exactly where it shows up in the EFL Lesson Framework.
               </p>
             </div>
           </div>
@@ -1205,21 +1244,19 @@ export default function App() {
             <Mail size={12} /> pedrobritx@gmail.com
           </a>
 
-      <div className="lf-footer-line">
-        © {new Date().getFullYear()} · Pedro Brito · The EFLL Framework is an open framework.
-      </div>
-    </footer>
+          <div className="lf-footer-line">
+            © {new Date().getFullYear()} · Pedro Brito · The EFLL Framework is an open framework.
+          </div>
+        </footer>
 
-      {
-    toast && (
-      <div className="lf-toast" role="status">
-        <Check size={14} /> {toast.label}
-      </div>
-    )
-  }
+        {toast && (
+          <div className="lf-toast" role="status">
+            <Check size={14} /> {toast.label}
+          </div>
+        )}
 
-  <XRefBackPill />
-    </div >
-    </XRefContext.Provider >
+        <XRefBackPill />
+      </div>
+    </XRefContext.Provider>
   );
 }

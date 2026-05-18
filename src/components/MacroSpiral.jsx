@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowDown } from 'lucide-react';
 import { polar, annularSectorPath, archimedeanPath, LAYER_COLORS } from '../utils/geometry.js';
 
-export default function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
+function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
   const rInner = 64;
@@ -97,3 +97,5 @@ export default function MacroSpiral({ themes, levels, selectedId, onSelect, onUs
     </div>
   );
 }
+
+export default React.memo(MacroSpiral);

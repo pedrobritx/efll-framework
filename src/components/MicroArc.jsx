@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowDown } from 'lucide-react';
 import { polar, annularSectorPath } from '../utils/geometry.js';
 
-export default function MicroArc({ phases, selectedId, onSelect, onUse }) {
+function MicroArc({ phases, selectedId, onSelect, onUse }) {
   const cx = 250;
   const cy = 250;
   const rInner = 192;
@@ -107,3 +107,5 @@ export default function MicroArc({ phases, selectedId, onSelect, onUse }) {
     </div>
   );
 }
+
+export default React.memo(MicroArc);
