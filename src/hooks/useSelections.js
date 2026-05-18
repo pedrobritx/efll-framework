@@ -9,6 +9,7 @@ const defaultSelections = {
   theme: null,
   phaseActivities: {}, // { [phaseId]: activityIndex }
   editedExamples: {},  // { [phaseId]: customString }
+  editedHandouts: {},  // { [phaseId]: customTaskString }
 };
 
 function loadSelections() {
