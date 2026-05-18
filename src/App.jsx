@@ -410,7 +410,7 @@ export default function App() {
 
         {/* HERO */}
         <header className="lf-hero">
-          <div className="lf-eyebrow">EFL·LF · A pedagogical framework for Brazilian EFL</div>
+          <div className="lf-eyebrow">EFLLF · A pedagogical framework for Brazilian EFL</div>
           <h1>
             English as a Foreign Language <em>Lesson Framework</em>
           </h1>
@@ -1134,6 +1134,7 @@ export default function App() {
                   author or key term in this panel to jump to the bibliography, where you can trace the research
                   and see exactly where it shows up in the EFL Lesson Framework.
                 </p>
+              </p>
             </div>
           </div>
 
@@ -1181,28 +1182,28 @@ export default function App() {
 
         {/* FOOTER */}
         <footer className="lf-footer">
-          <ExternalLink size={12} /> English with Pedro
-        </a>
-        <a
-          className="lf-footer-link"
-          href="https://www.linkedin.com/in/pedrobritx/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Linkedin size={12} /> LinkedIn
-        </a>
-        <a
-          className="lf-footer-link"
-          href="https://github.com/pedrobritx"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Github size={12} /> GitHub
-        </a>
-        <a className="lf-footer-link" href="mailto:pedrobritx@gmail.com">
-          <Mail size={12} /> pedrobritx@gmail.com
-        </a>
-      </nav>
+          <a className="lf-footer-link" href="#" target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={12} /> English with Pedro
+          </a>
+          <a
+            className="lf-footer-link"
+            href="https://www.linkedin.com/in/pedrobritx/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Linkedin size={12} /> LinkedIn
+          </a>
+          <a
+            className="lf-footer-link"
+            href="https://github.com/pedrobritx"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Github size={12} /> GitHub
+          </a>
+          <a className="lf-footer-link" href="mailto:pedrobritx@gmail.com">
+            <Mail size={12} /> pedrobritx@gmail.com
+          </a>
 
       <div className="lf-footer-line">
         © {new Date().getFullYear()} · Pedro Brito · The EFLL Framework is an open framework.
