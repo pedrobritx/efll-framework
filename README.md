@@ -1,4 +1,4 @@
-# EFLL Framework
+# EFL Lesson Framework
 
 **The English as a Foreign Language Lesson Framework** — a CEFR-anchored macro grid (6 levels × 6 themes) and a seven-phase micro template for 60-minute lessons, grounded in second language acquisition research and calibrated for Brazilian EFL classrooms.
 
