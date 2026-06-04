@@ -240,7 +240,7 @@ export default function App() {
           }
         }
       },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0 },
     );
     els.forEach((el) => observer.observe(el));
     return () => {
