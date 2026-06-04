@@ -270,6 +270,23 @@ export default function App() {
       phaseActivities: { ...s.phaseActivities, [phaseId]: idx },
     }));
 
+  // Picking an activity in the micro template advances the guided flow: record
+  // the choice, then jump up to the phase timeline rail and open the next
+  // phase's activities. On the final phase, head to the composed lesson once
+  // every phase has a selection.
+  const chooseActivity = (phaseId, idx) => {
+    setPhaseActivity(phaseId, idx);
+    if (phaseId < 7) {
+      goToPhase(phaseId + 1);
+    } else {
+      // The Phase 7 choice isn't in state yet (setState is async), so treat the
+      // current phase as picked when checking whether the plan is complete.
+      const allPicked = PHASES.every((p) => p.id === phaseId || hasPhaseSelection(p.id));
+      if (allPicked) scrollTo('compose');
+      else goToPhase(phaseId);
+    }
+  };
+
   const startEdit = (phaseId) => {
     setDraftText(getExample(phaseId));
     setEditingPhase(phaseId);
@@ -736,7 +753,7 @@ export default function App() {
                       <button
                         key={i}
                         className={`lf-activity-card ${isSelected ? 'selected' : ''}`}
-                        onClick={() => setPhaseActivity(phaseData.id, i)}
+                        onClick={() => chooseActivity(phaseData.id, i)}
                       >
                         <span className="lf-activity-check" aria-hidden><Check size={12} /></span>
                         <div className="lf-activity-head">
