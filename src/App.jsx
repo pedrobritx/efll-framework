@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from 'react';
 import {
   ArrowDown,
   ArrowLeft,
@@ -158,6 +158,20 @@ export default function App() {
     const el = document.getElementById('phase-timeline');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
+
+  // Keep the active phase card in view within the horizontal timeline rail
+  // (mobile). Scroll the track itself — not the button — so the page doesn't
+  // jump vertically.
+  const timelineTrackRef = useRef(null);
+  useEffect(() => {
+    const track = timelineTrackRef.current;
+    if (!track) return;
+    if (track.scrollWidth <= track.clientWidth) return; // not a scrollable rail
+    const activeBtn = track.querySelector('.lf-phase-btn.active');
+    if (!activeBtn) return;
+    const left = Math.max(0, activeBtn.offsetLeft - track.offsetLeft - 4);
+    track.scrollTo({ left, behavior: 'smooth' });
+  }, [activePhase]);
 
   // ─── CROSS-REFERENCE JUMPS ───────────────────────────────────────────────
   const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
@@ -642,7 +656,7 @@ export default function App() {
             className={`lf-timeline ${highlight?.kind === 'phase' ? 'is-highlight' : ''}`}
             id="phase-timeline"
           >
-            <div className="lf-timeline-track">
+            <div className="lf-timeline-track" ref={timelineTrackRef}>
               {PHASES.map((phase) => {
                 const Icon = phase.icon;
                 return (

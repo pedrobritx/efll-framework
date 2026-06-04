@@ -7,8 +7,23 @@
   margin-bottom: 48px;
   position: relative;
 }
-@media (max-width: 900px) { .lf-timeline-track { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 500px) { .lf-timeline-track { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .lf-timeline-track {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(180px, 76%); /* one card + a peek of the next */
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 4px;
+    -webkit-overflow-scrolling: touch;
+    /* offset the section gutter so the first/last cards align flush */
+    margin-left: -4px;
+    margin-right: -4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .lf-phase-btn { scroll-snap-align: start; }
+}
 .lf-phase-btn {
   background: var(--paper-deep);
   border: 1px solid var(--line);
