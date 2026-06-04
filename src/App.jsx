@@ -34,10 +34,9 @@ import MacroSpiral from './components/MacroSpiral.jsx';
 import MicroArc from './components/MicroArc.jsx';
 import ProgressBar from './components/ProgressBar.jsx';
 import BackToTop from './components/BackToTop.jsx';
-import JumpMenu from './components/JumpMenu.jsx';
 
-// Sections the scroll-spy / jump menu track, in document order. Principles has no
-// top-nav link, but is included so the jump menu and spy stay accurate near it.
+// Sections the scroll-spy tracks, in document order. Principles has no top-nav
+// link, but is included so the spy stays accurate near the bottom of the page.
 const SECTIONS = [
   { id: 'overview', num: '01', label: 'overview' },
   { id: 'macro', num: '02', label: 'macro' },
@@ -119,6 +118,8 @@ export default function App() {
   // so the nav highlight doesn't flicker through intermediate sections.
   const clickScrollLock = useRef(false);
   const clickScrollTimer = useRef(0);
+  // The sticky nav — measured so jump/snap landings clear it at any width.
+  const navRef = useRef(null);
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
   const [editingHandoutPhase, setEditingHandoutPhase] = useState(null);
@@ -201,6 +202,52 @@ export default function App() {
   useEffect(() => {
     if (spyId) setActiveSection(spyId);
   }, [spyId]);
+
+  // Keep --nav-offset in sync with the real nav height (it wraps taller on small
+  // screens), so scroll-padding-top offsets every jump/snap landing accurately.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const apply = () => {
+      const h = Math.round(nav.getBoundingClientRect().height) + 12;
+      document.documentElement.style.setProperty('--nav-offset', `${h}px`);
+    };
+    apply();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', apply, { passive: true });
+      return () => window.removeEventListener('resize', apply);
+    }
+    const ro = new ResizeObserver(apply);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, []);
+
+  // Reveal each section as it enters view. Gated so content is never stuck hidden:
+  // only arm when IntersectionObserver exists and motion isn't reduced.
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const root = document.querySelector('.lf-root');
+    const els = Array.from(document.querySelectorAll('.lf-reveal'));
+    if (!root || els.length === 0) return;
+    root.classList.add('lf-reveal-ready');
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px', threshold: 0.08 },
+    );
+    els.forEach((el) => observer.observe(el));
+    return () => {
+      observer.disconnect();
+      root.classList.remove('lf-reveal-ready');
+    };
+  }, []);
 
   const scrollTo = useCallback((id) => {
     setActiveSection(id);
@@ -510,6 +557,7 @@ export default function App() {
 
         {/* NAV */}
         <nav
+          ref={navRef}
           className="lf-nav"
           style={{
             background: scrolled ? 'rgba(242, 235, 221, 0.85)' : 'transparent',
@@ -555,7 +603,7 @@ export default function App() {
         </header>
 
         {/* PART 1 — OVERVIEW */}
-        <section id="overview" className="lf-section">
+        <section id="overview" className="lf-section lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">01</div>
             <div className="lf-section-title">
@@ -606,7 +654,7 @@ export default function App() {
         </section>
 
         {/* PART 2 — MACRO */}
-        <section id="macro" className="lf-section">
+        <section id="macro" className="lf-section lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">02</div>
             <div className="lf-section-title">
@@ -708,7 +756,7 @@ export default function App() {
         </section>
 
         {/* PART 3 — MICRO */}
-        <section id="micro" className="lf-section">
+        <section id="micro" className="lf-section lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">03</div>
             <div className="lf-section-title">
@@ -854,7 +902,7 @@ export default function App() {
         </section>
 
         {/* PART 4 — COMPOSE */}
-        <section id="compose" className="lf-section lf-compose">
+        <section id="compose" className="lf-section lf-compose lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">04</div>
             <div className="lf-section-title">
@@ -1253,7 +1301,7 @@ export default function App() {
         </section>
 
         {/* PRINCIPLES */}
-        <section id="principles" className="lf-principles">
+        <section id="principles" className="lf-principles lf-reveal">
           <div className="lf-principles-inner">
             <div className="lf-principles-tag">Three commitments</div>
             <h2>The framework <em>rests on</em> three commitments.</h2>
@@ -1279,7 +1327,7 @@ export default function App() {
         </section>
 
         {/* PART 5 — REFERENCES */}
-        <section id="references" className="lf-section lf-references">
+        <section id="references" className="lf-section lf-references lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">05</div>
             <div className="lf-section-title">
@@ -1371,7 +1419,6 @@ export default function App() {
           </div>
         )}
 
-        <JumpMenu sections={SECTIONS} activeId={activeSection} onJump={scrollTo} />
         <BackToTop visible={deepScrolled} raised={xrefStack.length > 0} />
         <XRefBackPill />
       </div>
