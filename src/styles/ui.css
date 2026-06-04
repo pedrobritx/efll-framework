@@ -1,6 +1,12 @@
 /* ─── BUTTONS ─── */
 .lf-icon-btn { width: 28px; height: 28px; padding: 0; background: transparent; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; font-size: 14px; }
 .lf-icon-btn:hover { border-color: var(--wine); color: var(--wine); background: var(--paper-shadow); }
+.lf-icon-btn:active { transform: translateY(0.5px); }
+/* On touch devices, grow the hit area to the HIG ~44px minimum without bloating
+   the dense desktop layout. */
+@media (hover: none) and (pointer: coarse) {
+  .lf-icon-btn { min-width: 44px; min-height: 44px; }
+}
 .lf-icon-btn-primary { background: var(--wine); color: var(--paper); border-color: var(--wine); }
 .lf-icon-btn-primary:hover { background: var(--wine-deep); color: var(--paper); }
 .lf-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 22px; border: 1px solid var(--wine); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--wine); white-space: nowrap; }
@@ -16,6 +22,43 @@
 .lf-compose-actions-bar { margin-top: 40px; padding: 32px; background: var(--paper-deep); border: 1px solid var(--line); display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
 .lf-compose-actions-bar .lf-actions-spacer { flex: 1; min-width: 0; }
 .lf-compose-actions-note { font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-mute); font-size: 14px; }
+/* On phones the three actions + note crowd onto slivers — stack them full-width
+   so each stays a comfortable tap target and the note reads above. */
+@media (max-width: 600px) {
+  .lf-compose-actions-bar { padding: 20px; justify-content: stretch; }
+  .lf-compose-actions-bar .lf-actions-spacer { flex: 1 1 100%; }
+  .lf-compose-actions-note { flex: 1 1 100%; text-align: center; margin-bottom: 4px; }
+  .lf-compose-actions-bar .lf-btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ─── BACK-TO-TOP ─── */
+/* Discreet floating control that appears once you've scrolled past a viewport.
+   Sits bottom-right; lifts above the xref back-pill when that's present so the
+   two never overlap. Safe-area insets keep it clear of the iOS home indicator. */
+.lf-backtotop {
+  position: fixed;
+  right: calc(22px + env(safe-area-inset-right, 0px));
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(58, 21, 26, 0.18), 0 2px 6px rgba(58, 21, 26, 0.14);
+  animation: lf-fade-up 0.22s ease-out;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+.lf-backtotop:hover { background: var(--wine); color: var(--paper); transform: translateY(-1px); }
+/* When the back-pill is showing, stack this above it. */
+.lf-backtotop.is-raised {
+  bottom: calc(22px + 52px + env(safe-area-inset-bottom, 0px));
+}
 
 /* Ornament */
 .lf-ornament { text-align: center; font-family: 'Fraunces', serif; font-size: 32px; color: var(--gold); margin: 24px 0; letter-spacing: 0.6em; opacity: 0.7; }

@@ -1,6 +1,6 @@
 /* ─── SECTION ─── */
 .lf-section {
-  padding: 100px 32px;
+  padding: var(--space-section) var(--space-gutter);
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
@@ -8,16 +8,20 @@
 }
 .lf-section-header {
   display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 32px;
-  margin-bottom: 72px;
+  grid-template-columns: var(--col-section-num) 1fr;
+  gap: var(--space-header-gap);
+  margin-bottom: var(--space-header-mb);
   align-items: start;
+}
+/* On narrow phones the numeral column squeezes the title — stack them. */
+@media (max-width: 560px) {
+  .lf-section-header { grid-template-columns: 1fr; gap: 12px; }
 }
 .lf-section-num {
   font-family: 'Fraunces', serif;
   font-style: italic;
   font-weight: 300;
-  font-size: 80px;
+  font-size: var(--size-section-num);
   line-height: 0.9;
   color: var(--wine);
 }
@@ -45,6 +49,6 @@
 .lf-section-desc {
   max-width: 720px;
   color: var(--ink-soft);
-  font-size: 18px;
+  font-size: var(--text-desc);
   line-height: 1.65;
 }

@@ -1,5 +1,5 @@
 /* ─── PRINCIPLES / FOOTER ─── */
-.lf-principles { background: var(--wine-deep); color: var(--paper); padding: 100px 32px; position: relative; z-index: 2; }
+.lf-principles { background: var(--wine-deep); color: var(--paper); padding: var(--space-section) var(--space-gutter); position: relative; z-index: 2; }
 .lf-principles-inner { max-width: 1400px; margin: 0 auto; }
 .lf-principles-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--gold-soft); margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
 .lf-principles-tag::before { content: ''; width: 40px; height: 1px; background: var(--gold-soft); }

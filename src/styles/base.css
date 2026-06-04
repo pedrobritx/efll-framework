@@ -8,7 +8,7 @@ html, body { background: var(--paper); overflow-x: clip; }
   background: var(--paper);
   color: var(--ink);
   font-family: 'Newsreader', Georgia, serif;
-  font-size: 17px;
+  font-size: var(--text-body);
   line-height: 1.55;
   min-height: 100vh;
   position: relative;
@@ -36,3 +36,40 @@ html, body { background: var(--paper); overflow-x: clip; }
 
 .lf-display { font-family: 'Fraunces', Georgia, serif; font-weight: 500; letter-spacing: -0.02em; }
 .lf-mono { font-family: 'JetBrains Mono', monospace; font-feature-settings: 'ss01'; }
+
+/* ─── FOCUS-VISIBLE ─── */
+/* A single, consistent keyboard-focus ring across every interactive control.
+   Most buttons here strip their native borders, so without this they'd have no
+   visible focus state. Gold reads clearly on both the paper and dark-wine surfaces. */
+.lf-nav-link:focus-visible,
+.lf-level-btn:focus-visible,
+.lf-cell:focus-visible,
+.lf-phase-btn:focus-visible,
+.lf-activity-card:focus-visible,
+.lf-compose-tab:focus-visible,
+.lf-icon-btn:focus-visible,
+.lf-btn:focus-visible,
+.lf-overview-cta:focus-visible,
+.lf-detail-cta:focus-visible,
+.lf-compose-activity-swap:focus-visible,
+.lf-jump-toggle:focus-visible,
+.lf-jump-item:focus-visible,
+.lf-backtotop:focus-visible,
+.lf-footer-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Inside panels that clip their overflow, an outset ring gets cut off — inset it. */
+.lf-detail .lf-detail-cta:focus-visible { outline-offset: -2px; }
+
+/* ─── REDUCED MOTION ─── */
+/* Honor the OS "Reduce Motion" setting for every animation, transition and the
+   native smooth-scroll. JS-driven scrolls are guarded separately in App.jsx. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

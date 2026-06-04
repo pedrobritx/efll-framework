@@ -38,6 +38,11 @@
   outline-offset: 2px;
 }
 .lf-xref-pill svg { opacity: 0.85; }
+/* Touch devices: pad the pills to a comfortable ~44px tap height; desktop keeps
+   its compact editorial density. */
+@media (hover: none) and (pointer: coarse) {
+  .lf-xref-pill { padding: 11px 14px; min-height: 44px; }
+}
 
 /* Phase detail (Part 03) cross-refs */
 .lf-phase-xrefs {
@@ -99,8 +104,8 @@
 /* Floating back-pill */
 .lf-xref-back-pill {
   position: fixed;
-  right: 22px;
-  bottom: 22px;
+  right: calc(22px + env(safe-area-inset-right, 0px));
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   z-index: 50;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
