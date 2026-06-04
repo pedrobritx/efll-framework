@@ -1,6 +1,6 @@
 /* ─── HERO ─── */
 .lf-hero {
-  padding: 80px 32px 120px;
+  padding: clamp(56px, 8vw, 80px) var(--space-gutter) clamp(72px, 11vw, 120px);
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
@@ -40,14 +40,14 @@
 }
 .lf-hero-sub {
   max-width: 680px;
-  font-size: 19px;
+  font-size: var(--text-hero-sub);
   line-height: 1.6;
   color: var(--ink-soft);
-  margin-bottom: 56px;
+  margin-bottom: clamp(36px, 6vw, 56px);
 }
 .lf-hero-meta {
   display: flex;
-  gap: 56px;
+  gap: clamp(28px, 5vw, 56px);
   flex-wrap: wrap;
   padding-top: 32px;
   border-top: 1px solid var(--line);

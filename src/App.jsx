@@ -12,6 +12,7 @@ import {
   Pencil,
   Printer,
   RotateCcw,
+  X,
 } from 'lucide-react';
 
 import {
@@ -24,11 +25,29 @@ import {
 } from './data/index.js';
 import { refsForAnchor } from './data/references.js';
 import { useSelections } from './hooks/useSelections.js';
+import { useScrollSpy } from './hooks/useScrollSpy.js';
+import { scrollBehavior } from './hooks/useReducedMotion.js';
 import { buildMarkdown } from './utils/exportMarkdown.js';
 import EvidencePanel from './components/EvidencePanel.jsx';
 import EvidenceDigest from './components/EvidenceDigest.jsx';
 import MacroSpiral from './components/MacroSpiral.jsx';
 import MicroArc from './components/MicroArc.jsx';
+import ProgressBar from './components/ProgressBar.jsx';
+import BackToTop from './components/BackToTop.jsx';
+import JumpMenu from './components/JumpMenu.jsx';
+
+// Sections the scroll-spy / jump menu track, in document order. Principles has no
+// top-nav link, but is included so the jump menu and spy stay accurate near it.
+const SECTIONS = [
+  { id: 'overview', num: '01', label: 'overview' },
+  { id: 'macro', num: '02', label: 'macro' },
+  { id: 'micro', num: '03', label: 'micro' },
+  { id: 'compose', num: '04', label: 'compose' },
+  { id: 'principles', num: '·', label: 'principles' },
+  { id: 'references', num: '05', label: 'references' },
+];
+const SECTION_IDS = SECTIONS.map((s) => s.id);
+const NAV_ITEMS = SECTIONS.filter((s) => s.id !== 'principles');
 
 // ── Cross-reference plumbing ──────────────────────────────────────────────
 // Lets a user jump from a reference to a concept (or vice-versa) and walk back.
@@ -92,6 +111,14 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('overview');
   const [activePhase, setActivePhase] = useState(1);
   const [scrolled, setScrolled] = useState(false);
+  // 0–1 reading-progress fraction, fed to <ProgressBar/>.
+  const [progress, setProgress] = useState(0);
+  // True once the page is scrolled past a viewport — gates <BackToTop/>.
+  const [deepScrolled, setDeepScrolled] = useState(false);
+  // While a click-driven smooth scroll is animating, suppress scroll-spy writes
+  // so the nav highlight doesn't flicker through intermediate sections.
+  const clickScrollLock = useRef(false);
+  const clickScrollTimer = useRef(0);
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
   const [editingHandoutPhase, setEditingHandoutPhase] = useState(null);
@@ -129,34 +156,63 @@ export default function App() {
     return () => { cancelled = true; clearTimeout(t); };
   }, []);
 
+  // One rAF-throttled scroll listener drives the nav blur, the progress bar, and
+  // the back-to-top visibility — no duplicate listeners.
   useEffect(() => {
     let frame = 0;
     let ticking = false;
+    const measure = () => {
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrolled(y > 80);
+      setDeepScrolled(y > window.innerHeight);
+      setProgress(max > 0 ? Math.min(1, Math.max(0, y / max)) : 0);
+      ticking = false;
+    };
     const handler = () => {
       if (ticking) return;
       ticking = true;
-      frame = window.requestAnimationFrame(() => {
-        setScrolled(window.scrollY > 80);
-        ticking = false;
-      });
+      frame = window.requestAnimationFrame(measure);
     };
     window.addEventListener('scroll', handler, { passive: true });
+    window.addEventListener('resize', handler, { passive: true });
+    measure();
     return () => {
       window.removeEventListener('scroll', handler);
+      window.removeEventListener('resize', handler);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
+  // Briefly hold the spy off so a click jump isn't overridden mid-animation.
+  const lockScrollSpy = useCallback(() => {
+    clickScrollLock.current = true;
+    if (clickScrollTimer.current) window.clearTimeout(clickScrollTimer.current);
+    clickScrollTimer.current = window.setTimeout(() => {
+      clickScrollLock.current = false;
+    }, 650);
+  }, []);
+
+  // Scroll-spy owns the active section during free scroll; clicks set it eagerly
+  // (below) and pause the spy so the two don't fight.
+  const spyId = useScrollSpy(SECTION_IDS, {
+    isPaused: () => clickScrollLock.current,
+  });
+  useEffect(() => {
+    if (spyId) setActiveSection(spyId);
+  }, [spyId]);
+
   const scrollTo = useCallback((id) => {
     setActiveSection(id);
+    lockScrollSpy();
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
+    if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+  }, [lockScrollSpy]);
 
   const goToPhase = useCallback((id) => {
     setActivePhase(id);
     const el = document.getElementById('phase-timeline');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
   }, []);
 
   // Keep the active phase card in view within the horizontal timeline rail
@@ -170,11 +226,12 @@ export default function App() {
     const activeBtn = track.querySelector('.lf-phase-btn.active');
     if (!activeBtn) return;
     const left = Math.max(0, activeBtn.offsetLeft - track.offsetLeft - 4);
-    track.scrollTo({ left, behavior: 'smooth' });
+    track.scrollTo({ left, behavior: scrollBehavior() });
   }, [activePhase]);
 
   // ─── CROSS-REFERENCE JUMPS ───────────────────────────────────────────────
   const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
+    lockScrollSpy();
     setXrefStack((s) => [
       ...s,
       { fromLabel, scrollY: window.scrollY, restorePhase: activePhase, restoreTab: composeTab },
@@ -195,11 +252,11 @@ export default function App() {
         : document.getElementById(id);
       if (groupId) setHighlight({ kind: 'ref', id: groupId });
     }
-    if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (targetEl) targetEl.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     if (typeof window !== 'undefined') {
       window.setTimeout(() => setHighlight(null), 2200);
     }
-  }, [activePhase, composeTab]);
+  }, [activePhase, composeTab, lockScrollSpy]);
 
   const popXref = useCallback(() => {
     setXrefStack((s) => {
@@ -207,10 +264,11 @@ export default function App() {
       const entry = s[s.length - 1];
       if (typeof entry.restorePhase === 'number') setActivePhase(entry.restorePhase);
       if (entry.restoreTab) setComposeTab(entry.restoreTab);
-      window.scrollTo({ top: entry.scrollY, behavior: 'smooth' });
+      lockScrollSpy();
+      window.scrollTo({ top: entry.scrollY, behavior: scrollBehavior() });
       return s.slice(0, -1);
     });
-  }, []);
+  }, [lockScrollSpy]);
 
   const xrefValue = useMemo(
     () => ({ stack: xrefStack, jumpTo, popXref }),
@@ -447,6 +505,7 @@ export default function App() {
   return (
     <XRefContext.Provider value={xrefValue}>
       <div className="lf-root">
+        <ProgressBar progress={progress} />
         <div className="lf-grain" />
 
         {/* NAV */}
@@ -461,17 +520,12 @@ export default function App() {
           <div className="lf-nav-inner">
             <div className="lf-monogram">EFL Lesson<span>·</span>framework</div>
             <div className="lf-nav-links">
-              {[
-                { id: 'overview', label: 'overview' },
-                { id: 'macro', label: 'macro' },
-                { id: 'micro', label: 'micro' },
-                { id: 'compose', label: 'compose' },
-                { id: 'references', label: 'references' },
-              ].map((item) => (
+              {NAV_ITEMS.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollTo(item.id)}
                   className={`lf-nav-link ${activeSection === item.id ? 'active' : ''}`}
+                  aria-current={activeSection === item.id ? 'true' : undefined}
                 >
                   {item.label}
                 </button>
@@ -848,10 +902,22 @@ export default function App() {
               </div>
 
               {/* TABS */}
-              <div className="lf-compose-tabs" role="tablist" aria-label="Compose view">
+              <div
+                className="lf-compose-tabs"
+                role="tablist"
+                aria-label="Compose view"
+                onKeyDown={(e) => {
+                  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                  e.preventDefault();
+                  setComposeTab((t) => (t === 'plan' ? 'handout' : 'plan'));
+                }}
+              >
                 <button
                   role="tab"
+                  id="tab-plan"
+                  aria-controls="panel-plan"
                   aria-selected={composeTab === 'plan'}
+                  tabIndex={composeTab === 'plan' ? 0 : -1}
                   className={`lf-compose-tab ${composeTab === 'plan' ? 'is-active' : ''}`}
                   onClick={() => setComposeTab('plan')}
                 >
@@ -859,7 +925,10 @@ export default function App() {
                 </button>
                 <button
                   role="tab"
+                  id="tab-handout"
+                  aria-controls="panel-handout"
                   aria-selected={composeTab === 'handout'}
+                  tabIndex={composeTab === 'handout' ? 0 : -1}
                   className={`lf-compose-tab ${composeTab === 'handout' ? 'is-active' : ''}`}
                   onClick={() => setComposeTab('handout')}
                 >
@@ -869,7 +938,7 @@ export default function App() {
 
               {/* LESSON PLAN */}
               {composeTab === 'plan' && (
-                <div className="lf-compose-plan">
+                <div className="lf-compose-plan" id="panel-plan" role="tabpanel" aria-labelledby="tab-plan" tabIndex={-1}>
                   <div className="lf-compose-plan-header">
                     <div>
                       <div className="lf-compose-plan-eyebrow">The lesson · 60 min · {level} {themeData.name}</div>
@@ -934,6 +1003,7 @@ export default function App() {
                                       className="lf-icon-btn"
                                       onClick={() => resetExample(phase.id)}
                                       title="Reset to library default"
+                                      aria-label="Reset prompt to library default"
                                     >
                                       <RotateCcw size={13} />
                                     </button>
@@ -942,6 +1012,7 @@ export default function App() {
                                     className="lf-icon-btn"
                                     onClick={() => startEdit(phase.id)}
                                     title="Edit prompt"
+                                    aria-label="Edit prompt"
                                   >
                                     <Pencil size={13} />
                                   </button>
@@ -952,13 +1023,15 @@ export default function App() {
                                     className="lf-icon-btn"
                                     onClick={cancelEdit}
                                     title="Cancel"
+                                    aria-label="Cancel editing"
                                   >
-                                    ✕
+                                    <X size={13} />
                                   </button>
                                   <button
                                     className="lf-icon-btn lf-icon-btn-primary"
                                     onClick={() => saveEdit(phase.id)}
                                     title="Save"
+                                    aria-label="Save prompt"
                                   >
                                     <Check size={13} />
                                   </button>
@@ -971,6 +1044,10 @@ export default function App() {
                                 className="lf-compose-example-edit"
                                 value={draftText}
                                 onChange={(e) => setDraftText(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+                                  else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveEdit(phase.id); }
+                                }}
                                 autoFocus
                                 rows={4}
                               />
@@ -1038,7 +1115,7 @@ export default function App() {
 
               {/* STUDENT HANDOUT */}
               {composeTab === 'handout' && (
-                <div className="lf-handout">
+                <div className="lf-handout" id="panel-handout" role="tabpanel" aria-labelledby="tab-handout" tabIndex={-1}>
                   <div className="lf-handout-header">
                     <div className="lf-handout-eyebrow">Student handout</div>
                     <h3 className="lf-handout-title">{themeData.name}</h3>
@@ -1089,6 +1166,7 @@ export default function App() {
                                     className="lf-icon-btn"
                                     onClick={() => resetHandout(phase.id)}
                                     title="Reset to library default"
+                                    aria-label="Reset task to library default"
                                   >
                                     <RotateCcw size={13} />
                                   </button>
@@ -1097,6 +1175,7 @@ export default function App() {
                                   className="lf-icon-btn"
                                   onClick={() => startHandoutEdit(phase.id, actIdx)}
                                   title="Edit task"
+                                  aria-label="Edit task"
                                 >
                                   <Pencil size={13} />
                                 </button>
@@ -1107,13 +1186,15 @@ export default function App() {
                                   className="lf-icon-btn"
                                   onClick={cancelHandoutEdit}
                                   title="Cancel"
+                                  aria-label="Cancel editing"
                                 >
-                                  ✕
+                                  <X size={13} />
                                 </button>
                                 <button
                                   className="lf-icon-btn lf-icon-btn-primary"
                                   onClick={() => saveHandoutEdit(phase.id)}
                                   title="Save"
+                                  aria-label="Save task"
                                 >
                                   <Check size={13} />
                                 </button>
@@ -1125,6 +1206,10 @@ export default function App() {
                               className="lf-handout-task-edit"
                               value={handoutDraftText}
                               onChange={(e) => setHandoutDraftText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') { e.preventDefault(); cancelHandoutEdit(); }
+                                else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveHandoutEdit(phase.id); }
+                              }}
                               autoFocus
                               rows={4}
                             />
@@ -1168,7 +1253,7 @@ export default function App() {
         </section>
 
         {/* PRINCIPLES */}
-        <section className="lf-principles">
+        <section id="principles" className="lf-principles">
           <div className="lf-principles-inner">
             <div className="lf-principles-tag">Three commitments</div>
             <h2>The framework <em>rests on</em> three commitments.</h2>
@@ -1286,6 +1371,8 @@ export default function App() {
           </div>
         )}
 
+        <JumpMenu sections={SECTIONS} activeId={activeSection} onJump={scrollTo} />
+        <BackToTop visible={deepScrolled} raised={xrefStack.length > 0} />
         <XRefBackPill />
       </div>
     </XRefContext.Provider>

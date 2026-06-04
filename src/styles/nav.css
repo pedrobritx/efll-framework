@@ -56,7 +56,7 @@
   }
   .lf-monogram { font-size: 18px; }
   .lf-nav-links {
-    gap: 14px;
+    gap: 18px;
     font-size: 10px;
     letter-spacing: 0.08em;
     flex: 1 1 100%;
@@ -64,11 +64,44 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    /* Snap each link to the start so taps land on whole items. */
+    scroll-snap-type: x proximity;
+    scroll-padding-left: 2px;
+    /* Fade the trailing edge so it reads as "more, scroll right". */
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%);
   }
   .lf-nav-links::-webkit-scrollbar { display: none; }
-  .lf-nav-link { padding: 4px 0; white-space: nowrap; }
+  .lf-nav-link {
+    /* ≥44px touch height (HIG) while keeping the slim look via centered text. */
+    padding: 13px 0;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
 }
 @media (max-width: 420px) {
   .lf-monogram { font-size: 16px; }
-  .lf-nav-links { font-size: 9px; gap: 12px; }
+  .lf-nav-links { font-size: 9px; gap: 14px; }
+}
+
+/* ─── READING-PROGRESS BAR ─── */
+/* A hairline at the very top edge, above the sticky nav, that fills as you
+   read. Driven by a CSS var set from the shared scroll listener. */
+.lf-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60; /* above .lf-nav (50) */
+  pointer-events: none;
+  background: transparent;
+}
+.lf-progress-fill {
+  height: 100%;
+  transform-origin: left center;
+  transform: scaleX(var(--lf-progress, 0));
+  background: linear-gradient(to right, var(--wine), var(--gold));
+  transition: transform 0.1s linear;
+  will-change: transform;
 }

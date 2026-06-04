@@ -13,4 +13,21 @@
   --gold-soft: #D4B47A;
   --sage: #5E6B52;
   --line: #C7B89A;
+
+  /* ─── Fluid spacing scale (additive — no identity change) ─── */
+  --space-section: clamp(56px, 9vw, 100px);   /* vertical rhythm of .lf-section */
+  --space-gutter: clamp(16px, 4vw, 32px);     /* horizontal page gutter */
+  --space-header-gap: clamp(16px, 4vw, 32px); /* section-number → title gap */
+  --space-header-mb: clamp(40px, 7vw, 72px);  /* below the section header */
+  --pad-panel: clamp(20px, 5vw, 56px);        /* inner padding of detail panels */
+
+  /* ─── Fluid type scale ─── */
+  --size-section-num: clamp(44px, 11vw, 80px); /* the big italic part numerals */
+  --col-section-num: clamp(44px, 12vw, 80px);  /* width of the numeral column */
+  --text-body: clamp(15px, 0.6vw + 13.5px, 17px);
+  --text-desc: clamp(16px, 0.9vw + 14px, 18px);
+  --text-hero-sub: clamp(16px, 1.2vw + 14px, 19px);
+
+  /* ─── Focus ring ─── */
+  --focus-ring: var(--gold);
 }
