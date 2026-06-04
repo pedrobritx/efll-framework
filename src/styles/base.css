@@ -4,6 +4,24 @@ img, svg, video { max-width: 100%; height: auto; }
 
 html, body { background: var(--paper); overflow-x: clip; }
 
+/* ─── SLIDE / SNAP ─── */
+/* The document is the scroller. A gentle proximity snap settles the page at each
+   section's start (app-like) without trapping tall sections, and scroll-padding
+   keeps both snap and jump landings clear of the sticky nav. */
+html {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: var(--nav-offset);
+}
+.lf-hero,
+.lf-section,
+.lf-principles {
+  scroll-snap-align: start;
+}
+/* Snapping is itself motion — disable it when the user asks for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
+}
+
 .lf-root {
   background: var(--paper);
   color: var(--ink);
@@ -52,8 +70,6 @@ html, body { background: var(--paper); overflow-x: clip; }
 .lf-overview-cta:focus-visible,
 .lf-detail-cta:focus-visible,
 .lf-compose-activity-swap:focus-visible,
-.lf-jump-toggle:focus-visible,
-.lf-jump-item:focus-visible,
 .lf-backtotop:focus-visible,
 .lf-footer-link:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -72,4 +88,22 @@ html, body { background: var(--paper); overflow-x: clip; }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ─── SECTION REVEAL ─── */
+/* Each section gently rises into view as it enters. The hidden initial state is
+   gated behind .lf-reveal-ready (added by JS only when motion is allowed and
+   IntersectionObserver exists), so without JS — or with reduced motion — content
+   is always fully visible and never gets stuck hidden. */
+.lf-reveal-ready .lf-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.lf-reveal-ready .lf-reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lf-reveal-ready .lf-reveal { opacity: 1; transform: none; }
 }

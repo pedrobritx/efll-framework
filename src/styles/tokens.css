@@ -30,4 +30,12 @@
 
   /* ─── Focus ring ─── */
   --focus-ring: var(--gold);
+
+  /* Height the sticky nav occupies, used to offset jump/snap landings so targets
+     don't hide under it. Sensible default for first paint; refined at runtime in
+     App.jsx by measuring the actual nav (it wraps taller on small screens). */
+  --nav-offset: 76px;
+}
+@media (max-width: 640px) {
+  :root { --nav-offset: 96px; }
 }
