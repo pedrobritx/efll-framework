@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Check,
+  Compass,
   Copy,
   ExternalLink,
   Github,
@@ -26,14 +27,19 @@ import {
 import { refsForAnchor } from './data/references.js';
 import { useSelections } from './hooks/useSelections.js';
 import { useScrollSpy } from './hooks/useScrollSpy.js';
+import { useWizard } from './hooks/useWizard.js';
 import { scrollBehavior } from './hooks/useReducedMotion.js';
 import { buildMarkdown } from './utils/exportMarkdown.js';
+import { STEP_META, defaultActivityIdxFor } from './wizard/steps.js';
 import EvidencePanel from './components/EvidencePanel.jsx';
 import EvidenceDigest from './components/EvidenceDigest.jsx';
 import MacroSpiral from './components/MacroSpiral.jsx';
 import MicroArc from './components/MicroArc.jsx';
 import ProgressBar from './components/ProgressBar.jsx';
 import BackToTop from './components/BackToTop.jsx';
+import WizardStepper from './components/WizardStepper.jsx';
+import WizardNavBar from './components/WizardNavBar.jsx';
+import WizardWelcome from './components/WizardWelcome.jsx';
 
 // Sections the scroll-spy tracks, in document order. Principles has no top-nav
 // link, but is included so the spy stays accurate near the bottom of the page.
@@ -107,6 +113,11 @@ function XRefBackPill() {
 
 export default function App() {
   const [selections, setSelections, defaultSelections] = useSelections();
+  const wizard = useWizard();
+  const { mode, step } = wizard;
+  // Read mode synchronously from the scroll-spy pause check without re-subscribing.
+  const modeRef = useRef(mode);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
   const [activeSection, setActiveSection] = useState('overview');
   const [activePhase, setActivePhase] = useState(1);
   const [scrolled, setScrolled] = useState(false);
@@ -197,7 +208,7 @@ export default function App() {
   // Scroll-spy owns the active section during free scroll; clicks set it eagerly
   // (below) and pause the spy so the two don't fight.
   const spyId = useScrollSpy(SECTION_IDS, {
-    isPaused: () => clickScrollLock.current,
+    isPaused: () => clickScrollLock.current || modeRef.current === 'wizard',
   });
   useEffect(() => {
     if (spyId) setActiveSection(spyId);
@@ -278,6 +289,17 @@ export default function App() {
 
   // ─── CROSS-REFERENCE JUMPS ───────────────────────────────────────────────
   const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
+    // In the wizard the long document is hidden step-by-step, so scroll-jumps
+    // don't apply — switch to the relevant step instead.
+    if (modeRef.current === 'wizard') {
+      if (kind === 'phase') {
+        setActivePhase(id);
+        wizard.setStep('activities');
+      } else {
+        wizard.setStep('learn');
+      }
+      return;
+    }
     lockScrollSpy();
     setXrefStack((s) => [
       ...s,
@@ -381,6 +403,9 @@ export default function App() {
   // every phase has a selection.
   const chooseActivity = (phaseId, idx) => {
     setPhaseActivity(phaseId, idx);
+    // In the guided wizard, tapping a card only records the choice — the sticky
+    // Next button advances the phase, so a teacher can compare before moving on.
+    if (modeRef.current === 'wizard') return;
     if (phaseId < 7) {
       goToPhase(phaseId + 1);
     } else {
@@ -548,12 +573,129 @@ export default function App() {
   // ─── TOTAL ──────────────────────────────────────────────────────────────
   const totalMinutes = PHASES.reduce((sum, p) => sum + p.defaultMin, 0);
 
+  // ─── GUIDED WIZARD ──────────────────────────────────────────────────────
+  // Toggle a flag on <html> so global scroll-snap is disabled while the wizard
+  // shows one step at a time (snap fights the single-panel view).
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.toggle('lf-wizard-active', mode === 'wizard');
+    return () => html.classList.remove('lf-wizard-active');
+  }, [mode]);
+
+  // On entering a step — or moving between phases within the build step — return
+  // to the top so every screen reads from the same, predictable starting point.
+  useEffect(() => {
+    if (mode !== 'wizard') return;
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
+  }, [step, mode]);
+  useEffect(() => {
+    if (mode !== 'wizard' || step !== 'activities') return;
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
+  }, [activePhase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pre-select a sensible activity per phase as soon as a level+theme exist, so
+  // a teacher can accept the recommendation in one tap and tweak only what they
+  // want. Fills phases with no existing choice — never overrides a real pick.
+  useEffect(() => {
+    if (mode !== 'wizard' || !hasMacro) return;
+    setSelections((s) => {
+      let changed = false;
+      const pa = { ...s.phaseActivities };
+      for (const p of PHASES) {
+        if (pa[p.id] === undefined) {
+          pa[p.id] = defaultActivityIdxFor(p, s.level);
+          changed = true;
+        }
+      }
+      return changed ? { ...s, phaseActivities: pa } : s;
+    });
+  }, [mode, hasMacro, level, theme, setSelections]);
+
+  // ─── WIZARD NAVIGATION ──────────────────────────────────────────────────
+  const startPlanning = () => { wizard.markSeenWelcome(); wizard.setStep('level'); };
+  const showExample = () => {
+    setSelections((s) => {
+      const pa = { ...s.phaseActivities };
+      PHASES.forEach((p) => { pa[p.id] = defaultActivityIdxFor(p, 'B1'); });
+      return { ...s, level: 'B1', theme: 'media', phaseActivities: pa };
+    });
+    wizard.markSeenWelcome();
+    wizard.setStep('compose');
+  };
+  const enterExplore = () => wizard.setMode('explore');
+  const enterGuided = () => wizard.setMode('wizard');
+
+  const goPrevPhase = () => {
+    if (activePhase > 1) setActivePhase(activePhase - 1);
+    else wizard.setStep('theme');
+  };
+  const goNextPhase = () => {
+    if (activePhase < 7) setActivePhase(activePhase + 1);
+    else wizard.setStep('compose');
+  };
+
+  const stepIsComplete = (id) => {
+    if (id === 'level') return Boolean(level);
+    if (id === 'theme') return hasMacro;
+    if (id === 'activities') return hasMacro && allPhasesPicked;
+    return false;
+  };
+  const stepCanGoTo = (id) => {
+    if (id === 'level' || id === 'learn') return true;
+    if (id === 'theme') return Boolean(level);
+    if (id === 'activities' || id === 'compose') return hasMacro;
+    return false;
+  };
+
+  // Per-step Back/Next config for the sticky bottom bar.
+  let navCfg = null;
+  if (mode === 'wizard' && step !== 'welcome') {
+    if (step === 'level') {
+      navCfg = {
+        back: { label: 'Welcome', onClick: () => wizard.setStep('welcome') },
+        next: { label: 'Next: choose a theme', disabled: !level, onClick: () => wizard.setStep('theme') },
+        helper: !level ? 'Pick the level you teach to continue' : null,
+      };
+    } else if (step === 'theme') {
+      navCfg = {
+        back: { label: 'Level', onClick: () => wizard.setStep('level') },
+        next: { label: 'Next: build the lesson', disabled: !hasMacro, onClick: () => wizard.setStep('activities') },
+        helper: !theme ? 'Choose a theme to continue' : null,
+      };
+    } else if (step === 'activities') {
+      navCfg = {
+        back: { label: activePhase > 1 ? 'Previous phase' : 'Theme', onClick: goPrevPhase },
+        next: { label: activePhase < 7 ? 'Next phase' : 'Next: your lesson', onClick: goNextPhase },
+        helper: `Phase ${activePhase} of 7 · a recommended activity is pre-selected`,
+      };
+    } else if (step === 'compose') {
+      navCfg = {
+        back: { label: 'Activities', onClick: () => wizard.setStep('activities') },
+        next: { label: 'Download PDF', icon: 'printer', onClick: handlePrintPdf },
+        helper: allPhasesPicked ? 'Ready to teach — export below, or open the research' : 'Tip: the research tab is one step away',
+      };
+    } else if (step === 'learn') {
+      navCfg = {
+        back: { label: 'Your lesson', onClick: () => wizard.setStep('compose') },
+        next: null,
+      };
+    }
+  }
+
+  const isWizard = mode === 'wizard';
+
   // ─── RENDER ─────────────────────────────────────────────────────────────
   return (
     <XRefContext.Provider value={xrefValue}>
-      <div className="lf-root">
-        <ProgressBar progress={progress} />
+      <div
+        className={`lf-root ${isWizard ? 'lf-mode-wizard' : 'lf-mode-explore'}`}
+        data-wstep={isWizard ? step : undefined}
+      >
+        {!isWizard && <ProgressBar progress={progress} />}
         <div className="lf-grain" />
+        {isWizard && (
+          <div className="lf-sr-only" aria-live="polite">{STEP_META[step]?.label}</div>
+        )}
 
         {/* NAV */}
         <nav
@@ -567,20 +709,41 @@ export default function App() {
         >
           <div className="lf-nav-inner">
             <div className="lf-monogram">EFL Lesson<span>·</span>framework</div>
-            <div className="lf-nav-links">
-              {NAV_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => scrollTo(item.id)}
-                  className={`lf-nav-link ${activeSection === item.id ? 'active' : ''}`}
-                  aria-current={activeSection === item.id ? 'true' : undefined}
-                >
-                  {item.label}
+            {isWizard ? (
+              <button type="button" className="lf-nav-explore-toggle" onClick={enterExplore}>
+                <Compass size={13} aria-hidden /> Explore the framework
+              </button>
+            ) : (
+              <div className="lf-nav-links">
+                <button type="button" className="lf-nav-link lf-nav-guided" onClick={enterGuided}>
+                  guided mode
                 </button>
-              ))}
-            </div>
+                {NAV_ITEMS.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollTo(item.id)}
+                    className={`lf-nav-link ${activeSection === item.id ? 'active' : ''}`}
+                    aria-current={activeSection === item.id ? 'true' : undefined}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+          {isWizard && step !== 'welcome' && (
+            <WizardStepper
+              current={step}
+              isComplete={stepIsComplete}
+              canGoTo={stepCanGoTo}
+              onNavigate={(id) => wizard.setStep(id)}
+            />
+          )}
         </nav>
+
+        {isWizard && (
+          <WizardWelcome onStart={startPlanning} onExample={showExample} onExplore={enterExplore} />
+        )}
 
         {/* HERO */}
         <header className="lf-hero">
@@ -681,6 +844,27 @@ export default function App() {
             ))}
           </div>
 
+          {isWizard && (
+            <div className="lf-wizard-theme-extra">
+              {level && (
+                <div className="lf-wizard-context-chip">
+                  <span>Planning for <strong>{level} · {levelData?.name}</strong></span>
+                  <button type="button" onClick={() => wizard.setStep('level')}>change level</button>
+                </div>
+              )}
+              <div className="lf-wizard-spiral">
+                <MacroSpiral
+                  themes={THEMES}
+                  levels={LEVELS}
+                  selectedId={theme || 'identity'}
+                  onSelect={setTheme}
+                  onUse={() => {}}
+                  hideUseCta
+                />
+              </div>
+            </div>
+          )}
+
           <div className="lf-macro-grid">
             {THEMES.map((t) => {
               const Icon = t.icon;
@@ -770,6 +954,18 @@ export default function App() {
               </p>
             </div>
           </div>
+
+          {isWizard && (
+            <div className="lf-wizard-arc">
+              <MicroArc
+                phases={PHASES}
+                selectedId={activePhase}
+                onSelect={(id) => setActivePhase(id)}
+                onUse={() => {}}
+                hideUseCta
+              />
+            </div>
+          )}
 
           <div
             className={`lf-timeline ${highlight?.kind === 'phase' ? 'is-highlight' : ''}`}
@@ -1419,8 +1615,12 @@ export default function App() {
           </div>
         )}
 
-        <BackToTop visible={deepScrolled} raised={xrefStack.length > 0} />
-        <XRefBackPill />
+        {!isWizard && <BackToTop visible={deepScrolled} raised={xrefStack.length > 0} />}
+        {!isWizard && <XRefBackPill />}
+
+        {isWizard && step !== 'welcome' && navCfg && (
+          <WizardNavBar back={navCfg.back} next={navCfg.next} helper={navCfg.helper} />
+        )}
       </div>
     </XRefContext.Provider>
   );

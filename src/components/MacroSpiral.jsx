@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowDown } from 'lucide-react';
 import { polar, annularSectorPath, archimedeanPath, LAYER_COLORS } from '../utils/geometry.js';
 
-function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
+function MacroSpiral({ themes, levels, selectedId, onSelect, onUse, hideUseCta = false }) {
   const cx = 250;
   const cy = 250;
   const rInner = 64;
@@ -85,14 +85,16 @@ function MacroSpiral({ themes, levels, selectedId, onSelect, onUse }) {
         </div>
         <h4 className="lf-arc-desc-name">{selected.name}</h4>
         <p className="lf-arc-desc-purpose">{selected.description}</p>
-        <button
-          type="button"
-          className="lf-overview-cta"
-          onClick={() => onUse(selected.id)}
-          title={`Use ${selected.name} in macro`}
-        >
-          Use in macro <ArrowDown size={12} />
-        </button>
+        {!hideUseCta && (
+          <button
+            type="button"
+            className="lf-overview-cta"
+            onClick={() => onUse(selected.id)}
+            title={`Use ${selected.name} in macro`}
+          >
+            Use in macro <ArrowDown size={12} />
+          </button>
+        )}
       </div>
     </div>
   );

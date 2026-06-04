@@ -21,6 +21,8 @@ html {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-snap-type: none; }
 }
+/* The guided wizard shows one step at a time; section snap would fight it. */
+html.lf-wizard-active { scroll-snap-type: none; }
 
 .lf-root {
   background: var(--paper);

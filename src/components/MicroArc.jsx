@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowDown } from 'lucide-react';
 import { polar, annularSectorPath } from '../utils/geometry.js';
 
-function MicroArc({ phases, selectedId, onSelect, onUse }) {
+function MicroArc({ phases, selectedId, onSelect, onUse, hideUseCta = false }) {
   const cx = 250;
   const cy = 250;
   const rInner = 192;
@@ -95,14 +95,16 @@ function MicroArc({ phases, selectedId, onSelect, onUse }) {
         <div className="lf-arc-desc-sla">
           <span className="lf-mono">SLA · </span>{selected.sla}
         </div>
-        <button
-          type="button"
-          className="lf-overview-cta"
-          onClick={() => onUse(selected.id)}
-          title={`Use Phase ${selected.id} in micro`}
-        >
-          Use in micro <ArrowDown size={12} />
-        </button>
+        {!hideUseCta && (
+          <button
+            type="button"
+            className="lf-overview-cta"
+            onClick={() => onUse(selected.id)}
+            title={`Use Phase ${selected.id} in micro`}
+          >
+            Use in micro <ArrowDown size={12} />
+          </button>
+        )}
       </div>
     </div>
   );
