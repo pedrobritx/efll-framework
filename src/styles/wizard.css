@@ -115,6 +115,11 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line) !important;
 }
+.lf-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .lf-nav-explore-toggle {
   display: inline-flex;
   align-items: center;
@@ -133,6 +138,28 @@
 .lf-nav-explore-toggle:hover {
   color: var(--wine);
   border-color: var(--wine);
+}
+/* Compact primary CTA in the nav — only on the homepage. Mirrors the wine-deep /
+   paper look of .lf-btn-primary (ui.css), sized to sit on the nav line. */
+.lf-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--wine-deep);
+  color: var(--paper);
+  border: 1px solid var(--wine-deep);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 9px 16px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.lf-nav-cta:hover {
+  background: var(--ink);
+  border-color: var(--ink);
 }
 
 /* ─── STEPPER ─── */
@@ -388,49 +415,14 @@
   color: var(--ink-mute);
   margin-top: 4px;
 }
-.lf-welcome-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 32px;
-}
-/* ─── WELCOME · concise manifesto + credit foot ─── */
-.lf-welcome-manifesto {
-  margin-top: 40px;
-  padding-top: 26px;
+/* ─── WELCOME · inline manifesto + credit foot ─── */
+/* The full manifesto + licence are folded directly into the homepage. A hairline
+   and generous top margin set them apart from the hero above. */
+.lf-home-manifesto {
+  display: block;
+  margin-top: 48px;
+  padding-top: 36px;
   border-top: 1px solid var(--line);
-}
-.lf-welcome-manifesto-lead {
-  font-family: 'Newsreader', serif;
-  font-size: 17px;
-  line-height: 1.65;
-  color: var(--ink-soft);
-  max-width: 640px;
-}
-.lf-welcome-manifesto-lead strong {
-  font-family: 'Fraunces', serif;
-  font-weight: 500;
-  color: var(--ink);
-}
-.lf-welcome-manifesto-link {
-  margin-top: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--wine);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s;
-}
-.lf-welcome-manifesto-link:hover {
-  border-bottom-color: var(--wine);
 }
 .lf-welcome-foot {
   margin-top: 34px;
@@ -601,7 +593,7 @@
 .lf-wizard-back:focus-visible,
 .lf-wizard-next:focus-visible,
 .lf-nav-explore-toggle:focus-visible,
-.lf-welcome-manifesto-link:focus-visible,
+.lf-nav-cta:focus-visible,
 .lf-welcome-foot-link:focus-visible,
 .lf-wizard-context-chip button:focus-visible {
   outline: 2px solid var(--focus-ring);

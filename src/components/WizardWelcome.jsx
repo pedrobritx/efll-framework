@@ -1,12 +1,15 @@
 import React from 'react';
-import { ArrowRight, Eye, BookOpen, Coffee, ExternalLink } from 'lucide-react';
+import { Coffee, ExternalLink } from 'lucide-react';
 import { CREDIT_LINE, CREDIT_URL, SUPPORT_URL } from '../data/credit.js';
+import Manifesto from './Manifesto.jsx';
+import LicenseNotice from './LicenseNotice.jsx';
 
 // First-run orientation. A calm editorial welcome — reusing hero typography —
-// that tells a teacher what the tool does and gives one obvious way to begin,
-// plus an instant "show me an example" so newcomers see the output immediately.
-// A concise manifesto sits below; the full version opens via onManifesto.
-function WizardWelcome({ onStart, onExample, onManifesto }) {
+// that tells a teacher what the tool does. The single way to begin now lives in
+// the nav ("Start planning"); the full manifesto and licence are folded directly
+// into the homepage below, so newcomers can read the philosophy and terms without
+// opening a modal. The nav/footer "Manifesto & licence" links scroll here.
+function WizardWelcome() {
   const STEPS = [
     { n: '1', label: 'Level', sub: 'A1 – C2' },
     { n: '2', label: 'Theme', sub: 'six units' },
@@ -37,27 +40,12 @@ function WizardWelcome({ onStart, onExample, onManifesto }) {
         ))}
       </ol>
 
-      <div className="lf-welcome-actions">
-        <button type="button" className="lf-btn lf-btn-primary" onClick={onStart}>
-          Start planning <ArrowRight size={14} aria-hidden />
-        </button>
-        <button type="button" className="lf-btn lf-btn-secondary" onClick={onExample}>
-          <Eye size={14} aria-hidden /> Show me an example lesson
-        </button>
-      </div>
-
-      {/* Concise manifesto — the full version (with the two-layer diagrams and
-          the licence) opens in an overlay via onManifesto. */}
-      <div className="lf-welcome-manifesto">
-        <p className="lf-welcome-manifesto-lead">
-          <strong>Well-structured lessons, built from accurate, well-sourced research.</strong>{' '}
-          A two-layer framework — a CEFR-anchored macro grid and a seven-phase micro lesson — where
-          every level, theme, and activity is tied to a citation you can trace.
-        </p>
-        <button type="button" className="lf-welcome-manifesto-link" onClick={onManifesto}>
-          <BookOpen size={13} aria-hidden /> Read the manifesto &amp; licence
-        </button>
-      </div>
+      {/* The framework's philosophy and dual licence, folded directly into the
+          homepage. The nav and footer "Manifesto & licence" links scroll here. */}
+      <section id="lf-home-manifesto" className="lf-home-manifesto" aria-label="Manifesto and licence">
+        <Manifesto />
+        <LicenseNotice />
+      </section>
 
       <div className="lf-welcome-foot">
         <a className="lf-welcome-foot-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
