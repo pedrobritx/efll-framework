@@ -1,33 +1,41 @@
 # Additional Terms and Clarifications
 
-## Educational Use
+These notes supplement **[LICENSE.md](./LICENSE.md)**, which is the authoritative,
+dual-licence text. If anything here and the licence appear to conflict, the licence
+governs.
 
-Teachers, tutors, schools, and educational institutions are permitted to use, adapt, and distribute this framework for educational purposes under the CC BY-NC 4.0 license.
+## The short version
 
-## Commercial Restrictions
-
-You may NOT:
-
-- Sell this framework or derivative versions
-- Repackage this work into paid courses, SaaS products, apps, or platforms
-- Use this framework in commercial educational products without explicit permission
-- Monetize derivative versions of this framework
-- Redistribute modified versions behind paywalls
+- **Free, with attribution** — individual teachers and tutors, public schools, and
+  any institution that charges students **no tuition** may use, adapt, and share the
+  framework and the lessons it produces.
+- **Paid, for tuition-charging schools** — private language schools, franchises, and
+  commercial course providers need a paid, recurring commercial licence first.
+  Pricing on request: **pedrobritx@gmail.com**.
 
 ## Attribution
 
-Any public or redistributed use of this framework must include visible credit to:
+Public, shared, or exported materials must keep the credit visible:
 
-Pedro Henrique Bahia Brito
+> Created with EFL Lesson Framework — by pedrobritx · https://pedrobritx.github.io/EwP/
 
-and link back to the original repository whenever possible.
+The app adds this to its Markdown and PDF exports automatically. Please don't remove
+it. Author: **Pedro Henrique Bahia Brito** ("English with Pedro").
 
-## AI and Dataset Usage
+## You may not (without written permission)
 
-This framework and its contents may not be used for training commercial AI models, datasets, or proprietary machine learning systems without explicit written permission.
+- Sell, repackage, sublicense, or paywall the framework itself (lessons you create
+  with it are yours to use under the grants above).
+- Remove or alter the attribution.
+- Use the framework or its contents to train commercial AI models, datasets, or
+  proprietary machine-learning systems.
 
-## Support the Project
+## Supporting the project
 
-If you'd like to support the continued development of this framework, you can contribute here:
-
+Voluntary support is welcome and is separate from the commercial licence:
 https://buymeacoffee.com/pedrobritx
+
+## Not legal advice
+
+These terms are the project's own and are provided as-is. They are not formal legal
+advice.

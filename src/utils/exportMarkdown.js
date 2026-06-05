@@ -1,5 +1,6 @@
 import { PHASES } from '../data/phases.js';
 import { getEvidenceForSelection } from '../data/evidence.js';
+import { CREDIT_MARKDOWN } from '../data/credit.js';
 
 /**
  * Build a Markdown string for the composed lesson plan.
@@ -48,6 +49,6 @@ export function buildMarkdown({
       md += `> **Caveat:** ${evidenceItems.map((item) => item.limitation).join(' ')}\n\n`;
     }
   });
-  md += `\n---\n*Generated with the EFLL Framework — English as a Foreign Language Lesson Framework — by Pedro Brito.*\n`;
+  md += `\n---\n${CREDIT_MARKDOWN}\n`;
   return md;
 }

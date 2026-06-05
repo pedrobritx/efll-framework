@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from 'react';
 import {
-  ArrowDown,
-  ArrowLeft,
   ArrowUpRight,
+  BookOpen,
   Check,
-  Compass,
+  Coffee,
   Copy,
   ExternalLink,
   Github,
@@ -23,10 +22,12 @@ import {
   PHASES,
   REFERENCE_GROUPS,
   getEvidenceForSelection,
+  getEvidenceForLevel,
+  getEvidenceForTheme,
 } from './data/index.js';
 import { refsForAnchor } from './data/references.js';
+import { CREDIT_LINE, CREDIT_URL, COMMERCIAL_CONTACT, SUPPORT_URL } from './data/credit.js';
 import { useSelections } from './hooks/useSelections.js';
-import { useScrollSpy } from './hooks/useScrollSpy.js';
 import { useWizard } from './hooks/useWizard.js';
 import { scrollBehavior } from './hooks/useReducedMotion.js';
 import { buildMarkdown } from './utils/exportMarkdown.js';
@@ -35,27 +36,14 @@ import EvidencePanel from './components/EvidencePanel.jsx';
 import EvidenceDigest from './components/EvidenceDigest.jsx';
 import MacroSpiral from './components/MacroSpiral.jsx';
 import MicroArc from './components/MicroArc.jsx';
-import ProgressBar from './components/ProgressBar.jsx';
-import BackToTop from './components/BackToTop.jsx';
 import WizardStepper from './components/WizardStepper.jsx';
 import WizardNavBar from './components/WizardNavBar.jsx';
 import WizardWelcome from './components/WizardWelcome.jsx';
-
-// Sections the scroll-spy tracks, in document order. Principles has no top-nav
-// link, but is included so the spy stays accurate near the bottom of the page.
-const SECTIONS = [
-  { id: 'overview', num: '01', label: 'overview' },
-  { id: 'macro', num: '02', label: 'macro' },
-  { id: 'micro', num: '03', label: 'micro' },
-  { id: 'compose', num: '04', label: 'compose' },
-  { id: 'principles', num: '·', label: 'principles' },
-  { id: 'references', num: '05', label: 'references' },
-];
-const SECTION_IDS = SECTIONS.map((s) => s.id);
-const NAV_ITEMS = SECTIONS.filter((s) => s.id !== 'principles');
+import Manifesto from './components/Manifesto.jsx';
+import LicenseNotice from './components/LicenseNotice.jsx';
 
 // ── Cross-reference plumbing ──────────────────────────────────────────────
-// Lets a user jump from a reference to a concept (or vice-versa) and walk back.
+// Lets a reference pill jump to the concept's wizard step.
 const XRefContext = createContext(null);
 
 const PRINCIPLE_NAMES = {
@@ -73,6 +61,8 @@ function anchorLabel(a) {
   if (a.label) return a.label;
   if (a.kind === 'phase') return `Phase ${a.id}`;
   if (a.kind === 'principle') return `Principle: ${PRINCIPLE_NAMES[a.id] ?? a.id}`;
+  if (a.kind === 'level') return `Level ${a.id}`;
+  if (a.kind === 'theme') return THEMES.find((t) => t.id === a.id)?.name ?? a.id;
   if (a.kind === 'section') return a.id;
   return String(a.id);
 }
@@ -94,42 +84,12 @@ function XRefPill({ kind, id, label, fromLabel, targetGroupId }) {
   );
 }
 
-function XRefBackPill() {
-  const xref = useContext(XRefContext);
-  if (!xref || xref.stack.length === 0) return null;
-  const top = xref.stack[xref.stack.length - 1];
-  return (
-    <button
-      type="button"
-      className="lf-xref-back-pill"
-      onClick={xref.popXref}
-      title="Back to where you jumped from"
-    >
-      <ArrowLeft size={13} aria-hidden />
-      <span>Back to <strong>{top.fromLabel}</strong></span>
-    </button>
-  );
-}
-
 export default function App() {
   const [selections, setSelections, defaultSelections] = useSelections();
   const wizard = useWizard();
-  const { mode, step } = wizard;
-  // Read mode synchronously from the scroll-spy pause check without re-subscribing.
-  const modeRef = useRef(mode);
-  useEffect(() => { modeRef.current = mode; }, [mode]);
-  const [activeSection, setActiveSection] = useState('overview');
+  const { step } = wizard;
   const [activePhase, setActivePhase] = useState(1);
-  const [scrolled, setScrolled] = useState(false);
-  // 0–1 reading-progress fraction, fed to <ProgressBar/>.
-  const [progress, setProgress] = useState(0);
-  // True once the page is scrolled past a viewport — gates <BackToTop/>.
-  const [deepScrolled, setDeepScrolled] = useState(false);
-  // While a click-driven smooth scroll is animating, suppress scroll-spy writes
-  // so the nav highlight doesn't flicker through intermediate sections.
-  const clickScrollLock = useRef(false);
-  const clickScrollTimer = useRef(0);
-  // The sticky nav — measured so jump/snap landings clear it at any width.
+  // The sticky nav — measured so --nav-offset (scroll-margin) clears it at any width.
   const navRef = useRef(null);
   const [editingPhase, setEditingPhase] = useState(null);
   const [draftText, setDraftText] = useState('');
@@ -138,13 +98,8 @@ export default function App() {
   const [toast, setToast] = useState(null);
   // Which tab is active in Part 04 — view state only, not persisted.
   const [composeTab, setComposeTab] = useState('plan'); // 'plan' | 'handout'
-  // Part 01 overview-local selections (independent of the global composer).
-  const [overviewTheme, setOverviewTheme] = useState('identity');
-  const [overviewPhase, setOverviewPhase] = useState(1);
-  // Cross-reference jump history — pushed on jumpTo, popped on back-pill click.
-  const [xrefStack, setXrefStack] = useState([]);
-  // Transient highlight for a jump target (phase id, principle id, or ref group id).
-  const [highlight, setHighlight] = useState(null); // { kind, id }
+  // The manifesto / licence overlay (reachable from the nav and the welcome).
+  const [manifestoOpen, setManifestoOpen] = useState(false);
   // Heavy data modules (examples ~32 KB, handouts ~280 KB) are split out of the
   // initial bundle and fetched on idle so first paint stays light. By the time
   // the user navigates to the compose section they're already resident.
@@ -167,52 +122,6 @@ export default function App() {
     const t = setTimeout(load, 200);
     return () => { cancelled = true; clearTimeout(t); };
   }, []);
-
-  // One rAF-throttled scroll listener drives the nav blur, the progress bar, and
-  // the back-to-top visibility — no duplicate listeners.
-  useEffect(() => {
-    let frame = 0;
-    let ticking = false;
-    const measure = () => {
-      const y = window.scrollY;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      setScrolled(y > 80);
-      setDeepScrolled(y > window.innerHeight);
-      setProgress(max > 0 ? Math.min(1, Math.max(0, y / max)) : 0);
-      ticking = false;
-    };
-    const handler = () => {
-      if (ticking) return;
-      ticking = true;
-      frame = window.requestAnimationFrame(measure);
-    };
-    window.addEventListener('scroll', handler, { passive: true });
-    window.addEventListener('resize', handler, { passive: true });
-    measure();
-    return () => {
-      window.removeEventListener('scroll', handler);
-      window.removeEventListener('resize', handler);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  // Briefly hold the spy off so a click jump isn't overridden mid-animation.
-  const lockScrollSpy = useCallback(() => {
-    clickScrollLock.current = true;
-    if (clickScrollTimer.current) window.clearTimeout(clickScrollTimer.current);
-    clickScrollTimer.current = window.setTimeout(() => {
-      clickScrollLock.current = false;
-    }, 650);
-  }, []);
-
-  // Scroll-spy owns the active section during free scroll; clicks set it eagerly
-  // (below) and pause the spy so the two don't fight.
-  const spyId = useScrollSpy(SECTION_IDS, {
-    isPaused: () => clickScrollLock.current || modeRef.current === 'wizard',
-  });
-  useEffect(() => {
-    if (spyId) setActiveSection(spyId);
-  }, [spyId]);
 
   // Keep --nav-offset in sync with the real nav height (it wraps taller on small
   // screens), so scroll-padding-top offsets every jump/snap landing accurately.
@@ -260,13 +169,6 @@ export default function App() {
     };
   }, []);
 
-  const scrollTo = useCallback((id) => {
-    setActiveSection(id);
-    lockScrollSpy();
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
-  }, [lockScrollSpy]);
-
   const goToPhase = useCallback((id) => {
     setActivePhase(id);
     const el = document.getElementById('phase-timeline');
@@ -288,67 +190,26 @@ export default function App() {
   }, [activePhase]);
 
   // ─── CROSS-REFERENCE JUMPS ───────────────────────────────────────────────
-  const jumpTo = useCallback(({ kind, id, fromLabel, targetGroupId }) => {
-    // In the wizard the long document is hidden step-by-step, so scroll-jumps
-    // don't apply — switch to the relevant step instead.
-    if (modeRef.current === 'wizard') {
-      if (kind === 'phase') {
-        setActivePhase(id);
-        wizard.setStep('activities');
-      } else {
-        wizard.setStep('learn');
-      }
-      return;
-    }
-    lockScrollSpy();
-    setXrefStack((s) => [
-      ...s,
-      { fromLabel, scrollY: window.scrollY, restorePhase: activePhase, restoreTab: composeTab },
-    ]);
+  // The framework is shown one step at a time, so a reference pill switches to
+  // the relevant step rather than scrolling a long document.
+  const wizardRef = useRef(wizard);
+  wizardRef.current = wizard;
+  const jumpTo = useCallback(({ kind, id }) => {
+    if (kind === 'phase') setActivePhase(id);
+    wizardRef.current.setStep(kind === 'phase' ? 'activities' : 'learn');
+  }, []);
 
-    let targetEl = null;
-    if (kind === 'phase') {
-      setActivePhase(id);
-      targetEl = document.getElementById('phase-timeline');
-      setHighlight({ kind: 'phase', id });
-    } else if (kind === 'principle') {
-      targetEl = document.getElementById(`principle-${id}`);
-      setHighlight({ kind: 'principle', id });
-    } else if (kind === 'section') {
-      const groupId = targetGroupId;
-      targetEl = groupId
-        ? document.getElementById(`ref-${groupId}`)
-        : document.getElementById(id);
-      if (groupId) setHighlight({ kind: 'ref', id: groupId });
-    }
-    if (targetEl) targetEl.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
-    if (typeof window !== 'undefined') {
-      window.setTimeout(() => setHighlight(null), 2200);
-    }
-  }, [activePhase, composeTab, lockScrollSpy]);
-
-  const popXref = useCallback(() => {
-    setXrefStack((s) => {
-      if (!s.length) return s;
-      const entry = s[s.length - 1];
-      if (typeof entry.restorePhase === 'number') setActivePhase(entry.restorePhase);
-      if (entry.restoreTab) setComposeTab(entry.restoreTab);
-      lockScrollSpy();
-      window.scrollTo({ top: entry.scrollY, behavior: scrollBehavior() });
-      return s.slice(0, -1);
-    });
-  }, [lockScrollSpy]);
-
-  const xrefValue = useMemo(
-    () => ({ stack: xrefStack, jumpTo, popXref }),
-    [xrefStack, jumpTo, popXref],
-  );
+  const xrefValue = useMemo(() => ({ jumpTo }), [jumpTo]);
 
   // ─── DERIVED STATE ──────────────────────────────────────────────────────
   const level = selections.level;
   const theme = selections.theme;
   const levelData = useMemo(() => LEVELS.find((l) => l.id === level) || null, [level]);
   const themeData = useMemo(() => THEMES.find((t) => t.id === theme) || null, [theme]);
+  const levelEvidence = useMemo(() => getEvidenceForLevel(levelData), [levelData]);
+  // The theme step previews a focused theme (the spiral default) before commit.
+  const themeFocus = useMemo(() => themeData || THEMES.find((t) => t.id === 'identity'), [themeData]);
+  const themeEvidence = useMemo(() => getEvidenceForTheme(themeFocus), [themeFocus]);
   const macroCell = useMemo(() => (level && theme ? MACRO[level]?.[theme] : null), [level, theme]);
   const hasMacro = Boolean(level && theme && macroCell);
 
@@ -397,24 +258,10 @@ export default function App() {
       phaseActivities: { ...s.phaseActivities, [phaseId]: idx },
     }));
 
-  // Picking an activity in the micro template advances the guided flow: record
-  // the choice, then jump up to the phase timeline rail and open the next
-  // phase's activities. On the final phase, head to the composed lesson once
-  // every phase has a selection.
+  // Tapping a card records the choice; the sticky Next button advances the
+  // phase, so a teacher can compare options before moving on.
   const chooseActivity = (phaseId, idx) => {
     setPhaseActivity(phaseId, idx);
-    // In the guided wizard, tapping a card only records the choice — the sticky
-    // Next button advances the phase, so a teacher can compare before moving on.
-    if (modeRef.current === 'wizard') return;
-    if (phaseId < 7) {
-      goToPhase(phaseId + 1);
-    } else {
-      // The Phase 7 choice isn't in state yet (setState is async), so treat the
-      // current phase as picked when checking whether the plan is complete.
-      const allPicked = PHASES.every((p) => p.id === phaseId || hasPhaseSelection(p.id));
-      if (allPicked) scrollTo('compose');
-      else goToPhase(phaseId);
-    }
   };
 
   const startEdit = (phaseId) => {
@@ -470,24 +317,6 @@ export default function App() {
     setTimeout(() => setToast(null), 2200);
   };
 
-  // ─── PART 01 → COMPOSER PRE-SELECT HANDLERS ─────────────────────────────
-  // useCallback so the memoised MacroSpiral / MicroArc components don't
-  // re-render on unrelated parent state changes.
-  const useThemeFromOverview = useCallback((themeId) => {
-    const t = THEMES.find((x) => x.id === themeId);
-    setSelections((s) => ({ ...s, theme: themeId, level: s.level ?? 'B1' }));
-    setToast({ kind: 'ok', label: `${t?.name ?? 'Theme'} set in macro` });
-    setTimeout(() => setToast(null), 2200);
-    scrollTo('macro');
-  }, [setSelections, scrollTo]);
-
-  const usePhaseFromOverview = useCallback((phaseId) => {
-    setActivePhase(phaseId);
-    setToast({ kind: 'ok', label: `Phase ${phaseId} focused in micro` });
-    setTimeout(() => setToast(null), 2200);
-    scrollTo('micro');
-  }, [scrollTo]);
-
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
   const getMarkdown = () => {
     if (!hasMacro) return '';
@@ -513,7 +342,7 @@ export default function App() {
       md += `**${activity.name}**\n\n`;
       md += `**Your task:** ${task}\n\n`;
     });
-    md += `\n---\n*English with Pedro · lesson handout.*\n`;
+    md += `\n---\n*${CREDIT_LINE} (${CREDIT_URL})*\n`;
     return md;
   };
 
@@ -574,22 +403,34 @@ export default function App() {
   const totalMinutes = PHASES.reduce((sum, p) => sum + p.defaultMin, 0);
 
   // ─── GUIDED WIZARD ──────────────────────────────────────────────────────
-  // Toggle a flag on <html> so global scroll-snap is disabled while the wizard
-  // shows one step at a time (snap fights the single-panel view).
+  // Disable global scroll-snap: the wizard shows one step at a time and snap
+  // fights the single-panel view.
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.toggle('lf-wizard-active', mode === 'wizard');
+    html.classList.add('lf-wizard-active');
     return () => html.classList.remove('lf-wizard-active');
-  }, [mode]);
+  }, []);
+
+  // Close the manifesto/licence overlay on Escape, and lock body scroll while open.
+  useEffect(() => {
+    if (!manifestoOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') setManifestoOpen(false); };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [manifestoOpen]);
 
   // On entering a step — or moving between phases within the build step — return
   // to the top so every screen reads from the same, predictable starting point.
   useEffect(() => {
-    if (mode !== 'wizard') return;
     window.scrollTo({ top: 0, behavior: scrollBehavior() });
-  }, [step, mode]);
+  }, [step]);
   useEffect(() => {
-    if (mode !== 'wizard' || step !== 'activities') return;
+    if (step !== 'activities') return;
     window.scrollTo({ top: 0, behavior: scrollBehavior() });
   }, [activePhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -597,7 +438,7 @@ export default function App() {
   // a teacher can accept the recommendation in one tap and tweak only what they
   // want. Fills phases with no existing choice — never overrides a real pick.
   useEffect(() => {
-    if (mode !== 'wizard' || !hasMacro) return;
+    if (!hasMacro) return;
     setSelections((s) => {
       let changed = false;
       const pa = { ...s.phaseActivities };
@@ -609,7 +450,7 @@ export default function App() {
       }
       return changed ? { ...s, phaseActivities: pa } : s;
     });
-  }, [mode, hasMacro, level, theme, setSelections]);
+  }, [hasMacro, level, theme, setSelections]);
 
   // ─── WIZARD NAVIGATION ──────────────────────────────────────────────────
   const startPlanning = () => { wizard.markSeenWelcome(); wizard.setStep('level'); };
@@ -622,8 +463,6 @@ export default function App() {
     wizard.markSeenWelcome();
     wizard.setStep('compose');
   };
-  const enterExplore = () => wizard.setMode('explore');
-  const enterGuided = () => wizard.setMode('wizard');
 
   const goPrevPhase = () => {
     if (activePhase > 1) setActivePhase(activePhase - 1);
@@ -649,7 +488,7 @@ export default function App() {
 
   // Per-step Back/Next config for the sticky bottom bar.
   let navCfg = null;
-  if (mode === 'wizard' && step !== 'welcome') {
+  if (step !== 'welcome') {
     if (step === 'level') {
       navCfg = {
         back: { label: 'Welcome', onClick: () => wizard.setStep('welcome') },
@@ -682,56 +521,26 @@ export default function App() {
     }
   }
 
-  const isWizard = mode === 'wizard';
-
   // ─── RENDER ─────────────────────────────────────────────────────────────
   return (
     <XRefContext.Provider value={xrefValue}>
-      <div
-        className={`lf-root ${isWizard ? 'lf-mode-wizard' : 'lf-mode-explore'}`}
-        data-wstep={isWizard ? step : undefined}
-      >
-        {!isWizard && <ProgressBar progress={progress} />}
+      <div className="lf-root lf-mode-wizard" data-wstep={step}>
         <div className="lf-grain" />
-        {isWizard && (
-          <div className="lf-sr-only" aria-live="polite">{STEP_META[step]?.label}</div>
-        )}
+        <div className="lf-sr-only" aria-live="polite">{STEP_META[step]?.label}</div>
 
         {/* NAV */}
-        <nav
-          ref={navRef}
-          className="lf-nav"
-          style={{
-            background: scrolled ? 'rgba(242, 235, 221, 0.85)' : 'transparent',
-            backdropFilter: scrolled ? 'blur(12px)' : 'none',
-            borderBottom: scrolled ? '1px solid var(--line)' : '1px solid transparent',
-          }}
-        >
+        <nav ref={navRef} className="lf-nav">
           <div className="lf-nav-inner">
             <div className="lf-monogram">EFL Lesson<span>·</span>framework</div>
-            {isWizard ? (
-              <button type="button" className="lf-nav-explore-toggle" onClick={enterExplore}>
-                <Compass size={13} aria-hidden /> Explore the framework
-              </button>
-            ) : (
-              <div className="lf-nav-links">
-                <button type="button" className="lf-nav-link lf-nav-guided" onClick={enterGuided}>
-                  guided mode
-                </button>
-                {NAV_ITEMS.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollTo(item.id)}
-                    className={`lf-nav-link ${activeSection === item.id ? 'active' : ''}`}
-                    aria-current={activeSection === item.id ? 'true' : undefined}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              className="lf-nav-explore-toggle"
+              onClick={() => setManifestoOpen(true)}
+            >
+              <BookOpen size={13} aria-hidden /> Manifesto &amp; licence
+            </button>
           </div>
-          {isWizard && step !== 'welcome' && (
+          {step !== 'welcome' && (
             <WizardStepper
               current={step}
               isComplete={stepIsComplete}
@@ -741,80 +550,11 @@ export default function App() {
           )}
         </nav>
 
-        {isWizard && (
-          <WizardWelcome onStart={startPlanning} onExample={showExample} onExplore={enterExplore} />
-        )}
-
-        {/* HERO */}
-        <header className="lf-hero">
-          <div className="lf-eyebrow">EFLLF · A pedagogical framework for Brazilian EFL</div>
-          <h1>
-            English as a Foreign Language <em>Lesson Framework</em>
-          </h1>
-          <p className="lf-hero-sub">
-            A two-layer framework for planning English lessons in Brazilian EFL contexts. The <strong>macro</strong>
-            layer is a CEFR-anchored grid of six thematic units (A1–C2) paired with informal-input recommendations. The
-            <strong> micro</strong> layer is a seven-phase, 60-minute lesson template grounded in second language
-            acquisition research. Designed for binational centers, language franchises, private tutoring, and self-study.
-          </p>
-          <div className="lf-hero-meta">
-            <div className="lf-hero-meta-item"><div>Levels</div><div>A1 → C2 · CEFR Companion Vol.</div></div>
-            <div className="lf-hero-meta-item"><div>Themes</div><div>Six durable, spiralling domains</div></div>
-            <div className="lf-hero-meta-item"><div>Lesson template</div><div>Seven phases · 60 minutes</div></div>
-            <div className="lf-hero-meta-item"><div>Context</div><div>EFL Brazil · four institutional tracks</div></div>
-          </div>
-        </header>
-
-        {/* PART 1 — OVERVIEW */}
-        <section id="overview" className="lf-section lf-reveal">
-          <div className="lf-section-header">
-            <div className="lf-section-num">01</div>
-            <div className="lf-section-title">
-              <div className="lf-section-kicker">The two layers</div>
-              <h2>Macro <em>and</em> micro structures, woven together.</h2>
-              <p className="lf-section-desc">
-                The framework operates simultaneously at curricular scale (years of study mapped to CEFR) and at lesson
-                scale (60 minutes of structured activity). Each layer answers a different design question. Together they
-                make informal digital input curricular rather than residual.
-              </p>
-            </div>
-          </div>
-
-          <div className="lf-overview">
-            <div className="lf-overview-card">
-              <div className="lf-overview-tag">Macro · curricular scale</div>
-              <h3>Six themes, six levels. <em>Spiralling, not stacking.</em></h3>
-              <p>
-                Each theme deepens through every level. Click a theme to see its rings bloom outward — A1 inner,
-                C2 outer — and read a brief description.
-              </p>
-              <MacroSpiral
-                themes={THEMES}
-                levels={LEVELS}
-                selectedId={overviewTheme}
-                onSelect={setOverviewTheme}
-                onUse={useThemeFromOverview}
-              />
-            </div>
-
-            <div className="lf-overview-card micro">
-              <div className="lf-overview-tag">Micro · lesson scale</div>
-              <h3>Seven phases, sixty minutes. <em>One full hour.</em></h3>
-              <p>
-                A 60-minute lesson curved into a full clock face. Click any stop to see its purpose and SLA grounding; the
-                arc fills wine → gold as the lesson unfolds.
-              </p>
-              <MicroArc
-                phases={PHASES}
-                selectedId={overviewPhase}
-                onSelect={setOverviewPhase}
-                onUse={usePhaseFromOverview}
-              />
-            </div>
-          </div>
-
-          <div className="lf-ornament">❦ ❦ ❦</div>
-        </section>
+        <WizardWelcome
+          onStart={startPlanning}
+          onExample={showExample}
+          onManifesto={() => setManifestoOpen(true)}
+        />
 
         {/* PART 2 — MACRO */}
         <section id="macro" className="lf-section lf-reveal">
@@ -844,26 +584,70 @@ export default function App() {
             ))}
           </div>
 
-          {isWizard && (
-            <div className="lf-wizard-theme-extra">
-              {level && (
-                <div className="lf-wizard-context-chip">
-                  <span>Planning for <strong>{level} · {levelData?.name}</strong></span>
-                  <button type="button" onClick={() => wizard.setStep('level')}>change level</button>
+          {/* LEVEL STEP — what the chosen CEFR level means, with sources */}
+          <div className="lf-wizard-level-extra">
+            {levelData ? (
+              <div className="lf-step-desc">
+                <div className="lf-step-desc-head">
+                  <span className="lf-step-desc-tag">{levelData.label} · {levelData.name}</span>
+                  <span className="lf-step-desc-sub">CEFR descriptor</span>
                 </div>
-              )}
-              <div className="lf-wizard-spiral">
-                <MacroSpiral
-                  themes={THEMES}
-                  levels={LEVELS}
-                  selectedId={theme || 'identity'}
-                  onSelect={setTheme}
-                  onUse={() => {}}
-                  hideUseCta
-                />
+                <p className="lf-step-desc-lead">{levelData.cefrDescriptor}</p>
+                <p className="lf-step-desc-why">
+                  <strong>Planning emphasis · </strong>{levelData.whyThisLevel}
+                </p>
+                {levelEvidence.length > 0 && (
+                  <details className="lf-step-sources">
+                    <summary>Why this level — the research <span aria-hidden>›</span></summary>
+                    <EvidencePanel
+                      items={levelEvidence}
+                      context={`${levelData.label} · ${levelData.name}`}
+                    />
+                  </details>
+                )}
               </div>
+            ) : (
+              <p className="lf-step-desc-empty">
+                Pick a level above to see what it means and the research behind it.
+              </p>
+            )}
+          </div>
+
+          {/* THEME STEP — level context, the spiral, and why this theme */}
+          <div className="lf-wizard-theme-extra">
+            {level && (
+              <div className="lf-wizard-context-chip">
+                <span>Planning for <strong>{level} · {levelData?.name}</strong></span>
+                <button type="button" onClick={() => wizard.setStep('level')}>change level</button>
+              </div>
+            )}
+            <div className="lf-wizard-spiral">
+              <MacroSpiral
+                themes={THEMES}
+                levels={LEVELS}
+                selectedId={theme || 'identity'}
+                onSelect={setTheme}
+                onUse={() => {}}
+                hideUseCta
+              />
             </div>
-          )}
+            <div className="lf-step-desc">
+              <div className="lf-step-desc-head">
+                <span className="lf-step-desc-tag">{themeFocus.num} · {themeFocus.name}</span>
+                <span className="lf-step-desc-sub">{theme ? 'selected theme' : 'preview — tap a theme'}</span>
+              </div>
+              <p className="lf-step-desc-lead">{themeFocus.description}</p>
+              <p className="lf-step-desc-why">
+                <strong>Why this theme · </strong>{themeFocus.rationale}
+              </p>
+              {themeEvidence.length > 0 && (
+                <details className="lf-step-sources">
+                  <summary>Why this theme — the research <span aria-hidden>›</span></summary>
+                  <EvidencePanel items={themeEvidence} context={themeFocus.name} />
+                </details>
+              )}
+            </div>
+          </div>
 
           <div className="lf-macro-grid">
             {THEMES.map((t) => {
@@ -929,10 +713,6 @@ export default function App() {
                   <div className="lf-strand" style={{ flex: levelData.hours.f, background: '#5E4720', color: 'var(--paper)' }}>Fluency · {levelData.hours.f}h</div>
                 </div>
               </div>
-
-              <button className="lf-detail-cta" onClick={() => scrollTo('micro')}>
-                Continue to micro <ArrowDown size={12} />
-              </button>
             </div>
           )}
 
@@ -955,22 +735,17 @@ export default function App() {
             </div>
           </div>
 
-          {isWizard && (
-            <div className="lf-wizard-arc">
-              <MicroArc
-                phases={PHASES}
-                selectedId={activePhase}
-                onSelect={(id) => setActivePhase(id)}
-                onUse={() => {}}
-                hideUseCta
-              />
-            </div>
-          )}
+          <div className="lf-wizard-arc">
+            <MicroArc
+              phases={PHASES}
+              selectedId={activePhase}
+              onSelect={(id) => setActivePhase(id)}
+              onUse={() => {}}
+              hideUseCta
+            />
+          </div>
 
-          <div
-            className={`lf-timeline ${highlight?.kind === 'phase' ? 'is-highlight' : ''}`}
-            id="phase-timeline"
-          >
+          <div className="lf-timeline" id="phase-timeline">
             <div className="lf-timeline-track" ref={timelineTrackRef}>
               {PHASES.map((phase) => {
                 const Icon = phase.icon;
@@ -1071,25 +846,6 @@ export default function App() {
                   items={activeEvidence}
                   context={`Phase ${phaseData.id}: ${phaseData.name} · ${activeActivity?.name || 'Select an activity'}`}
                 />
-
-                {phaseData.id < 7 && (
-                  <button
-                    className="lf-detail-cta"
-                    style={{ marginTop: 24, color: 'var(--wine)', borderColor: 'var(--wine)' }}
-                    onClick={() => goToPhase(phaseData.id + 1)}
-                  >
-                    Next phase <ArrowDown size={12} style={{ transform: 'rotate(-90deg)' }} />
-                  </button>
-                )}
-                {phaseData.id === 7 && allPhasesPicked && (
-                  <button
-                    className="lf-detail-cta"
-                    style={{ marginTop: 24, color: 'var(--wine)', borderColor: 'var(--wine)' }}
-                    onClick={() => scrollTo('compose')}
-                  >
-                    See the composed lesson <ArrowDown size={12} />
-                  </button>
-                )}
               </div>
             )}
           </div>
@@ -1468,7 +1224,7 @@ export default function App() {
                   })}
 
                   <div className="lf-handout-footer">
-                    English with Pedro · lesson handout
+                    {CREDIT_LINE} · {CREDIT_URL.replace('https://', '')}
                   </div>
                 </div>
               )}
@@ -1503,17 +1259,17 @@ export default function App() {
             <h2>The framework <em>rests on</em> three commitments.</h2>
 
             <div className="lf-principles-list">
-              <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 1 ? 'is-highlight' : ''}`} id="principle-1">
+              <div className="lf-principle" id="principle-1">
                 <h4>Informal input is curricular, not residual.</h4>
                 <p>A lesson that ends without an informal-input bridge hasn't closed the loop the framework argues for. Phase 7 is non-optional.</p>
                 <XRefPill kind="section" id="references" label="research · informal input" fromLabel="Principle: informal input" targetGroupId="input" />
               </div>
-              <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 2 ? 'is-highlight' : ''}`} id="principle-2">
+              <div className="lf-principle" id="principle-2">
                 <h4>L1 is a resource, not a contaminant.</h4>
                 <p>Strategic Portuguese in Phases 3 and 6 supports rather than undermines L2 acquisition. Translanguaging is permission, not problem.</p>
                 <XRefPill kind="section" id="references" label="research · translanguaging" fromLabel="Principle: L1 as resource" targetGroupId="translanguaging" />
               </div>
-              <div className={`lf-principle ${highlight?.kind === 'principle' && highlight.id === 3 ? 'is-highlight' : ''}`} id="principle-3">
+              <div className="lf-principle" id="principle-3">
                 <h4>Variability is the norm.</h4>
                 <p>Complex Dynamic Systems Theory tells us learners don't progress linearly through the macro grid. The framework is a spiral, not a staircase.</p>
                 <XRefPill kind="section" id="references" label="research · complex dynamic systems" fromLabel="Principle: variability" targetGroupId="cdst" />
@@ -1539,11 +1295,7 @@ export default function App() {
 
           <div className="lf-references-grid">
             {REFERENCE_GROUPS.map((group) => (
-              <div
-                key={group.id}
-                id={`ref-${group.id}`}
-                className={`lf-ref-group ${highlight?.kind === 'ref' && highlight.id === group.id ? 'is-highlight' : ''}`}
-              >
+              <div key={group.id} id={`ref-${group.id}`} className="lf-ref-group">
                 <div className="lf-ref-group-head">
                   <h3 className="lf-ref-group-name">{group.name}</h3>
                   <div className="lf-ref-group-anchor">
@@ -1581,7 +1333,7 @@ export default function App() {
 
         {/* FOOTER */}
         <footer className="lf-footer">
-          <a className="lf-footer-link" href="#" target="_blank" rel="noopener noreferrer">
+          <a className="lf-footer-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
             <ExternalLink size={12} /> English with Pedro
           </a>
           <a
@@ -1600,12 +1352,23 @@ export default function App() {
           >
             <Github size={12} /> GitHub
           </a>
-          <a className="lf-footer-link" href="mailto:pedrobritx@gmail.com">
-            <Mail size={12} /> pedrobritx@gmail.com
+          <a className="lf-footer-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+            <Coffee size={12} /> Support the project
           </a>
+          <a className="lf-footer-link" href={`mailto:${COMMERCIAL_CONTACT}`}>
+            <Mail size={12} /> {COMMERCIAL_CONTACT}
+          </a>
+          <button
+            type="button"
+            className="lf-footer-link lf-footer-link-btn"
+            onClick={() => setManifestoOpen(true)}
+          >
+            <BookOpen size={12} /> Manifesto &amp; licence
+          </button>
 
           <div className="lf-footer-line">
-            © {new Date().getFullYear()} · Pedro Brito · The EFLL Framework is an open framework.
+            © {new Date().getFullYear()} · Pedro Henrique Bahia Brito · Free for individual &amp; tuition-free use
+            with attribution · Commercial licence required for tuition-charging schools.
           </div>
         </footer>
 
@@ -1615,11 +1378,32 @@ export default function App() {
           </div>
         )}
 
-        {!isWizard && <BackToTop visible={deepScrolled} raised={xrefStack.length > 0} />}
-        {!isWizard && <XRefBackPill />}
-
-        {isWizard && step !== 'welcome' && navCfg && (
+        {step !== 'welcome' && navCfg && (
           <WizardNavBar back={navCfg.back} next={navCfg.next} helper={navCfg.helper} />
+        )}
+
+        {/* MANIFESTO / LICENCE OVERLAY */}
+        {manifestoOpen && (
+          <div
+            className="lf-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Manifesto and licence"
+            onClick={(e) => { if (e.target === e.currentTarget) setManifestoOpen(false); }}
+          >
+            <div className="lf-overlay-panel">
+              <button
+                type="button"
+                className="lf-overlay-close"
+                onClick={() => setManifestoOpen(false)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+              <Manifesto />
+              <LicenseNotice />
+            </div>
+          </div>
         )}
       </div>
     </XRefContext.Provider>

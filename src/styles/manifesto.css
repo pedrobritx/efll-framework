@@ -1,0 +1,295 @@
+/* ─── MANIFESTO / LICENCE OVERLAY ─────────────────────────────────────────
+   A re-openable panel holding the framework's philosophy (folded in from the
+   old overview, with the two-layer diagrams) and the dual-licence summary.
+   Reuses the existing tokens — no new colours or fonts. */
+
+.lf-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(40, 28, 24, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: clamp(16px, 5vw, 64px) var(--space-gutter);
+  animation: lf-overlay-in 0.2s ease;
+}
+@keyframes lf-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.lf-overlay-panel {
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 80px rgba(40, 28, 24, 0.28);
+  padding: clamp(28px, 5vw, 56px);
+}
+.lf-overlay-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lf-overlay-close:hover {
+  color: var(--wine);
+  border-color: var(--wine);
+}
+.lf-overlay-close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ─── MANIFESTO ─── */
+.lf-manifesto-kicker,
+.lf-license-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--wine);
+}
+.lf-manifesto-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(28px, 4.5vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 12px 0 0;
+  max-width: 720px;
+}
+.lf-manifesto-title em {
+  font-style: italic;
+  color: var(--wine);
+}
+.lf-manifesto-lead {
+  font-family: 'Newsreader', serif;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin-top: 18px;
+  max-width: 680px;
+}
+
+.lf-manifesto-layers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 32px 0;
+}
+.lf-manifesto-layer {
+  background: var(--paper-deep);
+  padding: 22px 24px 26px;
+}
+.lf-manifesto-layer-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+}
+.lf-manifesto-layer h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 10px 0 0;
+}
+.lf-manifesto-layer h3 em {
+  font-style: italic;
+  color: var(--wine);
+}
+.lf-manifesto-layer p {
+  font-family: 'Newsreader', serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 10px 0 16px;
+}
+.lf-manifesto-layer .lf-spiral-wrap,
+.lf-manifesto-layer .lf-arc-wrap {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.lf-manifesto-commitments {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 26px 28px;
+  margin: 8px 0 28px;
+}
+.lf-manifesto-commitments-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.lf-manifesto-commitments ul {
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+.lf-manifesto-commitments li {
+  font-family: 'Newsreader', serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(242, 235, 221, 0.82);
+  padding-left: 16px;
+  border-left: 2px solid var(--gold);
+}
+.lf-manifesto-commitments li strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+.lf-manifesto-ethos {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 680px;
+}
+.lf-manifesto-ethos em {
+  font-style: normal;
+  color: var(--wine);
+}
+
+/* ─── LICENCE NOTICE ─── */
+.lf-license {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.lf-license-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(22px, 3.5vw, 30px);
+  color: var(--ink);
+  margin: 10px 0 0;
+}
+.lf-license-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 22px 0;
+}
+.lf-license-card {
+  background: var(--paper-deep);
+  padding: 18px 20px;
+}
+.lf-license-card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--wine);
+  margin-bottom: 10px;
+}
+.lf-license-card p {
+  font-family: 'Newsreader', serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.lf-license-card strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.lf-license-credit {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+.lf-license-credit-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+}
+.lf-license-credit a {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--wine-deep);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lf-license-credit a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lf-license-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-bottom: 18px;
+}
+.lf-license-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.lf-license-link:hover {
+  color: var(--wine);
+}
+.lf-license-disclaimer {
+  font-family: 'Newsreader', serif;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+}
+.lf-license-disclaimer code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--wine);
+}
+
+/* Footer "Manifesto & licence" button reuses the footer-link look. */
+.lf-footer-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .lf-manifesto-layers,
+  .lf-license-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 const STORAGE_KEY = 'lf-wizard';
 
 const defaultWizard = {
-  mode: 'wizard', // 'wizard' | 'explore'
   step: 'welcome',
   seenWelcome: false,
 };
@@ -15,7 +14,10 @@ function loadWizard() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultWizard;
-    return { ...defaultWizard, ...JSON.parse(raw) };
+    // Older builds persisted a `mode` field (the now-removed Explore mode). Drop
+    // it so a stale payload can't reintroduce dead state.
+    const { mode, ...rest } = JSON.parse(raw);
+    return { ...defaultWizard, ...rest };
   } catch {
     return defaultWizard;
   }
@@ -30,18 +32,17 @@ function persistWizard(value) {
 }
 
 /**
- * Owns the guided-wizard view state (current step, mode, first-run flag) with
- * its own localStorage persistence. Step gating/validation stays in App, where
- * the lesson selections live.
+ * Owns the guided-wizard view state (current step, first-run flag) with its own
+ * localStorage persistence. Step gating/validation stays in App, where the
+ * lesson selections live.
  */
 export function useWizard() {
   const [state, setState] = useState(loadWizard);
 
   useEffect(() => persistWizard(state), [state]);
 
-  const setMode = (mode) => setState((s) => ({ ...s, mode }));
   const setStep = (step) => setState((s) => ({ ...s, step }));
   const markSeenWelcome = () => setState((s) => ({ ...s, seenWelcome: true }));
 
-  return { ...state, setMode, setStep, markSeenWelcome };
+  return { ...state, setStep, markSeenWelcome };
 }

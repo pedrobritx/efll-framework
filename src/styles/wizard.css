@@ -65,7 +65,8 @@
 .lf-mode-wizard[data-wstep='level'] .lf-wizard-theme-extra {
   display: none;
 }
-.lf-mode-wizard[data-wstep='theme'] #macro .lf-macro-controls {
+.lf-mode-wizard[data-wstep='theme'] #macro .lf-macro-controls,
+.lf-mode-wizard[data-wstep='theme'] .lf-wizard-level-extra {
   display: none;
 }
 
@@ -89,6 +90,10 @@
 .lf-mode-wizard[data-wstep='learn'] #principles,
 .lf-mode-wizard[data-wstep='learn'] #references {
   display: block;
+}
+/* The end of the journey carries the real footer (credit, support, licence). */
+.lf-mode-wizard[data-wstep='learn'] .lf-footer {
+  display: flex;
 }
 
 /* In-section CTAs and cross-ref jump pills don't fit a hidden, step-by-step
@@ -128,9 +133,6 @@
 .lf-nav-explore-toggle:hover {
   color: var(--wine);
   border-color: var(--wine);
-}
-.lf-nav-guided {
-  color: var(--wine) !important;
 }
 
 /* ─── STEPPER ─── */
@@ -392,9 +394,26 @@
   gap: 12px;
   margin-top: 32px;
 }
-.lf-welcome-explore {
-  margin-top: 22px;
-  align-self: flex-start;
+/* ─── WELCOME · concise manifesto + credit foot ─── */
+.lf-welcome-manifesto {
+  margin-top: 40px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+.lf-welcome-manifesto-lead {
+  font-family: 'Newsreader', serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 640px;
+}
+.lf-welcome-manifesto-lead strong {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  color: var(--ink);
+}
+.lf-welcome-manifesto-link {
+  margin-top: 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -402,7 +421,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-mute);
+  color: var(--wine);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -410,9 +429,30 @@
   border-bottom: 1px solid transparent;
   transition: all 0.2s;
 }
-.lf-welcome-explore:hover {
-  color: var(--wine);
+.lf-welcome-manifesto-link:hover {
   border-bottom-color: var(--wine);
+}
+.lf-welcome-foot {
+  margin-top: 34px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+.lf-welcome-foot-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.lf-welcome-foot-link:hover {
+  color: var(--wine);
 }
 @media (max-width: 640px) {
   .lf-welcome-steps {
@@ -464,12 +504,105 @@
   margin: 0 auto 4px;
 }
 
+/* ─── STEP DESCRIPTION + EXPANDABLE SOURCES (level / theme) ─── */
+.lf-wizard-level-extra {
+  margin: 4px 0 28px;
+}
+.lf-step-desc {
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--wine);
+  padding: 18px 22px;
+  margin-top: 16px;
+}
+.lf-wizard-level-extra .lf-step-desc {
+  margin-top: 0;
+}
+.lf-step-desc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.lf-step-desc-tag {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 19px;
+  color: var(--wine-deep);
+}
+.lf-step-desc-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+}
+.lf-step-desc-lead {
+  font-family: 'Newsreader', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.lf-step-desc-why {
+  font-family: 'Newsreader', serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: 10px;
+}
+.lf-step-desc-why strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--wine);
+}
+.lf-step-desc-empty {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-mute);
+  padding: 8px 2px;
+}
+.lf-step-sources {
+  margin-top: 14px;
+  border-top: 1px dotted var(--line);
+  padding-top: 12px;
+}
+.lf-step-sources > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--wine);
+  padding: 4px 0;
+}
+.lf-step-sources > summary::-webkit-details-marker {
+  display: none;
+}
+.lf-step-sources > summary span {
+  transition: transform 0.2s;
+}
+.lf-step-sources[open] > summary span {
+  transform: rotate(90deg);
+}
+.lf-step-sources .lf-evidence-panel {
+  margin-top: 12px;
+}
+
 /* ─── FOCUS-VISIBLE for new controls ─── */
 .lf-wizard-step-node button:focus-visible,
 .lf-wizard-back:focus-visible,
 .lf-wizard-next:focus-visible,
 .lf-nav-explore-toggle:focus-visible,
-.lf-welcome-explore:focus-visible,
+.lf-welcome-manifesto-link:focus-visible,
+.lf-welcome-foot-link:focus-visible,
 .lf-wizard-context-chip button:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

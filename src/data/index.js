@@ -7,4 +7,9 @@ export { LEVELS } from './levels.js';
 export { MACRO } from './macro.js';
 export { PHASES, DEFAULT_PHASE_MINUTES } from './phases.js';
 export { REFERENCE_GROUPS } from './references.js';
-export { EVIDENCE_ITEMS, getEvidenceForSelection } from './evidence.js';
+export {
+  EVIDENCE_ITEMS,
+  getEvidenceForSelection,
+  getEvidenceForLevel,
+  getEvidenceForTheme,
+} from './evidence.js';

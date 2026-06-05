@@ -1,10 +1,12 @@
 import React from 'react';
-import { ArrowRight, Eye, Compass } from 'lucide-react';
+import { ArrowRight, Eye, BookOpen, Coffee, ExternalLink } from 'lucide-react';
+import { CREDIT_LINE, CREDIT_URL, SUPPORT_URL } from '../data/credit.js';
 
 // First-run orientation. A calm editorial welcome — reusing hero typography —
 // that tells a teacher what the tool does and gives one obvious way to begin,
 // plus an instant "show me an example" so newcomers see the output immediately.
-function WizardWelcome({ onStart, onExample, onExplore }) {
+// A concise manifesto sits below; the full version opens via onManifesto.
+function WizardWelcome({ onStart, onExample, onManifesto }) {
   const STEPS = [
     { n: '1', label: 'Level', sub: 'A1 – C2' },
     { n: '2', label: 'Theme', sub: 'six units' },
@@ -44,9 +46,27 @@ function WizardWelcome({ onStart, onExample, onExplore }) {
         </button>
       </div>
 
-      <button type="button" className="lf-welcome-explore" onClick={onExplore}>
-        <Compass size={13} aria-hidden /> Just exploring? Browse the full framework
-      </button>
+      {/* Concise manifesto — the full version (with the two-layer diagrams and
+          the licence) opens in an overlay via onManifesto. */}
+      <div className="lf-welcome-manifesto">
+        <p className="lf-welcome-manifesto-lead">
+          <strong>Well-structured lessons, built from accurate, well-sourced research.</strong>{' '}
+          A two-layer framework — a CEFR-anchored macro grid and a seven-phase micro lesson — where
+          every level, theme, and activity is tied to a citation you can trace.
+        </p>
+        <button type="button" className="lf-welcome-manifesto-link" onClick={onManifesto}>
+          <BookOpen size={13} aria-hidden /> Read the manifesto &amp; licence
+        </button>
+      </div>
+
+      <div className="lf-welcome-foot">
+        <a className="lf-welcome-foot-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
+          {CREDIT_LINE} <ExternalLink size={11} aria-hidden />
+        </a>
+        <a className="lf-welcome-foot-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+          <Coffee size={12} aria-hidden /> Support the project
+        </a>
+      </div>
     </div>
   );
 }

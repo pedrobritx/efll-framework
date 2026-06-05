@@ -1,9 +1,20 @@
 /* ─── PRINT STYLESHEET ─── */
 @media print {
-  @page { size: A4; margin: 16mm 14mm; }
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+    /* Per-page attribution watermark (Chromium honours margin boxes; other
+       engines ignore them and fall back to the end-of-document footers below). */
+    @bottom-center {
+      content: "Created with EFL Lesson Framework — by pedrobritx";
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.5pt;
+      color: #8a6d3b;
+    }
+  }
   html, body, .lf-root { background: var(--paper) !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .lf-nav, .lf-grain, .lf-hero, #overview, #macro, #micro, #references, .lf-principles, .lf-footer, .lf-section-header, .lf-compose-tabs, .lf-compose-actions-bar, .lf-compose-example-actions, .lf-compose-activity-swap-wrap, .lf-compose-xrefs, .lf-phase-xrefs, .lf-xref-pill, .lf-xref-back-pill, .lf-handout-task-actions, .lf-ornament, .lf-toast, .lf-progress, .lf-backtotop { display: none !important; }
+  .lf-nav, .lf-grain, .lf-hero, #macro, #micro, #references, .lf-principles, .lf-footer, .lf-section-header, .lf-compose-tabs, .lf-compose-actions-bar, .lf-compose-example-actions, .lf-compose-activity-swap-wrap, .lf-compose-xrefs, .lf-phase-xrefs, .lf-xref-pill, .lf-xref-back-pill, .lf-handout-task-actions, .lf-ornament, .lf-toast, .lf-progress, .lf-backtotop, .lf-wizard-navbar, .lf-overlay { display: none !important; }
   body.lf-print-handout .lf-compose-context { display: none !important; }
   .lf-handout { background: var(--paper) !important; border: none !important; padding: 0 !important; }
   .lf-handout-header { padding-bottom: 14px !important; margin-bottom: 18px !important; }
@@ -55,5 +66,5 @@
   .lf-compose-evidence-item strong { font-size: 9pt !important; color: var(--ink) !important; margin-right: 6px !important; }
   .lf-compose-evidence-item span { font-size: 7.5pt !important; color: var(--wine) !important; }
   .lf-compose-evidence-item p { font-size: 8.5pt !important; color: var(--ink-soft) !important; line-height: 1.35 !important; margin-top: 2px !important; }
-  .lf-compose-plan::after { content: "Generated with the English with Pedro lesson framework."; display: block; margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-size: 9.5pt; color: var(--wine); text-align: center; }
+  .lf-compose-plan::after { content: "Created with EFL Lesson Framework — by pedrobritx · pedrobritx.github.io/EwP"; display: block; margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-size: 9.5pt; color: var(--wine); text-align: center; }
 }
