@@ -1,4 +1,4 @@
-// SLA reference groups for the references section of the EFLL Framework.
+// SLA reference groups for the references section of the EFL Lesson Framework.
 // Each entry: { authors, year, title, venue?, anchors[] (where the construct shows up in the framework) }.
 // Anchor kinds: 'phase' (id 1–7), 'principle' (id 1–3), 'section' (id matches DOM section id),
 // 'level' (CEFR id A1–C2), 'theme' (theme id). The inverted index below is generic over kind.

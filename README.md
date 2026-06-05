@@ -95,7 +95,7 @@ Requires Node 20+.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/efll-framework/
+npm run dev      # http://localhost:5173/efl-lesson-framework/
 npm run build    # production bundle in dist/
 npm run preview  # preview the production build
 ```
@@ -106,10 +106,10 @@ current step persists under `lf-wizard`. Clear selections with **Reset** at the 
 
 ## Deploy to GitHub Pages
 
-1. The repo name must match the `base` path in `vite.config.js` (`/efll-framework/`).
+1. The repo name must match the `base` path in `vite.config.js` (`/efl-lesson-framework/`).
 2. In **Settings → Pages**, set **Source** to **GitHub Actions** (one-time).
 3. `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
-4. Site URL: `https://<username>.github.io/efll-framework/`.
+4. Site URL: `https://<username>.github.io/efl-lesson-framework/`.
 
 ## Project structure
 
