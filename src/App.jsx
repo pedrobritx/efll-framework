@@ -7,6 +7,7 @@ import {
   Coffee,
   Copy,
   ExternalLink,
+  FlaskConical,
   Github,
   Linkedin,
   Mail,
@@ -40,6 +41,8 @@ import MicroArc from './components/MicroArc.jsx';
 import WizardStepper from './components/WizardStepper.jsx';
 import WizardNavBar from './components/WizardNavBar.jsx';
 import WizardWelcome from './components/WizardWelcome.jsx';
+import Modal from './components/Modal.jsx';
+import { ModalContext } from './context/modal.js';
 
 // ── Cross-reference plumbing ──────────────────────────────────────────────
 // Lets a reference pill jump to the concept's wizard step.
@@ -83,6 +86,42 @@ function XRefPill({ kind, id, label, fromLabel, targetGroupId }) {
   );
 }
 
+// The body of a reference-group modal: its jump-to anchors and full bibliography.
+// Rendered inside the modal opened from the references cards.
+function ReferenceGroupBody({ group }) {
+  return (
+    <div className="lf-ref-modal">
+      {group.anchors?.length > 0 && (
+        <div className="lf-ref-group-anchor">
+          <span className="lf-ref-group-anchor-label">Jump to ·</span>
+          {group.anchors.map((a, i) => (
+            <XRefPill
+              key={`${a.kind}-${a.id}-${i}`}
+              kind={a.kind}
+              id={a.id}
+              label={anchorLabel(a)}
+              fromLabel={group.name}
+            />
+          ))}
+        </div>
+      )}
+      <ul className="lf-ref-list">
+        {group.items.map((item, i) => (
+          <li key={i} className="lf-ref-item">
+            <div className="lf-ref-citation">
+              <span className="lf-ref-author">{item.authors}</span>
+              <span className="lf-ref-year"> ({item.year}).</span>{' '}
+              <em className="lf-ref-title">{item.title}</em>
+              {item.venue && <span className="lf-ref-venue">. {item.venue}.</span>}
+            </div>
+            <div className="lf-ref-note">{item.note}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function App() {
   const [selections, setSelections, defaultSelections] = useSelections();
   const wizard = useWizard();
@@ -97,6 +136,8 @@ export default function App() {
   const [toast, setToast] = useState(null);
   // Which tab is active in Part 04 — view state only, not persisted.
   const [composeTab, setComposeTab] = useState('plan'); // 'plan' | 'handout'
+  // The single app-wide dialog: { node, title } or null.
+  const [modal, setModal] = useState(null);
   // Heavy data modules (examples ~32 KB, handouts ~280 KB) are split out of the
   // initial bundle and fetched on idle so first paint stays light. By the time
   // the user navigates to the compose section they're already resident.
@@ -192,11 +233,16 @@ export default function App() {
   const wizardRef = useRef(wizard);
   wizardRef.current = wizard;
   const jumpTo = useCallback(({ kind, id }) => {
+    setModal(null); // a jump navigates away — close any open dialog first
     if (kind === 'phase') setActivePhase(id);
     wizardRef.current.setStep(kind === 'phase' ? 'activities' : 'learn');
   }, []);
 
   const xrefValue = useMemo(() => ({ jumpTo }), [jumpTo]);
+
+  // ─── MODAL ───────────────────────────────────────────────────────────────
+  const openModal = useCallback((node, opts) => setModal({ node, title: opts?.title }), []);
+  const closeModal = useCallback(() => setModal(null), []);
 
   // ─── DERIVED STATE ──────────────────────────────────────────────────────
   const level = selections.level;
@@ -507,6 +553,7 @@ export default function App() {
 
   // ─── RENDER ─────────────────────────────────────────────────────────────
   return (
+    <ModalContext.Provider value={openModal}>
     <XRefContext.Provider value={xrefValue}>
       <div className="lf-root lf-mode-wizard" data-wstep={step}>
         <div className="lf-grain" />
@@ -523,6 +570,13 @@ export default function App() {
                 onClick={goToManifesto}
               >
                 <BookOpen size={13} aria-hidden /> Manifesto &amp; licence
+              </button>
+              <button
+                type="button"
+                className="lf-nav-explore-toggle"
+                onClick={() => wizard.setStep('learn')}
+              >
+                <FlaskConical size={13} aria-hidden /> Research
               </button>
               {step === 'welcome' && (
                 <button
@@ -588,13 +642,19 @@ export default function App() {
                   <strong>Planning emphasis · </strong>{levelData.whyThisLevel}
                 </p>
                 {levelEvidence.length > 0 && (
-                  <details className="lf-step-sources">
-                    <summary>Why this level — the research <span aria-hidden>›</span></summary>
-                    <EvidencePanel
-                      items={levelEvidence}
-                      context={`${levelData.label} · ${levelData.name}`}
-                    />
-                  </details>
+                  <button
+                    type="button"
+                    className="lf-sources-btn"
+                    onClick={() => openModal(
+                      <EvidencePanel
+                        items={levelEvidence}
+                        context={`${levelData.label} · ${levelData.name}`}
+                      />,
+                      { title: `Why this level — ${levelData.label} · ${levelData.name}` },
+                    )}
+                  >
+                    <BookOpen size={13} aria-hidden /> Why this level — {levelEvidence.length} source{levelEvidence.length === 1 ? '' : 's'}
+                  </button>
                 )}
               </div>
             ) : (
@@ -632,10 +692,16 @@ export default function App() {
                 <strong>Why this theme · </strong>{themeFocus.rationale}
               </p>
               {themeEvidence.length > 0 && (
-                <details className="lf-step-sources">
-                  <summary>Why this theme — the research <span aria-hidden>›</span></summary>
-                  <EvidencePanel items={themeEvidence} context={themeFocus.name} />
-                </details>
+                <button
+                  type="button"
+                  className="lf-sources-btn"
+                  onClick={() => openModal(
+                    <EvidencePanel items={themeEvidence} context={themeFocus.name} />,
+                    { title: `Why this theme — ${themeFocus.name}` },
+                  )}
+                >
+                  <BookOpen size={13} aria-hidden /> Why this theme — {themeEvidence.length} source{themeEvidence.length === 1 ? '' : 's'}
+                </button>
               )}
             </div>
           </div>
@@ -1066,6 +1132,22 @@ export default function App() {
                             }
                           />
 
+                          {evidenceItems.length > 0 && (
+                            <button
+                              type="button"
+                              className="lf-sources-btn"
+                              onClick={() => openModal(
+                                <EvidencePanel
+                                  items={evidenceItems}
+                                  context={`Phase ${phase.id} · ${phase.name}`}
+                                />,
+                                { title: `Why this works — Phase ${phase.id} · ${phase.name}` },
+                              )}
+                            >
+                              <BookOpen size={13} aria-hidden /> See all {evidenceItems.length} source{evidenceItems.length === 1 ? '' : 's'}
+                            </button>
+                          )}
+
                           <div className="lf-compose-xrefs">
                             <span className="lf-compose-xrefs-label">Trace ·</span>
                             <XRefPill
@@ -1277,45 +1359,27 @@ export default function App() {
               <div className="lf-section-kicker">The research</div>
               <h2>Where each move <em>comes from.</em></h2>
               <p className="lf-section-desc">
-                Each phase in the micro lesson is grounded in second language acquisition principles. Click an
-                author or key term in this panel to jump to the bibliography, where you can trace the research
-                and see exactly where it shows up in the EFL Lesson Framework.
+                Each phase in the micro lesson is grounded in second language acquisition principles. Open a
+                topic to read its bibliography and trace exactly where the research shows up in the EFL Lesson
+                Framework.
               </p>
             </div>
           </div>
 
           <div className="lf-references-grid">
             {REFERENCE_GROUPS.map((group) => (
-              <div key={group.id} id={`ref-${group.id}`} className="lf-ref-group">
-                <div className="lf-ref-group-head">
-                  <h3 className="lf-ref-group-name">{group.name}</h3>
-                  <div className="lf-ref-group-anchor">
-                    <span className="lf-ref-group-anchor-label">Jump to ·</span>
-                    {group.anchors.map((a, i) => (
-                      <XRefPill
-                        key={`${a.kind}-${a.id}-${i}`}
-                        kind={a.kind}
-                        id={a.id}
-                        label={anchorLabel(a)}
-                        fromLabel={group.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <ul className="lf-ref-list">
-                  {group.items.map((item, i) => (
-                    <li key={i} className="lf-ref-item">
-                      <div className="lf-ref-citation">
-                        <span className="lf-ref-author">{item.authors}</span>
-                        <span className="lf-ref-year"> ({item.year}).</span>{' '}
-                        <em className="lf-ref-title">{item.title}</em>
-                        {item.venue && <span className="lf-ref-venue">. {item.venue}.</span>}
-                      </div>
-                      <div className="lf-ref-note">{item.note}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <button
+                key={group.id}
+                type="button"
+                className="lf-ref-card"
+                onClick={() => openModal(<ReferenceGroupBody group={group} />, { title: group.name })}
+              >
+                <span className="lf-ref-card-name">{group.name}</span>
+                <span className="lf-ref-card-meta">
+                  {group.items.length} reference{group.items.length === 1 ? '' : 's'}
+                  <ArrowUpRight size={14} aria-hidden />
+                </span>
+              </button>
             ))}
           </div>
 
@@ -1324,38 +1388,40 @@ export default function App() {
 
         {/* FOOTER */}
         <footer className="lf-footer">
-          <a className="lf-footer-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
-            <ExternalLink size={12} /> English with Pedro
-          </a>
-          <a
-            className="lf-footer-link"
-            href="https://www.linkedin.com/in/pedrobritx/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Linkedin size={12} /> LinkedIn
-          </a>
-          <a
-            className="lf-footer-link"
-            href="https://github.com/pedrobritx"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Github size={12} /> GitHub
-          </a>
-          <a className="lf-footer-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-            <Coffee size={12} /> Support the project
-          </a>
-          <a className="lf-footer-link" href={`mailto:${COMMERCIAL_CONTACT}`}>
-            <Mail size={12} /> {COMMERCIAL_CONTACT}
-          </a>
-          <button
-            type="button"
-            className="lf-footer-link lf-footer-link-btn"
-            onClick={goToManifesto}
-          >
-            <BookOpen size={12} /> Manifesto &amp; licence
-          </button>
+          <div className="lf-footer-links">
+            <a className="lf-footer-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
+              <ExternalLink size={12} /> English with Pedro
+            </a>
+            <a
+              className="lf-footer-link"
+              href="https://www.linkedin.com/in/pedrobritx/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Linkedin size={12} /> LinkedIn
+            </a>
+            <a
+              className="lf-footer-link"
+              href="https://github.com/pedrobritx"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github size={12} /> GitHub
+            </a>
+            <a className="lf-footer-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+              <Coffee size={12} /> Support the project
+            </a>
+            <a className="lf-footer-link" href={`mailto:${COMMERCIAL_CONTACT}`}>
+              <Mail size={12} /> {COMMERCIAL_CONTACT}
+            </a>
+            <button
+              type="button"
+              className="lf-footer-link lf-footer-link-btn"
+              onClick={goToManifesto}
+            >
+              <BookOpen size={12} /> Manifesto &amp; licence
+            </button>
+          </div>
 
           <div className="lf-footer-line">
             © {new Date().getFullYear()} · Pedro Henrique Bahia Brito · Free for individual &amp; tuition-free use
@@ -1372,7 +1438,12 @@ export default function App() {
         {step !== 'welcome' && navCfg && (
           <WizardNavBar back={navCfg.back} next={navCfg.next} helper={navCfg.helper} />
         )}
+
+        <Modal open={!!modal} title={modal?.title} onClose={closeModal}>
+          {modal?.node}
+        </Modal>
       </div>
     </XRefContext.Provider>
+    </ModalContext.Provider>
   );
 }

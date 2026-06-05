@@ -5,7 +5,7 @@ const portEnv = process.env.PORT ? Number(process.env.PORT) : undefined;
 
 export default defineConfig({
   plugins: [react()],
-  base: '/efll-framework/',
+  base: '/efl-lesson-framework/',
   server: portEnv ? { port: portEnv, strictPort: true } : undefined,
   build: {
     outDir: 'dist',

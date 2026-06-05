@@ -1,4 +1,4 @@
-/* ─── EFLL Framework — Styles Index ─── */
+/* ─── EFL Lesson Framework — Styles Index ─── */
 /* All CSS partials are imported here in dependency order. */
 
 @import './tokens.css';
@@ -17,4 +17,5 @@
 @import './ui.css';
 @import './wizard.css';
 @import './manifesto.css';
+@import './modal.css';
 @import './print.css';

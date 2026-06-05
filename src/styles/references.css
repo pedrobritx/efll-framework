@@ -1,6 +1,16 @@
 /* ─── REFERENCES (Part 05) ─── */
-.lf-references-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 32px; }
-@media (max-width: 700px) { .lf-references-grid { grid-template-columns: 1fr; } }
+/* Compact topic cards; each opens its full bibliography in a modal. */
+.lf-references-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 32px; }
+@media (max-width: 560px) { .lf-references-grid { grid-template-columns: 1fr; } }
+.lf-ref-card { background: var(--paper-deep); padding: 22px 22px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left; border: none; cursor: pointer; font: inherit; transition: background 0.18s, box-shadow 0.18s; }
+.lf-ref-card:hover { background: var(--paper); box-shadow: inset 0 0 0 1px var(--gold-soft); }
+.lf-ref-card:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.lf-ref-card-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 20px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15; }
+.lf-ref-card-meta { display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--wine); }
+
+/* Bibliography body inside the reference modal. */
+.lf-ref-modal .lf-ref-group-anchor { margin-bottom: 18px; }
+.lf-ref-modal .lf-ref-group-anchor-label { margin-right: 6px; }
 .lf-ref-group { background: var(--paper-deep); padding: 32px 28px; display: flex; flex-direction: column; gap: 18px; }
 .lf-ref-group-head { display: flex; flex-direction: column; gap: 6px; }
 .lf-ref-group-name { font-family: 'Fraunces', serif; font-weight: 500; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15; }

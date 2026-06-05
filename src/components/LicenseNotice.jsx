@@ -1,6 +1,7 @@
 import React from 'react';
-import { Coffee, Mail, ExternalLink } from 'lucide-react';
-import { CREDIT_LINE, CREDIT_URL, COMMERCIAL_CONTACT, SUPPORT_URL } from '../data/credit.js';
+import { Mail, ExternalLink, Download } from 'lucide-react';
+import { CREDIT_LINE, CREDIT_URL, COMMERCIAL_CONTACT } from '../data/credit.js';
+import { downloadCreditImage } from '../utils/creditImage.js';
 
 // In-app summary of the dual licence. Free for individuals and tuition-free
 // institutions with attribution; tuition-charging private schools need a paid
@@ -35,14 +36,14 @@ function LicenseNotice() {
         <a href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
           {CREDIT_LINE} <ExternalLink size={11} aria-hidden />
         </a>
+        <button type="button" className="lf-license-credit-dl" onClick={downloadCreditImage}>
+          <Download size={13} aria-hidden /> Download credit image (PNG)
+        </button>
       </div>
 
       <div className="lf-license-links">
         <a className="lf-license-link" href={`mailto:${COMMERCIAL_CONTACT}`}>
           <Mail size={13} aria-hidden /> {COMMERCIAL_CONTACT} · commercial licensing
-        </a>
-        <a className="lf-license-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
-          <Coffee size={13} aria-hidden /> Support the project
         </a>
       </div>
 
