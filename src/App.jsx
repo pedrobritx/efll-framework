@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from 'react';
 import {
+  ArrowRight,
   ArrowUpRight,
   BookOpen,
   Check,
@@ -39,8 +40,6 @@ import MicroArc from './components/MicroArc.jsx';
 import WizardStepper from './components/WizardStepper.jsx';
 import WizardNavBar from './components/WizardNavBar.jsx';
 import WizardWelcome from './components/WizardWelcome.jsx';
-import Manifesto from './components/Manifesto.jsx';
-import LicenseNotice from './components/LicenseNotice.jsx';
 
 // ── Cross-reference plumbing ──────────────────────────────────────────────
 // Lets a reference pill jump to the concept's wizard step.
@@ -98,8 +97,6 @@ export default function App() {
   const [toast, setToast] = useState(null);
   // Which tab is active in Part 04 — view state only, not persisted.
   const [composeTab, setComposeTab] = useState('plan'); // 'plan' | 'handout'
-  // The manifesto / licence overlay (reachable from the nav and the welcome).
-  const [manifestoOpen, setManifestoOpen] = useState(false);
   // Heavy data modules (examples ~32 KB, handouts ~280 KB) are split out of the
   // initial bundle and fetched on idle so first paint stays light. By the time
   // the user navigates to the compose section they're already resident.
@@ -411,19 +408,6 @@ export default function App() {
     return () => html.classList.remove('lf-wizard-active');
   }, []);
 
-  // Close the manifesto/licence overlay on Escape, and lock body scroll while open.
-  useEffect(() => {
-    if (!manifestoOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') setManifestoOpen(false); };
-    window.addEventListener('keydown', onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [manifestoOpen]);
-
   // On entering a step — or moving between phases within the build step — return
   // to the top so every screen reads from the same, predictable starting point.
   useEffect(() => {
@@ -454,15 +438,15 @@ export default function App() {
 
   // ─── WIZARD NAVIGATION ──────────────────────────────────────────────────
   const startPlanning = () => { wizard.markSeenWelcome(); wizard.setStep('level'); };
-  const showExample = () => {
-    setSelections((s) => {
-      const pa = { ...s.phaseActivities };
-      PHASES.forEach((p) => { pa[p.id] = defaultActivityIdxFor(p, 'B1'); });
-      return { ...s, level: 'B1', theme: 'media', phaseActivities: pa };
+  // The manifesto + licence live inline on the homepage. From the nav or footer,
+  // return to the homepage if needed, then scroll the inline section into view.
+  const goToManifesto = useCallback(() => {
+    if (step !== 'welcome') wizard.setStep('welcome');
+    requestAnimationFrame(() => {
+      document.getElementById('lf-home-manifesto')
+        ?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
     });
-    wizard.markSeenWelcome();
-    wizard.setStep('compose');
-  };
+  }, [step, wizard]);
 
   const goPrevPhase = () => {
     if (activePhase > 1) setActivePhase(activePhase - 1);
@@ -532,13 +516,24 @@ export default function App() {
         <nav ref={navRef} className="lf-nav">
           <div className="lf-nav-inner">
             <div className="lf-monogram">EFL Lesson<span>·</span>framework</div>
-            <button
-              type="button"
-              className="lf-nav-explore-toggle"
-              onClick={() => setManifestoOpen(true)}
-            >
-              <BookOpen size={13} aria-hidden /> Manifesto &amp; licence
-            </button>
+            <div className="lf-nav-actions">
+              <button
+                type="button"
+                className="lf-nav-explore-toggle"
+                onClick={goToManifesto}
+              >
+                <BookOpen size={13} aria-hidden /> Manifesto &amp; licence
+              </button>
+              {step === 'welcome' && (
+                <button
+                  type="button"
+                  className="lf-nav-cta"
+                  onClick={startPlanning}
+                >
+                  Start planning <ArrowRight size={14} aria-hidden />
+                </button>
+              )}
+            </div>
           </div>
           {step !== 'welcome' && (
             <WizardStepper
@@ -550,11 +545,7 @@ export default function App() {
           )}
         </nav>
 
-        <WizardWelcome
-          onStart={startPlanning}
-          onExample={showExample}
-          onManifesto={() => setManifestoOpen(true)}
-        />
+        <WizardWelcome />
 
         {/* PART 2 — MACRO */}
         <section id="macro" className="lf-section lf-reveal">
@@ -1361,7 +1352,7 @@ export default function App() {
           <button
             type="button"
             className="lf-footer-link lf-footer-link-btn"
-            onClick={() => setManifestoOpen(true)}
+            onClick={goToManifesto}
           >
             <BookOpen size={12} /> Manifesto &amp; licence
           </button>
@@ -1380,30 +1371,6 @@ export default function App() {
 
         {step !== 'welcome' && navCfg && (
           <WizardNavBar back={navCfg.back} next={navCfg.next} helper={navCfg.helper} />
-        )}
-
-        {/* MANIFESTO / LICENCE OVERLAY */}
-        {manifestoOpen && (
-          <div
-            className="lf-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Manifesto and licence"
-            onClick={(e) => { if (e.target === e.currentTarget) setManifestoOpen(false); }}
-          >
-            <div className="lf-overlay-panel">
-              <button
-                type="button"
-                className="lf-overlay-close"
-                onClick={() => setManifestoOpen(false)}
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
-              <Manifesto />
-              <LicenseNotice />
-            </div>
-          </div>
         )}
       </div>
     </XRefContext.Provider>

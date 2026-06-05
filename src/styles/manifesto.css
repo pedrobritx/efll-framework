@@ -1,57 +1,7 @@
-/* ─── MANIFESTO / LICENCE OVERLAY ─────────────────────────────────────────
-   A re-openable panel holding the framework's philosophy (folded in from the
-   old overview, with the two-layer diagrams) and the dual-licence summary.
-   Reuses the existing tokens — no new colours or fonts. */
-
-.lf-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  background: rgba(40, 28, 24, 0.55);
-  backdrop-filter: blur(4px);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow-y: auto;
-  padding: clamp(16px, 5vw, 64px) var(--space-gutter);
-  animation: lf-overlay-in 0.2s ease;
-}
-@keyframes lf-overlay-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.lf-overlay-panel {
-  position: relative;
-  width: 100%;
-  max-width: 920px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  box-shadow: 0 24px 80px rgba(40, 28, 24, 0.28);
-  padding: clamp(28px, 5vw, 56px);
-}
-.lf-overlay-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--paper-deep);
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.lf-overlay-close:hover {
-  color: var(--wine);
-  border-color: var(--wine);
-}
-.lf-overlay-close:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
+/* ─── MANIFESTO / LICENCE ─────────────────────────────────────────────────
+   The framework's philosophy (folded in from the old overview, with the
+   two-layer diagrams) and the dual-licence summary, rendered inline on the
+   homepage. Reuses the existing tokens — no new colours or fonts. */
 
 /* ─── MANIFESTO ─── */
 .lf-manifesto-kicker,
