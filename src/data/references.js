@@ -1,6 +1,7 @@
 // SLA reference groups for the references section of the EFLL Framework.
 // Each entry: { authors, year, title, venue?, anchors[] (where the construct shows up in the framework) }.
-// Anchor kinds: 'phase' (id 1–7), 'principle' (id 1–3), 'section' (id matches DOM section id).
+// Anchor kinds: 'phase' (id 1–7), 'principle' (id 1–3), 'section' (id matches DOM section id),
+// 'level' (CEFR id A1–C2), 'theme' (theme id). The inverted index below is generic over kind.
 
 export const REFERENCE_GROUPS = [
   {
@@ -133,7 +134,7 @@ export const REFERENCE_GROUPS = [
         authors: 'Darvin, R., & Norton, B.',
         year: 2015,
         title: 'Identity and a model of investment in applied linguistics',
-        venue: 'Annual Review of Applied Linguistics, 35, 64–84',
+        venue: 'Annual Review of Applied Linguistics, 35, 36–56',
         note: 'Digital-age investment model; justifies tying classroom work to learners’ online lives.',
       },
       {
@@ -327,6 +328,91 @@ export const REFERENCE_GROUPS = [
         title: 'Meta-analysis to estimate the relative effectiveness of TBLT programs',
         venue: 'Language Teaching Research (online first)',
         note: 'Cautions against labelling exercises as tasks; precision matters in Phase 5 design.',
+      },
+    ],
+  },
+  {
+    id: 'cefr',
+    name: 'CEFR · Proficiency Framework',
+    anchors: [
+      { kind: 'section', id: 'macro', label: 'macro grid' },
+      { kind: 'level', id: 'A1' },
+      { kind: 'level', id: 'A2' },
+      { kind: 'level', id: 'B1' },
+      { kind: 'level', id: 'B2' },
+      { kind: 'level', id: 'C1' },
+      { kind: 'level', id: 'C2' },
+    ],
+    items: [
+      {
+        authors: 'Council of Europe',
+        year: 2020,
+        title: 'Common European Framework of Reference for Languages: Learning, Teaching, Assessment — Companion Volume',
+        venue: 'Council of Europe Publishing, Strasbourg',
+        note: 'The operative descriptor scales (A1–C2, plus Pre-A1, mediation, online interaction). Use these for level alignment.',
+      },
+      {
+        authors: 'Council of Europe',
+        year: 2001,
+        title: 'Common European Framework of Reference for Languages: Learning, Teaching, Assessment',
+        venue: 'Cambridge University Press',
+        note: 'The action-oriented approach and the six reference levels; global scale Table 1, p. 24.',
+      },
+      {
+        authors: 'North, B.',
+        year: 2014,
+        title: 'The CEFR in Practice',
+        venue: 'Cambridge University Press / English Profile Studies',
+        note: 'Written by a principal CEFR author; clarifies the intended use of the descriptors.',
+      },
+      {
+        authors: 'Hulstijn, J. H.',
+        year: 2007,
+        title: 'The shaky ground beneath the CEFR: Quantitative and qualitative dimensions of language proficiency',
+        venue: 'The Modern Language Journal, 91(4), 663–667',
+        note: 'Caveat: one descriptor can cover qualitatively different proficiencies; levels are bands, not cut-points.',
+      },
+    ],
+  },
+  {
+    id: 'thematic',
+    name: 'Thematic & Needs-Based Design',
+    anchors: [
+      { kind: 'theme', id: 'identity' },
+      { kind: 'theme', id: 'daily' },
+      { kind: 'theme', id: 'work' },
+      { kind: 'theme', id: 'travel' },
+      { kind: 'theme', id: 'media' },
+      { kind: 'theme', id: 'society' },
+    ],
+    items: [
+      {
+        authors: 'Long, M. H.',
+        year: 2015,
+        title: 'Second Language Acquisition and Task-Based Language Teaching',
+        venue: 'Wiley-Blackwell',
+        note: 'Needs analysis as the starting point for syllabus and theme choice.',
+      },
+      {
+        authors: 'Nayar, P. B.',
+        year: 1997,
+        title: 'ESL/EFL dichotomy today: Language politics or pragmatics?',
+        venue: 'TESOL Quarterly, 31(1), 9–37',
+        note: 'Treat Brazil as a context of expanding English use, not a deficient EFL setting.',
+      },
+      {
+        authors: 'Menezes de Souza, L. M. T., & Monte Mór, W.',
+        year: 2011,
+        title: 'Orientações Curriculares Nacionais — Línguas Estrangeiras',
+        venue: 'Brazilian Ministry of Education',
+        note: 'Critical-literacy (letramento crítico) grounding for theme content rooted in learners’ social worlds.',
+      },
+      {
+        authors: 'Laufer, B., & Hulstijn, J.',
+        year: 2001,
+        title: 'Incidental vocabulary acquisition in a second language: The construct of task-induced involvement',
+        venue: 'Applied Linguistics, 22(1), 1–26',
+        note: 'Involvement Load: themes that create need, search, and evaluation deepen everyday vocabulary.',
       },
     ],
   },

@@ -1,8 +1,93 @@
 # EFL Lesson Framework
 
-**The English as a Foreign Language Lesson Framework** — a CEFR-anchored macro grid (6 levels × 6 themes) and a seven-phase micro template for 60-minute lessons, grounded in second language acquisition research and calibrated for Brazilian EFL classrooms.
+**Well-structured English lessons, built from accurate, well-sourced research.**
 
-Pick a level and theme in **Part 02**, an activity per phase in **Part 03**, and **Part 04** assembles the lesson — downloadable as PDF, copyable as Markdown. **Part 05** documents the SLA scholarship the framework rests on.
+A guided planning tool for Brazilian EFL teachers. It pairs a **CEFR-anchored macro
+grid** (six themes × six levels, A1–C2) with a **seven-phase, 60-minute micro lesson**
+grounded in second language acquisition research — and ties every level, theme, and
+activity to a citation you can read and trace.
+
+Plan a complete lesson in four steps, then take it to class as a **PDF** or a
+**student handout**. No install, no account — work stays on the device.
+
+> 🔗 **English with Pedro** · https://pedrobritx.github.io/EwP/
+
+![Welcome](docs/screenshots/01-welcome.png)
+
+---
+
+## What it does
+
+The framework works at two scales at once:
+
+- **Macro · curricular scale** — a CEFR grid of six durable themes that *spiral* across
+  levels (food at A1 → food sustainability at B2 → the philosophy of food at C1). Each
+  level carries the official CEFR descriptor and a planning emphasis; each theme carries
+  a needs-based rationale.
+- **Micro · lesson scale** — a seven-phase, 60-minute lesson template, from lowering the
+  affective filter through input, noticing, output, and feedback, to an **informal-input
+  bridge** (Phase 7) that follows learners back to the screen.
+
+Every step shows a concise description with an expandable **“Why this — the research”**
+panel: the construct, the citation, the classroom implication, and an honest caveat.
+
+![Level step with sources](docs/screenshots/03-level.png)
+
+## Plan a lesson in four steps
+
+1. **Level** — pick a CEFR level (A1–C2). See what it means and the research behind it.
+2. **Theme** — pick one of six thematic units. See why it was chosen.
+3. **Build** — step through the seven phases; a sensible activity is pre-selected per phase.
+4. **Your lesson** — a live lesson plan and student handout, editable inline.
+
+![Composed lesson](docs/screenshots/06-compose.png)
+
+## The manifesto
+
+A re-openable manifesto states the philosophy — the two-layer structure and three
+commitments: *informal input is curricular*, *L1 is a resource*, and *variability is the
+norm* — alongside the full dual-licence summary.
+
+![Manifesto](docs/screenshots/02-manifesto.png)
+
+## Exports
+
+- **Download PDF** opens the browser print dialog with a tuned `@media print`
+  stylesheet — choose *Save as PDF*. The editorial design (Fraunces, Newsreader,
+  paper / wine / gold) is preserved with selectable, vector text.
+- **Copy as Markdown** copies the lesson plan or handout.
+
+Every export carries the attribution credit (see the licence below). Chrome produces the
+cleanest PDF; Safari and Firefox are close.
+
+---
+
+## Licence
+
+This project is **dual-licensed** — see [LICENSE.md](./LICENSE.md) and
+[TERMS.md](./TERMS.md) for the full text.
+
+- ✅ **Free, with attribution** — individual teachers and tutors, public schools, and any
+  institution that charges students **no tuition** may use, adapt, and share the framework
+  and the lessons it produces.
+- 💼 **Commercial licence required** — tuition-charging private schools, franchises, and
+  commercial course providers need a paid, recurring commercial licence first. Pricing on
+  request: **pedrobritx@gmail.com**.
+
+**Required credit** on shared or exported materials:
+
+> Created with EFL Lesson Framework — by pedrobritx · https://pedrobritx.github.io/EwP/
+
+You may not resell or repackage the framework itself, remove the attribution, or use it to
+train commercial AI models without written permission. These are the project's own terms,
+provided as-is, and are not formal legal advice.
+
+### Support
+
+If the framework is useful to you, voluntary support is welcome (and is separate from the
+commercial licence): ☕ **https://buymeacoffee.com/pedrobritx**
+
+---
 
 ## Local development
 
@@ -10,47 +95,45 @@ Requires Node 20+.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5173/efll-framework/
 npm run build    # production bundle in dist/
 npm run preview  # preview the production build
 ```
 
-Selections persist in `localStorage` under the key `lf-selections`. To clear them, click **Reset** at the bottom of Part 04, or run `localStorage.removeItem('lf-selections')` in the browser console.
+Lesson selections persist in `localStorage` under `lf-selections`; the wizard's
+current step persists under `lf-wizard`. Clear selections with **Reset** at the bottom of
+*Your lesson*, or run `localStorage.clear()` in the browser console.
 
 ## Deploy to GitHub Pages
 
-1. Create a new GitHub repo named `efll-framework` (the name must match the `base` path in `vite.config.js`; if you pick a different name, update `base: '/<your-repo>/'`).
-2. Push this directory to that repo's `main` branch.
-3. In the repo's **Settings → Pages**, set **Source** to **GitHub Actions** (one-time manual step).
-4. The workflow at `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
-5. Site URL: `https://<your-github-username>.github.io/efll-framework/`.
+1. The repo name must match the `base` path in `vite.config.js` (`/efll-framework/`).
+2. In **Settings → Pages**, set **Source** to **GitHub Actions** (one-time).
+3. `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
+4. Site URL: `https://<username>.github.io/efll-framework/`.
 
 ## Project structure
 
 ```
-├── index.html                    # mount point + Google Fonts preload
-├── vite.config.js                # base path for project page URL
-├── package.json
-├── src/
-│   ├── main.jsx                  # React 18 root
-│   ├── App.jsx                   # all four parts + composer logic
-│   ├── styles.css                # editorial design system + @media print
-│   └── data/
-│       ├── themes.js             # 6 thematic units
-│       ├── levels.js             # 6 CEFR levels
-│       ├── macro.js              # 6×6 can-do + bridge matrix
-│       ├── phases.js             # 7 phases + activity options
-│       └── examples.js           # 252 concrete prompts
-├── .github/workflows/deploy.yml  # GitHub Pages deployment
-└── lesson-framework.jsx          # original monolithic artifact — kept for reference
+src/
+├── App.jsx                  # the guided wizard + composer
+├── components/              # diagrams, evidence panels, manifesto, licence notice
+├── data/
+│   ├── themes.js            # 6 thematic units (+ rationale, evidence)
+│   ├── levels.js            # 6 CEFR levels (+ descriptor, evidence)
+│   ├── macro.js             # 6×6 can-do + bridge matrix
+│   ├── phases.js            # 7 phases + activity options
+│   ├── evidence.js          # SLA evidence model
+│   ├── references.js        # annotated bibliography (CEFR, thematic, SLA)
+│   └── credit.js            # attribution / licence strings
+├── hooks/                   # selections + wizard state
+├── styles/                  # editorial design system + @media print
+└── wizard/steps.js          # step model
 ```
-
-## PDF export
-
-Clicking **Download PDF** triggers the browser's print dialog with a tuned `@media print` stylesheet — choose **Save as PDF**. The PDF preserves the editorial design (Fraunces, Newsreader, paper / wine / gold) and is vector-rendered with selectable text. Chrome produces the cleanest output; Safari and Firefox are close.
-
-Before printing, the app waits on `document.fonts.ready` so the PDF uses Fraunces / Newsreader, not the Times fallback.
 
 ## Credits
 
-A framework by **English with Pedro**. Grounded in Krashen · Long · Swain · Vygotsky · Lantolf · Norton · Dörnyei · Schmidt · Lyster · Ellis · Nation · García & Wei · Larsen-Freeman · Paiva.
+A framework by **English with Pedro** (Pedro Henrique Bahia Brito). Grounded in the SLA,
+CEFR, and critical-literacy scholarship documented in *The research* step and the
+annotated bibliography — Council of Europe · Krashen · Long · Swain · Vygotsky · Lantolf ·
+Norton · Darvin · Dörnyei · Schmidt · Lyster · Ellis · Nation · Laufer & Hulstijn ·
+García & Wei · Larsen-Freeman · Nayar · Menezes de Souza & Monte Mór.

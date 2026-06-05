@@ -104,6 +104,45 @@ export const EVIDENCE_ITEMS = {
     implication: 'Give learners repeated, time-bounded chances to use already-known language faster and with less hesitation.',
     limitation: 'Fluency work should not introduce too much new language or it stops being fluency work.',
   },
+
+  // ── Level / CEFR evidence ──────────────────────────────────────────────
+  cefrAlignment: {
+    construct: 'CEFR alignment',
+    citation: 'Council of Europe (2020, 2001); North (2014)',
+    groupId: 'cefr',
+    implication: 'Plan to the Companion-Volume descriptor scales for this level — the action-oriented can-do statements — rather than to the one-line global summary.',
+    limitation: 'Levels are bands, not precise cut-points; many descriptors were intuitively scaled (Alderson 2007), so treat the boundary as approximate.',
+  },
+  proficiencyVariability: {
+    construct: 'Uneven proficiency profiles',
+    citation: 'Hulstijn (2007); Alderson (2007)',
+    groupId: 'cefr',
+    implication: 'Expect learners to sit at different levels across skills; place by the skill the lesson targets, not by a single global label.',
+    limitation: 'One descriptor can cover qualitatively different proficiencies — basic versus extended, literacy-dependent cognition.',
+  },
+
+  // ── Theme / needs-based design evidence ────────────────────────────────
+  needsAnalysis: {
+    construct: 'Needs analysis',
+    citation: 'Long (2015)',
+    groupId: 'thematic',
+    implication: 'Choose the theme by what learners actually need to do in English outside class, not by coursebook order.',
+    limitation: 'Needs shift over time and differ within a group; revisit the theme rather than assuming one fits everyone.',
+  },
+  thematicSpiral: {
+    construct: 'Spiral progression',
+    citation: 'Larsen-Freeman & Cameron (2008)',
+    groupId: 'cdst',
+    implication: 'Treat each theme as deepening across levels — food at A1 becomes food sustainability at B2 — rather than a topic finished once.',
+    limitation: 'Development is non-linear and learner-specific; the spiral is a design metaphor, not a guarantee of lockstep mastery (Gregg 2010).',
+  },
+  eflContext: {
+    construct: 'English as expanding use',
+    citation: 'Nayar (1997); Menezes de Souza & Monte Mor (2011)',
+    groupId: 'thematic',
+    implication: "Anchor themes in learners' real Brazilian worlds and treat English as a tool of participation, not a deficient copy of a native-speaker norm.",
+    limitation: 'Critical-literacy framing is under-represented in mainstream SLA syntheses, so its empirical effect-size base is thin.',
+  },
 };
 
 const PHASE_EVIDENCE_KEYS = {
@@ -138,6 +177,17 @@ function addUnique(target, keys) {
   keys.forEach((key) => {
     if (!target.includes(key)) target.push(key);
   });
+}
+
+// Level and theme steps carry an explicit `evidence` array (keys into
+// EVIDENCE_ITEMS) rather than the phase/activity text-matching above — the
+// justification is curated per option, not inferred.
+export function getEvidenceForLevel(levelData) {
+  return (levelData?.evidence ?? []).map((key) => EVIDENCE_ITEMS[key]).filter(Boolean);
+}
+
+export function getEvidenceForTheme(themeData) {
+  return (themeData?.evidence ?? []).map((key) => EVIDENCE_ITEMS[key]).filter(Boolean);
 }
 
 export function getEvidenceForSelection(phase, activity) {
