@@ -1,0 +1,246 @@
+/* ─── RESEARCH REPORT (Part 05) ─── */
+/* The research step reads as an evidence report: a lead, an expandable "how to
+   read this", a stack of decision arguments, then the full bibliography by
+   strand. Built on the site's <details> idiom and tokens — no new colours/fonts.
+   Replaces the old card→modal reference grid. */
+
+.lf-report .lf-section-desc { max-width: 760px; }
+
+/* ── Intro: lead + caveats ── */
+.lf-report-intro { margin-top: 8px; max-width: 760px; }
+.lf-report-lead {
+  font-family: 'Newsreader', serif;
+  font-size: clamp(17px, 0.5vw + 16px, 20px);
+  line-height: 1.66;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.lf-report-aside {
+  margin-top: 22px;
+  border-top: 1px dotted var(--line);
+  border-bottom: 1px dotted var(--line);
+}
+.lf-report-aside > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+}
+.lf-report-aside > summary::-webkit-details-marker { display: none; }
+.lf-report-aside-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px 30px;
+  padding: 4px 0 24px;
+}
+.lf-report-caveat h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.lf-report-caveat p {
+  font-family: 'Newsreader', serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .lf-report-aside-body { grid-template-columns: 1fr; gap: 18px; }
+}
+
+/* ── Decision accordions ── */
+.lf-report-decisions {
+  margin-top: 44px;
+  border-top: 1px solid var(--line);
+}
+.lf-report-decision { border-bottom: 1px solid var(--line); }
+.lf-report-decision > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 6px;
+  transition: background 0.18s;
+}
+.lf-report-decision > summary::-webkit-details-marker { display: none; }
+.lf-report-decision > summary:hover { background: var(--paper-deep); }
+.lf-report-decision[open] > summary { background: var(--paper-deep); }
+.lf-report-decision-head {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.lf-report-decision-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+}
+.lf-report-decision-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: clamp(20px, 1.1vw + 16px, 26px);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+.lf-report-chevron {
+  color: var(--wine);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.lf-report-aside[open] > summary .lf-report-chevron,
+.lf-report-decision[open] > summary .lf-report-chevron,
+.lf-report-strand[open] > summary .lf-report-chevron {
+  transform: rotate(90deg);
+}
+
+.lf-report-decision-body {
+  max-width: 760px;
+  margin: 2px 0 4px 2px;
+  padding: 4px 6px 30px 22px;
+  border-left: 2px solid var(--gold);
+}
+.lf-report-rationale {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(17px, 0.5vw + 16px, 21px);
+  line-height: 1.5;
+  color: var(--wine-deep);
+  margin: 0 0 20px;
+}
+.lf-report-evidence { margin-top: 16px; }
+.lf-report-evidence-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.lf-report-evidence-temper .lf-report-evidence-label { color: var(--wine-light); }
+.lf-report-evidence p {
+  font-family: 'Newsreader', serif;
+  font-size: 16px;
+  line-height: 1.66;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* foot: "shows up in" jump pills + "sources" links into the bibliography */
+.lf-report-decision-foot {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lf-report-foot-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lf-report-foot-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  margin-right: 4px;
+}
+.lf-report-source-link {
+  background: none;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  padding: 5px 10px;
+  transition: color 0.18s, border-color 0.18s;
+}
+.lf-report-source-link:hover {
+  color: var(--wine);
+  border-color: var(--wine);
+}
+
+/* The "shows up in →" pills are the report's interactivity; re-enable the
+   cross-reference pills that wizard mode hides globally. The strand bibliography's
+   own "Jump to" rows (.lf-ref-group-anchor) stay hidden so it reads as clean
+   citations. */
+.lf-mode-wizard #references .lf-xref-pill { display: inline-flex; }
+
+/* ── Full bibliography by strand ── */
+.lf-report-biblio { margin-top: 54px; }
+.lf-report-biblio-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-mute);
+  margin: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.lf-report-strands { border-bottom: 1px solid var(--line); }
+.lf-report-strand { border-bottom: 1px dotted var(--line); }
+.lf-report-strand:last-child { border-bottom: none; }
+.lf-report-strand > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 6px;
+  transition: background 0.18s;
+}
+.lf-report-strand > summary::-webkit-details-marker { display: none; }
+.lf-report-strand > summary:hover { background: var(--paper-deep); }
+.lf-report-strand[open] > summary { background: var(--paper-deep); }
+.lf-report-strand-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.lf-report-strand-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--wine);
+  flex-shrink: 0;
+}
+.lf-report-strand-body { padding: 6px 6px 26px; }
+.lf-report-strand-body .lf-ref-modal { max-width: 760px; }
+
+/* Keyboard focus for all report disclosure controls. */
+.lf-report-aside > summary:focus-visible,
+.lf-report-decision > summary:focus-visible,
+.lf-report-strand > summary:focus-visible,
+.lf-report-source-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

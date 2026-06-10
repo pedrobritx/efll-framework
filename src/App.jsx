@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BookOpen,
   Check,
+  ChevronRight,
   Coffee,
   Copy,
   ExternalLink,
@@ -23,6 +24,8 @@ import {
   MACRO,
   PHASES,
   REFERENCE_GROUPS,
+  REPORT_INTRO,
+  DECISIONS,
   getEvidenceForSelection,
   getEvidenceForLevel,
   getEvidenceForTheme,
@@ -118,6 +121,28 @@ function ReferenceGroupBody({ group }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// Confirmation body for the stepper's "Start over" action — rendered in the
+// site's own Modal (not a native confirm) for visual consistency. Clearing a
+// lesson is destructive, so the affirmative button is the non-default choice.
+function ConfirmStartOver({ onConfirm, onCancel }) {
+  return (
+    <div className="lf-confirm">
+      <p className="lf-confirm-body">
+        This clears your current level, theme and activity choices and returns you to step one.
+        It can’t be undone.
+      </p>
+      <div className="lf-confirm-actions">
+        <button type="button" className="lf-btn lf-btn-ghost" onClick={onCancel}>
+          Keep my lesson
+        </button>
+        <button type="button" className="lf-btn lf-btn-primary" onClick={onConfirm}>
+          <RotateCcw size={14} aria-hidden /> Start over
+        </button>
+      </div>
     </div>
   );
 }
@@ -244,6 +269,15 @@ export default function App() {
   const openModal = useCallback((node, opts) => setModal({ node, title: opts?.title }), []);
   const closeModal = useCallback(() => setModal(null), []);
 
+  // Research report: open a strand's bibliography accordion and bring it into
+  // view (used by a decision's "Sources" links to reveal the full citations).
+  const openStrand = useCallback((groupId) => {
+    const el = document.getElementById(`ref-group-${groupId}`);
+    if (!el) return;
+    el.open = true;
+    el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+  }, []);
+
   // ─── DERIVED STATE ──────────────────────────────────────────────────────
   const level = selections.level;
   const theme = selections.theme;
@@ -359,6 +393,17 @@ export default function App() {
     setToast({ kind: 'info', label: 'Selections reset' });
     setTimeout(() => setToast(null), 2200);
   };
+
+  // "Start over" from the stepper: confirm (clearing a lesson can't be undone),
+  // then reset selections and return to the first step. Reuses resetAll.
+  const confirmStartOver = () =>
+    openModal(
+      <ConfirmStartOver
+        onConfirm={() => { resetAll(); wizard.setStep('level'); closeModal(); }}
+        onCancel={closeModal}
+      />,
+      { title: 'Start a new lesson?' }
+    );
 
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
   const getMarkdown = () => {
@@ -562,7 +607,7 @@ export default function App() {
         {/* NAV */}
         <nav ref={navRef} className="lf-nav">
           <div className="lf-nav-inner">
-            <div className="lf-monogram">EFL Lesson<span>·</span>framework</div>
+            <div className="lf-monogram">EFL Lesson<span>·</span>Framework</div>
             <div className="lf-nav-actions">
               <button
                 type="button"
@@ -595,6 +640,7 @@ export default function App() {
               isComplete={stepIsComplete}
               canGoTo={stepCanGoTo}
               onNavigate={(id) => wizard.setStep(id)}
+              onStartOver={confirmStartOver}
             />
           )}
         </nav>
@@ -1351,36 +1397,110 @@ export default function App() {
           </div>
         </section>
 
-        {/* PART 5 — REFERENCES */}
-        <section id="references" className="lf-section lf-references lf-reveal">
+        {/* PART 5 — RESEARCH REPORT */}
+        <section id="references" className="lf-section lf-references lf-report lf-reveal">
           <div className="lf-section-header">
             <div className="lf-section-num">05</div>
             <div className="lf-section-title">
               <div className="lf-section-kicker">The research</div>
-              <h2>Where each move <em>comes from.</em></h2>
+              <h2>Why the framework <em>is built this way.</em></h2>
               <p className="lf-section-desc">
-                Each phase in the micro lesson is grounded in second language acquisition principles. Open a
-                topic to read its bibliography and trace exactly where the research shows up in the EFL Lesson
-                Framework.
+                An evidence report on the framework’s design decisions — each move paired with the research
+                that motivates it and the research that complicates it. Expand a decision to read the
+                argument, or open the full bibliography by strand at the end.
               </p>
             </div>
           </div>
 
-          <div className="lf-references-grid">
-            {REFERENCE_GROUPS.map((group) => (
-              <button
-                key={group.id}
-                type="button"
-                className="lf-ref-card"
-                onClick={() => openModal(<ReferenceGroupBody group={group} />, { title: group.name })}
-              >
-                <span className="lf-ref-card-name">{group.name}</span>
-                <span className="lf-ref-card-meta">
-                  {group.items.length} reference{group.items.length === 1 ? '' : 's'}
-                  <ArrowUpRight size={14} aria-hidden />
-                </span>
-              </button>
+          {/* Lead + the four caveats the bibliography asks us to keep in view. */}
+          <div className="lf-report-intro">
+            <p className="lf-report-lead">{REPORT_INTRO.lead}</p>
+            <details className="lf-report-aside">
+              <summary>
+                <ChevronRight size={14} aria-hidden className="lf-report-chevron" />
+                <span>On reading this evidence</span>
+              </summary>
+              <div className="lf-report-aside-body">
+                {REPORT_INTRO.caveats.map((c) => (
+                  <div key={c.title} className="lf-report-caveat">
+                    <h4>{c.title}</h4>
+                    <p>{c.body}</p>
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
+
+          {/* Decision-first narrative — each is an expandable argument. */}
+          <div className="lf-report-decisions">
+            {DECISIONS.map((d, i) => (
+              <details key={d.id} className="lf-report-decision" open={i === 0}>
+                <summary>
+                  <span className="lf-report-decision-head">
+                    <span className="lf-report-decision-kicker">{d.kicker}</span>
+                    <span className="lf-report-decision-title">{d.title}</span>
+                  </span>
+                  <ChevronRight size={18} aria-hidden className="lf-report-chevron" />
+                </summary>
+                <div className="lf-report-decision-body">
+                  <p className="lf-report-rationale">{d.rationale}</p>
+                  <div className="lf-report-evidence">
+                    <span className="lf-report-evidence-label">The evidence</span>
+                    <p>{d.support}</p>
+                  </div>
+                  <div className="lf-report-evidence lf-report-evidence-temper">
+                    <span className="lf-report-evidence-label">But —</span>
+                    <p>{d.temper}</p>
+                  </div>
+                  <div className="lf-report-decision-foot">
+                    {d.phases?.length > 0 && (
+                      <div className="lf-report-foot-row">
+                        <span className="lf-report-foot-label">Shows up in</span>
+                        {d.phases.map((p) => (
+                          <XRefPill key={p} kind="phase" id={p} label={`Phase ${p}`} fromLabel={d.title} />
+                        ))}
+                      </div>
+                    )}
+                    {d.groups?.length > 0 && (
+                      <div className="lf-report-foot-row">
+                        <span className="lf-report-foot-label">Sources</span>
+                        {d.groups.map((gid) => (
+                          <button
+                            key={gid}
+                            type="button"
+                            className="lf-report-source-link"
+                            onClick={() => openStrand(gid)}
+                          >
+                            {refGroupName(gid)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </details>
             ))}
+          </div>
+
+          {/* Full bibliography — by strand. Reuses the modal body, now inline. */}
+          <div className="lf-report-biblio">
+            <h3 className="lf-report-biblio-head">Full bibliography — by strand</h3>
+            <div className="lf-report-strands">
+              {REFERENCE_GROUPS.map((group) => (
+                <details key={group.id} id={`ref-group-${group.id}`} className="lf-report-strand">
+                  <summary>
+                    <span className="lf-report-strand-name">{group.name}</span>
+                    <span className="lf-report-strand-meta">
+                      {group.items.length} ref{group.items.length === 1 ? '' : 's'}
+                      <ChevronRight size={14} aria-hidden className="lf-report-chevron" />
+                    </span>
+                  </summary>
+                  <div className="lf-report-strand-body">
+                    <ReferenceGroupBody group={group} />
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
 
           <div className="lf-ornament">❦ ❦ ❦</div>

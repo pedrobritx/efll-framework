@@ -83,6 +83,25 @@
   margin: 0 0 14px;
 }
 
+/* Confirm dialog (e.g. the stepper's "Start over"). */
+.lf-confirm-body {
+  font-family: 'Newsreader', serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0 0 24px;
+}
+.lf-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 460px) {
+  .lf-confirm-actions { flex-direction: column-reverse; }
+  .lf-confirm-actions .lf-btn { width: 100%; justify-content: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lf-modal { animation: none; }
 }

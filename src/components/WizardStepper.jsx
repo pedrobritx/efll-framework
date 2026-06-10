@@ -1,17 +1,17 @@
 import React from 'react';
-import { Check, BookOpen } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { STEP_META, STEPPER_STEPS } from '../wizard/steps.js';
 
-// The top progress stepper. Shows the four core steps plus an optional trailing
-// "research" node. States: current (wine), complete (gold tick), available
-// (clickable), locked (greyed, not yet reachable).
-function WizardStepper({ current, isComplete, canGoTo, onNavigate }) {
+// The top progress stepper. Shows the four core steps, then a trailing "Start
+// over" action (not a step — it clears the lesson and returns to step 1). Step
+// states: current (wine), complete (gold tick), available (clickable), locked
+// (greyed, not yet reachable).
+function WizardStepper({ current, isComplete, canGoTo, onNavigate, onStartOver }) {
   return (
     <nav className="lf-wizard-stepper" aria-label="Lesson planning steps">
       <ol>
         {STEPPER_STEPS.map((id, i) => {
           const meta = STEP_META[id];
-          const isOptional = id === 'learn';
           const state =
             current === id
               ? 'current'
@@ -22,10 +22,7 @@ function WizardStepper({ current, isComplete, canGoTo, onNavigate }) {
                   : 'locked';
           const locked = state === 'locked';
           return (
-            <li
-              key={id}
-              className={`lf-wizard-step-node is-${state} ${isOptional ? 'is-optional' : ''}`}
-            >
+            <li key={id} className={`lf-wizard-step-node is-${state}`}>
               <button
                 type="button"
                 onClick={() => !locked && onNavigate(id)}
@@ -34,13 +31,7 @@ function WizardStepper({ current, isComplete, canGoTo, onNavigate }) {
                 aria-disabled={locked || undefined}
               >
                 <span className="lf-wizard-node-num">
-                  {isOptional ? (
-                    <BookOpen size={14} aria-hidden />
-                  ) : state === 'complete' ? (
-                    <Check size={14} aria-hidden />
-                  ) : (
-                    i + 1
-                  )}
+                  {state === 'complete' ? <Check size={14} aria-hidden /> : i + 1}
                 </span>
                 <span className="lf-wizard-node-labels">
                   <span className="lf-wizard-node-label">{meta.label}</span>
@@ -50,6 +41,21 @@ function WizardStepper({ current, isComplete, canGoTo, onNavigate }) {
             </li>
           );
         })}
+        {/* Trailing action — clears the lesson and restarts (sits where the old
+            "research" node was). Not a step, so it carries no number/aria-current. */}
+        {onStartOver && (
+          <li className="lf-wizard-step-node lf-wizard-step-restart">
+            <button type="button" onClick={onStartOver} title="Clear selections and start a new lesson">
+              <span className="lf-wizard-node-num">
+                <RotateCcw size={14} aria-hidden />
+              </span>
+              <span className="lf-wizard-node-labels">
+                <span className="lf-wizard-node-label">Start over</span>
+                <span className="lf-wizard-node-sub">new lesson</span>
+              </span>
+            </button>
+          </li>
+        )}
       </ol>
     </nav>
   );
