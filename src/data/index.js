@@ -7,6 +7,7 @@ export { LEVELS } from './levels.js';
 export { MACRO } from './macro.js';
 export { PHASES, DEFAULT_PHASE_MINUTES } from './phases.js';
 export { REFERENCE_GROUPS } from './references.js';
+export { REPORT_INTRO, DECISIONS } from './rationale.js';
 export {
   EVIDENCE_ITEMS,
   getEvidenceForSelection,

@@ -43,6 +43,11 @@
 .lf-mode-wizard {
   padding-bottom: 140px;
 }
+/* The welcome step has no sticky nav bar (its CTA lives in the top nav), so that
+   reserved space would otherwise sit empty below the footer. Reclaim it. */
+.lf-mode-wizard[data-wstep='welcome'] {
+  padding-bottom: 0;
+}
 
 /* Everything hidden by default; each step reveals only what it needs. */
 .lf-mode-wizard .lf-section,
@@ -264,8 +269,23 @@
 .lf-wizard-step-node.is-locked button {
   opacity: 0.45;
 }
-.lf-wizard-step-node.is-optional .lf-wizard-node-num {
+/* "Start over" trailing action — set apart from the numbered steps by a hairline
+   and marked as an action (dotted ring) rather than a stop on the path. */
+.lf-wizard-step-restart {
+  margin-left: 8px;
+  padding-left: 4px;
+  border-left: 1px solid var(--line);
+}
+.lf-wizard-step-restart .lf-wizard-node-num {
   border-style: dotted;
+}
+.lf-wizard-step-restart button:hover .lf-wizard-node-num {
+  border-color: var(--wine);
+  border-style: solid;
+  color: var(--wine);
+}
+.lf-wizard-step-restart button:hover .lf-wizard-node-label {
+  color: var(--wine);
 }
 /* Compact the stepper on small screens: drop subtitles, then collapse to
    numerals for all but the current step so it never overflows the thumb zone. */

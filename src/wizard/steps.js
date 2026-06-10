@@ -15,9 +15,10 @@ export const STEP_META = {
   learn: { label: 'The research', sub: 'references' },
 };
 
-// Nodes rendered in the top stepper, in order. `learn` is an optional trailing
-// node (rendered with a book glyph rather than a numeral).
-export const STEPPER_STEPS = ['level', 'theme', 'activities', 'compose', 'learn'];
+// Nodes rendered in the top stepper, in order. The research (`learn`) step is
+// intentionally absent — it duplicated the top-right "Research" button — and a
+// non-step "Start over" action is appended in WizardStepper instead.
+export const STEPPER_STEPS = ['level', 'theme', 'activities', 'compose'];
 
 // CEFR ordering, low → high.
 const ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
