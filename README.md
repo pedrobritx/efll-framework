@@ -95,7 +95,7 @@ Requires Node 20+.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/efl-lesson-framework/
+npm run dev      # http://localhost:5173/
 npm run build    # production bundle in dist/
 npm run preview  # preview the production build
 ```
@@ -106,10 +106,16 @@ current step persists under `lf-wizard`. Clear selections with **Reset** at the 
 
 ## Deploy to GitHub Pages
 
-1. The repo name must match the `base` path in `vite.config.js` (`/efl-lesson-framework/`).
-2. In **Settings → Pages**, set **Source** to **GitHub Actions** (one-time).
-3. `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
-4. Site URL: `https://<username>.github.io/efl-lesson-framework/`.
+The site deploys to the root of its own custom subdomain, **https://lessonframework.britx.me**,
+rather than under a `/efl-lesson-framework/` path.
+
+1. In **Settings → Pages**, set **Source** to **GitHub Actions** (one-time), and set the
+   custom domain to `lessonframework.britx.me` (DNS + HTTPS are managed outside this repo).
+2. `.github/workflows/deploy.yml` builds and deploys on every push to `main`.
+3. `vite.config.js` defaults `base` to `/`, which is correct for root-of-domain hosting. To
+   build instead for a path-based deployment (e.g. a plain `https://<username>.github.io/efl-lesson-framework/`
+   project page, with no custom domain), set `VITE_BASE_PATH=/efl-lesson-framework/` when
+   running `npm run build`.
 
 ## Project structure
 
