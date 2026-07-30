@@ -2,23 +2,28 @@ import React from 'react';
 import { ArrowDown } from 'lucide-react';
 import { polar, annularSectorPath } from '../utils/geometry.js';
 
-function MicroArc({ phases, selectedId, onSelect, onUse, hideUseCta = false }) {
+// `minutes` optionally overrides each phase's default allocation — that is how a
+// chosen archetype reshapes the ring. Omit it and the arc falls back to
+// phase.defaultMin, so callers that show the template rather than a composed
+// lesson are unaffected.
+function MicroArc({ phases, selectedId, onSelect, onUse, hideUseCta = false, minutes = null }) {
   const cx = 250;
   const cy = 250;
   const rInner = 192;
   const rOuter = 228;
-  const totalMin = phases.reduce((s, p) => s + p.defaultMin, 0); // 60
+  const minutesOf = (p, i) => (minutes ? minutes[i] : p.defaultMin);
+  const totalMin = phases.reduce((s, p, i) => s + minutesOf(p, i), 0); // 60
 
   let acc = 0;
-  const segments = phases.map((p) => {
+  const segments = phases.map((p, i) => {
     const startMin = acc;
-    acc += p.defaultMin;
+    acc += minutesOf(p, i);
     const endMin = acc;
     const startDeg = -90 + (startMin / totalMin) * 360;
     const endDeg = -90 + (endMin / totalMin) * 360;
     const midDeg = (startDeg + endDeg) / 2;
     const [labelX, labelY] = polar(cx, cy, (rInner + rOuter) / 2, midDeg);
-    return { ...p, startMin, endMin, startDeg, endDeg, labelX, labelY };
+    return { ...p, min: minutesOf(p, i), startMin, endMin, startDeg, endDeg, labelX, labelY };
   });
 
   const selected = segments.find((s) => s.id === selectedId) || segments[0];
@@ -65,7 +70,7 @@ function MicroArc({ phases, selectedId, onSelect, onUse, hideUseCta = false }) {
               className="lf-arc-segment-group"
               role="button"
               tabIndex={0}
-              aria-label={`Select phase ${seg.id}: ${seg.name} — ${seg.defaultMin} minutes`}
+              aria-label={`Select phase ${seg.id}: ${seg.name} — ${seg.min} minutes`}
               aria-pressed={isSelected}
               onClick={() => onSelect(seg.id)}
               onKeyDown={handleKey(seg.id)}
@@ -88,7 +93,7 @@ function MicroArc({ phases, selectedId, onSelect, onUse, hideUseCta = false }) {
       <div className="lf-arc-description" aria-live="polite">
         <div className="lf-arc-desc-meta">
           <span>Phase {selected.id} of 7</span>
-          <span className="lf-arc-desc-time">· {selected.defaultMin} min · starts at {selected.startMin}'</span>
+          <span className="lf-arc-desc-time">· {selected.min} min · starts at {selected.startMin}'</span>
         </div>
         <h4 className="lf-arc-desc-name">{selected.name}</h4>
         <p className="lf-arc-desc-purpose">{selected.purpose}</p>

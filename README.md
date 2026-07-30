@@ -37,10 +37,21 @@ panel: the construct, the citation, the classroom implication, and an honest cav
 
 1. **Level** — pick a CEFR level (A1–C2). See what it means and the research behind it.
 2. **Theme** — pick one of six thematic units. See why it was chosen.
-3. **Build** — step through the seven phases; a sensible activity is pre-selected per phase.
+3. **Build** — optionally say which of the unit's eight lessons this is, then step through the
+   seven phases; a sensible activity is pre-selected per phase.
 4. **Your lesson** — a live lesson plan and student handout, editable inline.
 
 ![Composed lesson](docs/screenshots/06-compose.png)
+
+### Lessons within a unit
+
+A unit is eight lessons, and each splits the same 60 minutes differently: lesson 1 spends 15
+minutes on input and 10 on the communicative task; lesson 8 inverts that, with 25 on the task
+and 5 on input. Picking an **archetype** on the Build step redistributes the seven phases
+accordingly, and every export carries it.
+
+It is optional. Leave it as *Standalone* and the lesson keeps the default split — which is
+exactly what every previously saved lesson continues to do.
 
 ## The manifesto
 

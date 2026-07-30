@@ -6,6 +6,16 @@ export { THEMES } from './themes.js';
 export { LEVELS } from './levels.js';
 export { MACRO } from './macro.js';
 export { PHASES, DEFAULT_PHASE_MINUTES } from './phases.js';
+export {
+  ARCHETYPES,
+  STANDALONE,
+  RECOMMENDED_ARCHETYPE_ID,
+  ARCHETYPE_SYSTEM_EVIDENCE,
+  archetypeById,
+  phaseMinutesFor,
+  TIGHT_PHASE_MINUTES,
+  GENEROUS_PHASE_MINUTES,
+} from './archetypes.js';
 export { REFERENCE_GROUPS } from './references.js';
 export { REPORT_INTRO, DECISIONS } from './rationale.js';
 export {

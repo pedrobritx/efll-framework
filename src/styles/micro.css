@@ -82,3 +82,139 @@
 .lf-activity-best { color: var(--wine); font-weight: 500; font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
 .lf-activity-check { position: absolute; top: 16px; right: 16px; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--ink); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
 .lf-activity-card.selected .lf-activity-check { opacity: 1; }
+
+/* ─── ARCHETYPE SELECTOR (Part 03) ───────────────────────────────────────
+   Which lesson of the eight this is. Optional: it redistributes the same 60
+   minutes across the seven phases. Follows the .lf-level-btn strip pattern
+   from macro.css so the two selectors read as the same kind of control. */
+.lf-archetype {
+  margin-bottom: 32px;
+}
+.lf-archetype-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.lf-archetype-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--wine);
+}
+.lf-archetype-note {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-mute);
+}
+.lf-archetype-controls {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--line);
+  overflow-x: auto;
+  background: var(--paper-deep);
+  margin-bottom: 24px;
+}
+.lf-archetype-btn {
+  flex: 1;
+  min-width: 104px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink-soft);
+  text-align: left;
+  transition: all 0.2s;
+  position: relative;
+}
+.lf-archetype-btn:last-child { border-right: none; }
+.lf-archetype-btn:hover { background: var(--paper-shadow); }
+.lf-archetype-btn.active {
+  background: var(--wine-deep);
+  color: var(--paper);
+}
+.lf-archetype-num {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.lf-archetype-name {
+  display: block;
+  font-size: 9.5px;
+  opacity: 0.72;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+}
+.lf-archetype-rec {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* The resolved minute split, so the effect of the choice is legible before
+   stepping through the phases. */
+.lf-archetype-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.lf-archetype-split-cell {
+  flex: 1;
+  min-width: 56px;
+  padding: 8px 6px;
+  text-align: center;
+  border-right: 1px solid var(--line);
+  font-family: 'JetBrains Mono', monospace;
+}
+.lf-archetype-split-cell:last-child { border-right: none; }
+.lf-archetype-split-cell.is-total { background: var(--paper-deep); }
+.lf-archetype-split-phase {
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+}
+.lf-archetype-split-min {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2px;
+}
+
+/* A phase squeezed to 5 minutes or given 18+ needs a differently sized
+   activity. Flag both ends rather than silently ranking activities — the data
+   carries no per-activity duration to rank by. */
+.lf-phase-budget-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: var(--paper);
+  vertical-align: middle;
+}
+.lf-phase-budget-hint.is-tight { border-color: var(--wine-light); color: var(--wine); }
+.lf-phase-budget-hint.is-generous { border-color: var(--gold); color: var(--gold); }

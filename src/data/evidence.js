@@ -104,6 +104,15 @@ export const EVIDENCE_ITEMS = {
     implication: 'Give learners repeated, time-bounded chances to use already-known language faster and with less hesitation.',
     limitation: 'Fluency work should not introduce too much new language or it stops being fluency work.',
   },
+  strandBalanceOverTime: {
+    construct: 'Strand balance across a unit',
+    citation: 'Nation (2022)',
+    groupId: 'vocabulary',
+    implication:
+      'Balance the four strands across the whole unit rather than inside every lesson. One lesson can lean hard on input and another on output — what matters is that the unit evens out, which is what the eight archetypes distribute.',
+    limitation:
+      'The balance is a planning heuristic, not a measured dose. It tells you no strand was quietly dropped across the sequence; it does not tell you any single lesson was correctly weighted.',
+  },
 
   // ── Level / CEFR evidence ──────────────────────────────────────────────
   cefrAlignment: {

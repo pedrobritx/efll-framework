@@ -12,6 +12,8 @@ import { CREDIT_MARKDOWN } from '../data/credit.js';
  * @param {Object} params.macroCell   – MACRO[level][theme] cell
  * @param {Function} params.getExample      – (phaseId) => string
  * @param {Function} params.selectedActivityIdx – (phaseId) => number
+ * @param {Function} params.minutesFor      – (phaseId) => number, from the chosen archetype
+ * @param {Object|null} params.archetypeData – archetype object, or null for a standalone lesson
  * @returns {string} Markdown content
  */
 export function buildMarkdown({
@@ -21,10 +23,16 @@ export function buildMarkdown({
   macroCell,
   getExample,
   selectedActivityIdx,
+  minutesFor,
+  archetypeData,
 }) {
+  const minutes = minutesFor ?? ((phaseId) => PHASES.find((p) => p.id === phaseId)?.defaultMin ?? 0);
   let md = `# Lesson Plan — ${themeData.name}\n\n`;
   md += `**Level:** ${level} · ${levelData.name}\n`;
-  md += `**Unit:** ${themeData.num}. ${themeData.name}\n\n`;
+  md += `**Unit:** ${themeData.num}. ${themeData.name}\n`;
+  md += archetypeData
+    ? `**Lesson:** ${archetypeData.id} of 8 · ${archetypeData.name} — ${archetypeData.focus}\n\n`
+    : `**Lesson:** standalone (default 60-minute split)\n\n`;
   md += `## Can-do outcomes\n\n`;
   macroCell.cando.forEach((c) => {
     md += `- I can ${c}.\n`;
@@ -40,7 +48,7 @@ export function buildMarkdown({
     const example = getExample(phase.id);
     const evidenceItems = getEvidenceForSelection(phase, activity).slice(0, 2);
     md += `### Phase ${phase.id} — ${phase.name}\n`;
-    md += `*${phase.defaultMin} min · ${activity.name}*\n\n`;
+    md += `*${minutes(phase.id)} min · ${activity.name}*\n\n`;
     md += `${example}\n\n`;
     md += `> **SLA grounding:** ${activity.sla}\n\n`;
     if (evidenceItems.length) {
