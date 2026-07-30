@@ -23,6 +23,14 @@ import {
   LEVELS,
   MACRO,
   PHASES,
+  ARCHETYPES,
+  RECOMMENDED_ARCHETYPE_ID,
+  ARCHETYPE_SYSTEM_EVIDENCE,
+  TIGHT_PHASE_MINUTES,
+  GENEROUS_PHASE_MINUTES,
+  EVIDENCE_ITEMS,
+  archetypeById,
+  phaseMinutesFor,
   REFERENCE_GROUPS,
   REPORT_INTRO,
   DECISIONS,
@@ -301,6 +309,27 @@ export default function App() {
   const selectedActivityIdx = (phaseId) => selections.phaseActivities[phaseId] ?? 0;
   const hasPhaseSelection = (phaseId) => selections.phaseActivities[phaseId] !== undefined;
   const allPhasesPicked = PHASES.every((p) => hasPhaseSelection(p.id));
+
+  // ─── ARCHETYPE ──────────────────────────────────────────────────────────
+  // Which lesson of the eight this is. Optional: with none chosen, the minute
+  // split is the standalone default and nothing about the lesson changes.
+  const archetype = selections.archetype ?? null;
+  const archetypeData = useMemo(() => archetypeById(archetype), [archetype]);
+  const archetypeEvidence = useMemo(
+    () =>
+      (archetypeData?.evidence ?? ARCHETYPE_SYSTEM_EVIDENCE)
+        .map((key) => EVIDENCE_ITEMS[key])
+        .filter(Boolean),
+    [archetypeData]
+  );
+  // Per-phase minutes for the chosen archetype, phase 1 at index 0. The single
+  // source for every minute figure shown or exported.
+  const phaseMinutes = useMemo(() => phaseMinutesFor(archetype), [archetype]);
+  const minutesFor = useCallback((phaseId) => phaseMinutes[phaseId - 1], [phaseMinutes]);
+  const setArchetype = useCallback(
+    (id) => setSelections((s) => ({ ...s, archetype: id })),
+    [setSelections]
+  );
   const activeActivityIdx = phaseData ? selectedActivityIdx(phaseData.id) : 0;
   const activeActivity = phaseData?.activities[activeActivityIdx] || null;
   const activeEvidence = useMemo(
@@ -408,7 +437,16 @@ export default function App() {
   // ─── EXPORT: MARKDOWN ───────────────────────────────────────────────────
   const getMarkdown = () => {
     if (!hasMacro) return '';
-    return buildMarkdown({ themeData, levelData, level, macroCell, getExample, selectedActivityIdx });
+    return buildMarkdown({
+      themeData,
+      levelData,
+      level,
+      macroCell,
+      getExample,
+      selectedActivityIdx,
+      minutesFor,
+      archetypeData,
+    });
   };
 
   // ─── EXPORT: HANDOUT MARKDOWN ───────────────────────────────────────────
@@ -416,6 +454,7 @@ export default function App() {
     if (!hasMacro) return '';
     let md = `# Student handout — ${themeData.name}\n\n`;
     md += `**Level:** ${level} · ${levelData.name}\n`;
+    if (archetypeData) md += `**Lesson:** ${archetypeData.id} of 8\n`;
     md += `**Date:** _________________________\n\n`;
     md += `## By the end of this lesson, you'll be able to\n\n`;
     macroCell.cando.forEach((c) => {
@@ -426,7 +465,7 @@ export default function App() {
       const actIdx = selectedActivityIdx(phase.id);
       const activity = phase.activities[actIdx];
       const task = getHandoutText(phase.id, actIdx);
-      md += `### Phase ${phase.id} — ${phase.name} (${phase.defaultMin} min)\n`;
+      md += `### Phase ${phase.id} — ${phase.name} (${minutesFor(phase.id)} min)\n`;
       md += `**${activity.name}**\n\n`;
       md += `**Your task:** ${task}\n\n`;
     });
@@ -488,7 +527,9 @@ export default function App() {
   };
 
   // ─── TOTAL ──────────────────────────────────────────────────────────────
-  const totalMinutes = PHASES.reduce((sum, p) => sum + p.defaultMin, 0);
+  // Derived rather than hardcoded to 60: every archetype budget sums to 60, so
+  // a total that reads otherwise means a bad budget rather than a display bug.
+  const totalMinutes = phaseMinutes.reduce((sum, m) => sum + m, 0);
 
   // ─── GUIDED WIZARD ──────────────────────────────────────────────────────
   // Disable global scroll-snap: the wizard shows one step at a time and snap
@@ -838,6 +879,94 @@ export default function App() {
             </div>
           </div>
 
+          {/* ARCHETYPE — which lesson of the eight this is. Optional: it
+              redistributes the same 60 minutes across the seven phases without
+              changing anything else about the lesson. */}
+          <div className="lf-archetype">
+            <div className="lf-archetype-head">
+              <span className="lf-archetype-kicker">Which lesson in the unit?</span>
+              <span className="lf-archetype-note">
+                Optional — it reshapes how the 60 minutes are split
+              </span>
+            </div>
+            <div className="lf-archetype-controls" role="group" aria-label="Lesson archetype">
+              <button
+                type="button"
+                className={`lf-archetype-btn ${archetype === null ? 'active' : ''}`}
+                onClick={() => setArchetype(null)}
+                aria-pressed={archetype === null}
+              >
+                <span className="lf-archetype-num">—</span>
+                <span className="lf-archetype-name">Standalone</span>
+              </button>
+              {ARCHETYPES.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className={`lf-archetype-btn ${archetype === a.id ? 'active' : ''}`}
+                  onClick={() => setArchetype(a.id)}
+                  aria-pressed={archetype === a.id}
+                  title={`${a.name} — ${a.focus}`}
+                >
+                  <span className="lf-archetype-num">{a.id}</span>
+                  <span className="lf-archetype-name">{a.name}</span>
+                  {a.id === RECOMMENDED_ARCHETYPE_ID && archetype === null && (
+                    <span className="lf-archetype-rec">suggested</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="lf-step-desc">
+              <div className="lf-step-desc-head">
+                <span className="lf-step-desc-tag">
+                  {archetypeData ? `Lesson ${archetypeData.id} of 8 · ${archetypeData.name}` : 'Standalone lesson'}
+                </span>
+                <span className="lf-step-desc-sub">
+                  {archetypeData ? archetypeData.aka !== archetypeData.name ? `also called ${archetypeData.aka}` : 'archetype' : 'default 60-minute split'}
+                </span>
+              </div>
+              <p className="lf-step-desc-lead">
+                {archetypeData
+                  ? archetypeData.focus
+                  : 'A single 60-minute lesson with no unit context. Phases keep their default allocation.'}
+              </p>
+              <p className="lf-step-desc-why">
+                <strong>Planning emphasis · </strong>
+                {archetypeData
+                  ? archetypeData.whyThisArchetype
+                  : `A unit is eight lessons, and each one splits the hour differently — lesson 1 spends 15 minutes on input, lesson 8 spends 25 on the task. Pick one above if you are planning a sequence. Lesson ${RECOMMENDED_ARCHETYPE_ID} is the balanced choice.`}
+              </p>
+              <div className="lf-archetype-split" aria-label="Minutes per phase">
+                {PHASES.map((p, i) => (
+                  <span key={p.id} className="lf-archetype-split-cell">
+                    <span className="lf-archetype-split-phase">P{p.id}</span>
+                    <span className="lf-archetype-split-min">{phaseMinutes[i]}′</span>
+                  </span>
+                ))}
+                <span className="lf-archetype-split-cell is-total">
+                  <span className="lf-archetype-split-phase">total</span>
+                  <span className="lf-archetype-split-min">{totalMinutes}′</span>
+                </span>
+              </div>
+              {archetypeEvidence.length > 0 && (
+                <button
+                  type="button"
+                  className="lf-sources-btn"
+                  onClick={() => openModal(
+                    <EvidencePanel
+                      items={archetypeEvidence}
+                      context={archetypeData ? `Lesson ${archetypeData.id} of 8 · ${archetypeData.name}` : 'Lesson archetypes'}
+                    />,
+                    { title: archetypeData ? `Why this lesson shape — ${archetypeData.name}` : 'Why lesson archetypes' },
+                  )}
+                >
+                  <BookOpen size={13} aria-hidden /> {archetypeData ? 'Why this lesson shape' : 'Why archetypes'} — {archetypeEvidence.length} source{archetypeEvidence.length === 1 ? '' : 's'}
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="lf-wizard-arc">
             <MicroArc
               phases={PHASES}
@@ -845,6 +974,7 @@ export default function App() {
               onSelect={(id) => setActivePhase(id)}
               onUse={() => {}}
               hideUseCta
+              minutes={phaseMinutes}
             />
           </div>
 
@@ -984,11 +1114,17 @@ export default function App() {
               {/* CONTEXT STRIP */}
               <div className="lf-compose-context">
                 <div className="lf-compose-context-col">
-                  <div className="lf-compose-context-label">Level · Theme</div>
-                  <div className="lf-compose-context-archetype">
-                    {level} · {themeData.name}
+                  <div className="lf-compose-context-label">
+                    {archetypeData ? `Lesson ${archetypeData.id} of 8` : 'Level · Theme'}
                   </div>
-                  <div className="lf-compose-context-archetype-focus">{levelData.name} — {levelData.desc}</div>
+                  <div className="lf-compose-context-archetype">
+                    {archetypeData ? archetypeData.name : `${level} · ${themeData.name}`}
+                  </div>
+                  <div className="lf-compose-context-archetype-focus">
+                    {archetypeData
+                      ? `${level} · ${themeData.name} — ${archetypeData.focus}`
+                      : `${levelData.name} — ${levelData.desc}`}
+                  </div>
                 </div>
                 <div className="lf-compose-context-col">
                   <div className="lf-compose-context-label">Can-do outcomes · {level}</div>
@@ -1044,7 +1180,10 @@ export default function App() {
                 <div className="lf-compose-plan" id="panel-plan" role="tabpanel" aria-labelledby="tab-plan" tabIndex={-1}>
                   <div className="lf-compose-plan-header">
                     <div>
-                      <div className="lf-compose-plan-eyebrow">The lesson · 60 min · {level} {themeData.name}</div>
+                      <div className="lf-compose-plan-eyebrow">
+                        The lesson · {totalMinutes} min · {level} {themeData.name}
+                        {archetypeData && ` · lesson ${archetypeData.id} of 8`}
+                      </div>
                       <h3 className="lf-compose-plan-title">Lesson — {themeData.name}</h3>
                     </div>
                     <div className="lf-compose-plan-total">{totalMinutes} min</div>
@@ -1052,7 +1191,7 @@ export default function App() {
 
                   {PHASES.map((phase) => {
                     const Icon = phase.icon;
-                    const time = phase.defaultMin;
+                    const time = minutesFor(phase.id);
                     const actIdx = selectedActivityIdx(phase.id);
                     const activity = phase.activities[actIdx];
                     const isEditing = editingPhase === phase.id;
@@ -1071,7 +1210,19 @@ export default function App() {
                               <Icon size={18} className="lf-compose-phase-icon" />
                               <div className="lf-compose-phase-title">{phase.name}</div>
                             </div>
-                            <div className="lf-compose-phase-time">{time} min</div>
+                            <div className="lf-compose-phase-time">
+                              {time} min
+                              {archetypeData && time <= TIGHT_PHASE_MINUTES && (
+                                <span className="lf-phase-budget-hint is-tight" title="This archetype squeezes this phase — choose something that lands quickly.">
+                                  tight
+                                </span>
+                              )}
+                              {archetypeData && time >= GENEROUS_PHASE_MINUTES && (
+                                <span className="lf-phase-budget-hint is-generous" title="This archetype gives this phase room — choose something that can fill it.">
+                                  room to expand
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -1273,7 +1424,7 @@ export default function App() {
                             <div className="lf-handout-phase-title">{phase.name}</div>
                             <div className="lf-handout-phase-activity">{activity.name}</div>
                           </div>
-                          <div className="lf-handout-phase-time">{phase.defaultMin} min</div>
+                          <div className="lf-handout-phase-time">{minutesFor(phase.id)} min</div>
                         </div>
                         <div className="lf-handout-task-block">
                           <div className="lf-handout-task-label">

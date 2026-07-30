@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'lf-selections';
+// Deliberately still 1 after adding `archetype`. `loadSelections` discards the
+// entire payload on a version mismatch, so bumping this would wipe every saved
+// lesson to introduce one optional field. The spread below already gives a
+// pre-archetype payload the new default, which is what an additive field needs.
 const SCHEMA_VERSION = 1;
 
 const defaultSelections = {
   schemaVersion: SCHEMA_VERSION,
   level: null,
   theme: null,
+  archetype: null,     // 1–8, or null for a standalone lesson (see data/archetypes.js)
   phaseActivities: {}, // { [phaseId]: activityIndex }
   editedExamples: {},  // { [phaseId]: customString }
   editedHandouts: {},  // { [phaseId]: customTaskString }
