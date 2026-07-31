@@ -114,8 +114,11 @@ npm install
 npm run dev       # http://localhost:5173/
 npm run build     # production bundle in dist/
 npm run preview   # preview the production build
-npm run validate  # check the framework data against schemas/
+npm run validate     # check the framework data against schemas/
+npm run check-links  # check every relative markdown link resolves
 ```
+
+Both run in CI on every pull request.
 
 Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Note that the dual
 licence requires a sign-off on every commit.
@@ -169,7 +172,9 @@ src/
 └── wizard/steps.js          # step model
 
 schemas/                     # JSON Schema (draft 2020-12) for the framework data
-tools/validate.mjs           # `npm run validate` — runs in CI on every PR
+tools/
+├── validate.mjs             # `npm run validate`    — data conformance + invariants
+└── check-links.mjs          # `npm run check-links` — relative markdown links resolve
 docs/                        # pedagogy, canon, research
 ```
 

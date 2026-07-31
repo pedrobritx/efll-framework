@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "postbuild": "cp dist/index.html dist/404.html",
-    "validate": "node tools/validate.mjs"
+    "validate": "node tools/validate.mjs",
+    "check-links": "node tools/check-links.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.460.0",

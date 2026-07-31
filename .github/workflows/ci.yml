@@ -27,5 +27,10 @@ jobs:
         # a blank handout when it is short.
         run: npm run validate
 
+      - name: Check internal links
+        # Docs cite `src/data/*.js` paths constantly, and those paths move. A dangling
+        # relative link is invisible on GitHub until someone clicks it.
+        run: npm run check-links
+
       - name: Build
         run: npm run build
