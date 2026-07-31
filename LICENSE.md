@@ -1,6 +1,6 @@
 # EFL Lesson Framework — Licence
 
-Copyright © Pedro Henrique Bahia Brito ("English with Pedro").
+Copyright © Pedro Brito ("BRITX").
 
 This project uses a **dual licence**: free for individual teachers and
 tuition-free institutions with attribution, and a paid commercial licence for
