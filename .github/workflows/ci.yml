@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  # Scoped to the default branch: an unqualified `push` would run this twice on
+  # every pull-request commit, once for the push and once for pull_request.
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate framework data
+        # Schema conformance plus the invariants schemas cannot express: archetype
+        # budgets summing to 60, strand hours summing to 60, grid completeness, and
+        # one handout task per activity option — the index join that silently prints
+        # a blank handout when it is short.
+        run: npm run validate
+
+      - name: Build
+        run: npm run build

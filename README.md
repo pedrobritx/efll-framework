@@ -78,6 +78,11 @@ cleanest PDF; Safari and Firefox are close.
 This project is **dual-licensed** — see [LICENSE.md](./LICENSE.md) and
 [TERMS.md](./TERMS.md) for the full text.
 
+The source is public and the framework is free for the teachers it is built for, but
+because commercial use is restricted this is **source-available, not open source** in
+the OSI sense. Worth being precise about: "open source" is a defined term, and using it
+loosely invites arguments that the licence itself never intended.
+
 - ✅ **Free, with attribution** — individual teachers and tutors, public schools, and any
   institution that charges students **no tuition** may use, adapt, and share the framework
   and the lessons it produces.
@@ -106,10 +111,14 @@ Requires Node 20+.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/
-npm run build    # production bundle in dist/
-npm run preview  # preview the production build
+npm run dev       # http://localhost:5173/
+npm run build     # production bundle in dist/
+npm run preview   # preview the production build
+npm run validate  # check the framework data against schemas/
 ```
+
+Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Note that the dual
+licence requires a sign-off on every commit.
 
 Lesson selections persist in `localStorage` under `lf-selections`; the wizard's
 current step persists under `lf-wizard`. Clear selections with **Reset** at the bottom of

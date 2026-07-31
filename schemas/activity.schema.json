@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pedrobritx/efl-lesson-framework/schemas/activity.schema.json",
+  "title": "Activity Library entry",
+  "description": "One atomic, reusable instructional activity, per docs/platform/activity-library.md. An activity solves one instructional objective — \"Information Gap\" is an activity, \"complete 90-minute lesson\" is not.\n\nEvery `required` field here is one of the eleven publication rules in that specification's Validation Rules section. An activity failing any of them cannot be published to the library, which is why they are structural rather than advisory. External resources are referenced by id only, and no presentation formatting is permitted anywhere in the object.",
+
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "activityId",
+    "version",
+    "name",
+    "status",
+    "cefr",
+    "skills",
+    "interaction",
+    "time",
+    "objectives",
+    "procedure",
+    "successCriteria",
+    "accessibility",
+    "rendering"
+  ],
+
+  "properties": {
+    "activityId": {
+      "description": "Permanent identifier, e.g. ACT-ROLEPLAY-001. Never changes.",
+      "type": "string",
+      "pattern": "^ACT-[A-Z0-9-]+$"
+    },
+    "version": { "$ref": "common.schema.json#/$defs/semver" },
+    "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "status": { "$ref": "common.schema.json#/$defs/lifecycleStatus" },
+    "summary": { "type": "string" },
+    "description": { "type": "string" },
+    "keywords": { "type": "array", "items": { "type": "string" } },
+
+    "category": {
+      "description": "Position in the activity taxonomy.",
+      "type": "string",
+      "enum": [
+        "presentation",
+        "controlled-practice",
+        "semi-controlled-practice",
+        "communicative-production",
+        "assessment",
+        "reflection"
+      ]
+    },
+
+    "cefr": {
+      "description": "Supported levels. At least one, per validation rule 2.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/cefrLevel" }
+    },
+
+    "skills": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["primary"],
+      "properties": {
+        "primary": { "type": "array", "minItems": 1, "items": { "$ref": "common.schema.json#/$defs/skill" } },
+        "secondary": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/skill" } }
+      }
+    },
+
+    "mode": { "type": "string", "enum": ["controlled", "semi-controlled", "free-practice"] },
+
+    "interaction": {
+      "description": "Supported interaction modes. At least one, per validation rule 3.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/interaction" }
+    },
+
+    "phases": {
+      "description": "Phases of the canonical 7-phase template this activity fits.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/phaseId" }
+    },
+
+    "time": {
+      "description": "Minutes. `recommended` must be > 0, per validation rule 5.",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["recommended"],
+      "properties": {
+        "minimum": { "type": "integer", "minimum": 1 },
+        "maximum": { "type": "integer", "minimum": 1 },
+        "recommended": { "type": "integer", "minimum": 1 }
+      }
+    },
+
+    "classSize": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "minimum": { "type": "integer", "minimum": 1 },
+        "maximum": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+
+    "ageGroups": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["children", "teenagers", "adults", "mixed"] }
+    },
+
+    "energy": { "type": "string", "enum": ["low", "medium", "high"] },
+    "noise": { "type": "string", "enum": ["low", "medium", "high"] },
+    "movement": { "type": "string", "enum": ["stationary", "walking", "physical"] },
+    "preparation": { "type": "string", "enum": ["none", "low", "medium", "high"] },
+    "teacherWorkload": { "type": "string", "enum": ["low", "medium", "high"] },
+
+    "objectives": {
+      "description": "At least one learning objective, per validation rule 1.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["type", "description"],
+        "properties": {
+          "type": { "$ref": "common.schema.json#/$defs/skill" },
+          "description": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "bloom": { "$ref": "common.schema.json#/$defs/bloomLevel" }
+        }
+      }
+    },
+
+    "prerequisites": { "type": "array", "items": { "type": "string" } },
+
+    "materials": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "required": { "type": "array", "items": { "type": "string" } },
+        "optional": { "type": "array", "items": { "type": "string" } },
+        "digital": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "procedure": {
+      "description": "Ordered steps, not paragraphs. At least one, per validation rule 4.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["step", "actor", "instruction"],
+        "properties": {
+          "step": { "type": "integer", "minimum": 1 },
+          "actor": { "type": "string", "enum": ["teacher", "student", "pair", "group", "class"] },
+          "instruction": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "duration": { "type": "integer", "minimum": 0 },
+          "expectedOutcome": { "type": "string" }
+        }
+      }
+    },
+
+    "resources": {
+      "description": "Referenced by id only, per validation rule 10. No embedded assets.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "type": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      }
+    },
+
+    "parameters": {
+      "description": "Configurable aspects that can change without changing the activity's identity — scenario, difficulty, timing, grouping.",
+      "type": "object"
+    },
+
+    "variables": {
+      "description": "Template variables the AI fills before rendering, e.g. {{topic}}, {{cefr}}, {{profession}}.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^\\{\\{[a-z_]+\\}\\}$" }
+    },
+
+    "variants": { "type": "array", "items": { "type": "string" } },
+
+    "successCriteria": {
+      "description": "Observable and countable. At least one, per validation rule 6. \"Student asks at least five follow-up questions\" qualifies; \"student communicates better\" does not.",
+      "$ref": "common.schema.json#/$defs/nonEmptyStringArray"
+    },
+
+    "differentiation": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "lowerLevel": { "type": "string" },
+        "higherLevel": { "type": "string" },
+        "fastFinishers": { "type": "string" },
+        "specialNeeds": { "type": "string" },
+        "largeClasses": { "type": "string" },
+        "onlineClasses": { "type": "string" },
+        "oneToOne": { "type": "string" }
+      }
+    },
+
+    "accessibility": {
+      "description": "Required even when every value is false or unknown, per validation rule 7 — silence about accessibility is not the same as a considered answer.",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["visualImpairment", "hearingImpairment", "dyslexia", "motorImpairment"],
+      "properties": {
+        "visualImpairment": { "$ref": "#/$defs/support" },
+        "hearingImpairment": { "$ref": "#/$defs/support" },
+        "dyslexia": { "$ref": "#/$defs/support" },
+        "adhd": { "$ref": "#/$defs/support" },
+        "autism": { "$ref": "#/$defs/support" },
+        "motorImpairment": { "$ref": "#/$defs/support" },
+        "colourIndependent": { "$ref": "#/$defs/support" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "assessment": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "methods": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["rubric", "observation", "checklist", "peer", "self", "teacher", "ai"] }
+        },
+        "evidence": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/skill" } },
+        "rubricId": { "type": "string" }
+      }
+    },
+
+    "commonProblems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["problem", "solution"],
+        "properties": {
+          "problem": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "solution": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+        }
+      }
+    },
+
+    "teacherTips": { "type": "array", "items": { "type": "string" } },
+    "extensions": { "type": "array", "items": { "type": "string" } },
+    "relatedActivities": { "type": "array", "items": { "type": "string", "pattern": "^ACT-[A-Z0-9-]+$" } },
+
+    "rendering": {
+      "description": "Renderer compatibility must be declared, per validation rule 8. This states which profiles the activity supports — never how it looks, per validation rule 9.",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["profiles"],
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["presentation", "worksheet", "teacher-guide", "homework", "quiz", "student-notes", "printable-lesson"]
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "analytics": {
+      "description": "Usage telemetry. Written by the platform, not by authors.",
+      "type": "object"
+    },
+
+    "slaGrounding": {
+      "description": "Named research supporting the activity. Optional here, but its absence is reported by tools/validate.mjs.",
+      "type": "string"
+    }
+  },
+
+  "$defs": {
+    "support": {
+      "description": "Whether the activity supports this accommodation. `unknown` is an honest answer; omitting the field is not.",
+      "oneOf": [{ "type": "boolean" }, { "type": "string", "enum": ["unknown", "partial"] }]
+    }
+  }
+}

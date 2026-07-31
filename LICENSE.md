@@ -49,6 +49,17 @@ the following credit, with the link intact:
 The app's own exports (Markdown and PDF) include this credit automatically. Do not
 remove it.
 
+### 4.1 Reserved rights of the copyright holder
+
+The copyright holder retains all rights in the Work, including the right to use it
+in their own products under different terms. In particular, **BRITX products —
+including the Lexis platform — may use the Work and distribute materials generated
+with it without the §4 attribution.**
+
+This is stated explicitly because §1 defines the Work to include the materials it
+generates, which would otherwise oblige the copyright holder's own products to
+credit the copyright holder. No third party gains any right from this clause.
+
 ## 5. Restrictions
 
 You may **not**, without prior written permission:

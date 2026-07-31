@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pedrobritx/efl-lesson-framework/schemas/framework.schema.json",
+  "title": "EFL Lesson Framework data",
+  "description": "Schemas for the framework's own data modules under src/data/. These describe the shapes as authored — src/data is the single source of truth, and the validator reads it directly rather than through a generated copy, so the two cannot drift.",
+
+  "$defs": {
+    "themes": {
+      "description": "src/data/themes.js — the six durable themes.",
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "num"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/themeId" },
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "num": { "type": "string", "enum": ["I", "II", "III", "IV", "V", "VI"] },
+          "description": { "type": "string" },
+          "rationale": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "levels": {
+      "description": "src/data/levels.js — six CEFR levels with Nation's four-strand hour budget per 60-hour block.",
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "name", "desc", "hours"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/cefrLevel" },
+          "label": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "desc": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "hours": {
+            "description": "i=meaning-focused input, o=output, l=language-focused learning, f=fluency. Must total 60.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["i", "o", "l", "f"],
+            "properties": {
+              "i": { "type": "integer", "minimum": 0 },
+              "o": { "type": "integer", "minimum": 0 },
+              "l": { "type": "integer", "minimum": 0 },
+              "f": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "cefrDescriptor": { "type": "string" },
+          "whyThisLevel": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "phases": {
+      "description": "src/data/phases.js — the canonical 7-phase lesson template.",
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "time", "defaultMin", "purpose", "sla", "activities"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/phaseId" },
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "time": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "defaultMin": {
+            "description": "Standalone-lesson allocation. Overridden per archetype; the seven must total 60.",
+            "type": "integer",
+            "minimum": 1
+          },
+          "purpose": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "sla": {
+            "description": "Named research the phase rests on. A phase with no grounding is not part of this framework.",
+            "$ref": "common.schema.json#/$defs/nonEmptyString"
+          },
+          "activities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["name", "best", "sla"],
+              "properties": {
+                "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+                "best": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+                "sla": { "$ref": "common.schema.json#/$defs/nonEmptyString" }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "archetypes": {
+      "description": "src/data/archetypes.js — the 8 lesson archetypes. phaseMinutes is load-bearing: every displayed and exported minute derives from it.",
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "aka", "focus", "phaseMinutes", "whyThisArchetype", "evidence"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/archetypeId" },
+          "name": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "aka": {
+            "description": "Course Syllabus name for the same position. Beware: \"Productive Stretch\" is the name of archetype 5 and the aka of archetype 7 — resolve by id only.",
+            "$ref": "common.schema.json#/$defs/nonEmptyString"
+          },
+          "focus": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "phaseMinutes": {
+            "type": "array",
+            "minItems": 7,
+            "maxItems": 7,
+            "items": { "type": "integer", "minimum": 1 }
+          },
+          "whyThisArchetype": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "macro": {
+      "description": "src/data/macro.js — MACRO[level][theme] → { cando, bridge }. 36 cells.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A1", "A2", "B1", "B2", "C1", "C2"],
+      "patternProperties": {
+        "^(A1|A2|B1|B2|C1|C2)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity", "daily", "work", "travel", "media", "society"],
+          "patternProperties": {
+            "^(identity|daily|work|travel|media|society)$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["cando", "bridge"],
+              "properties": {
+                "cando": { "$ref": "common.schema.json#/$defs/nonEmptyStringArray" },
+                "bridge": {
+                  "description": "Named, level-calibrated content. Phase 7 is curricular, not residual, so this may not be empty.",
+                  "$ref": "common.schema.json#/$defs/nonEmptyStringArray"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "examples": {
+      "description": "src/data/examples.js — EXAMPLES[level][theme][phase] → teacher-facing prompt. 6 × 6 × 7 = 252.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["A1", "A2", "B1", "B2", "C1", "C2"],
+      "patternProperties": {
+        "^(A1|A2|B1|B2|C1|C2)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity", "daily", "work", "travel", "media", "society"],
+          "patternProperties": {
+            "^(identity|daily|work|travel|media|society)$": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["1", "2", "3", "4", "5", "6", "7"],
+              "patternProperties": {
+                "^[1-7]$": {
+                  "description": "A concrete, deliverable instruction — specific content, specific task. Not a placeholder.",
+                  "type": "string",
+                  "minLength": 20
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

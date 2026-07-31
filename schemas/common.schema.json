@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pedrobritx/efl-lesson-framework/schemas/common.schema.json",
+  "title": "ETS shared definitions",
+  "description": "Controlled vocabularies shared across every ETS schema. Referencing these rather than re-declaring enums is what keeps a theme id or a CEFR level from drifting between files.",
+
+  "$defs": {
+    "cefrLevel": {
+      "description": "CEFR level. The framework spans all six; the EwP flagship programme uses A2–C1 only (CANON.md D5).",
+      "type": "string",
+      "enum": ["A1", "A2", "B1", "B2", "C1", "C2"]
+    },
+
+    "programmeLevel": {
+      "description": "The four levels the EwP flagship programme covers.",
+      "type": "string",
+      "enum": ["A2", "B1", "B2", "C1"]
+    },
+
+    "themeId": {
+      "description": "One of the six durable themes, which spiral across every level.",
+      "type": "string",
+      "enum": ["identity", "daily", "work", "travel", "media", "society"]
+    },
+
+    "phaseId": {
+      "description": "Position in the canonical 7-phase lesson template (CANON.md D1).",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7
+    },
+
+    "archetypeId": {
+      "description": "Position of a lesson within its 8-lesson unit. Position is the canonical archetype identity — never resolve archetypes by name (CANON.md D2).",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+
+    "strandHours": {
+      "description": "Nation's four strands as hours per 60-hour block. Must total the level's blockHours (CANON.md D3).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "meaningFocusedInput",
+        "meaningFocusedOutput",
+        "languageFocusedLearning",
+        "fluencyDevelopment"
+      ],
+      "properties": {
+        "meaningFocusedInput": { "type": "integer", "minimum": 0 },
+        "meaningFocusedOutput": { "type": "integer", "minimum": 0 },
+        "languageFocusedLearning": { "type": "integer", "minimum": 0 },
+        "fluencyDevelopment": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "skill": {
+      "type": "string",
+      "enum": [
+        "Reading",
+        "Listening",
+        "Writing",
+        "Speaking",
+        "Grammar",
+        "Vocabulary",
+        "Pronunciation",
+        "Interaction",
+        "Mediation"
+      ]
+    },
+
+    "bloomLevel": {
+      "type": "string",
+      "enum": ["Remember", "Understand", "Apply", "Analyze", "Evaluate", "Create"]
+    },
+
+    "interaction": {
+      "type": "string",
+      "enum": ["individual", "pair", "group", "whole-class"]
+    },
+
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+
+    "lifecycleStatus": {
+      "type": "string",
+      "enum": ["draft", "experimental", "stable", "deprecated", "archived"]
+    }
+  }
+}
