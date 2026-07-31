@@ -1,6 +1,6 @@
 # Annotated Bibliography for ELT, SLA, and English-Language Assessment
 
-**Prepared for Pedro Brito — Translator, ESL Teacher ("English with Pedro"), CS/Full-Stack Student**
+**Prepared for Pedro Brito (BRITX) — translator, ESL teacher, CS/full-stack student**
 **Verification pass: May 2026 — page/paragraph locations re-checked against primary sources where accessible; explicit caveats flagged**
 
 ---

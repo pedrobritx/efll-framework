@@ -39,7 +39,16 @@ import {
   getEvidenceForTheme,
 } from './data/index.js';
 import { refsForAnchor } from './data/references.js';
-import { CREDIT_LINE, CREDIT_URL, COMMERCIAL_CONTACT, SUPPORT_URL } from './data/credit.js';
+import {
+  AUTHOR,
+  CREDIT_LINE,
+  CREDIT_URL,
+  CREDIT_HOST,
+  COMMERCIAL_CONTACT,
+  SUPPORT_URL,
+  LINKEDIN_URL,
+  GITHUB_URL,
+} from './data/credit.js';
 import { useSelections } from './hooks/useSelections.js';
 import { useWizard } from './hooks/useWizard.js';
 import { scrollBehavior } from './hooks/useReducedMotion.js';
@@ -1494,7 +1503,7 @@ export default function App() {
                   })}
 
                   <div className="lf-handout-footer">
-                    {CREDIT_LINE} · {CREDIT_URL.replace('https://', '')}
+                    {CREDIT_LINE} · {CREDIT_HOST}
                   </div>
                 </div>
               )}
@@ -1661,22 +1670,12 @@ export default function App() {
         <footer className="lf-footer">
           <div className="lf-footer-links">
             <a className="lf-footer-link" href={CREDIT_URL} target="_blank" rel="noopener noreferrer">
-              <ExternalLink size={12} /> English with Pedro
+              <ExternalLink size={12} /> {AUTHOR}
             </a>
-            <a
-              className="lf-footer-link"
-              href="https://www.linkedin.com/in/pedrobritx/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a className="lf-footer-link" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
               <Linkedin size={12} /> LinkedIn
             </a>
-            <a
-              className="lf-footer-link"
-              href="https://github.com/pedrobritx"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a className="lf-footer-link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
               <Github size={12} /> GitHub
             </a>
             <a className="lf-footer-link" href={SUPPORT_URL} target="_blank" rel="noopener noreferrer">
@@ -1695,8 +1694,8 @@ export default function App() {
           </div>
 
           <div className="lf-footer-line">
-            © {new Date().getFullYear()} · Pedro Henrique Bahia Brito · Free for individual &amp; tuition-free use
-            with attribution · Commercial licence required for tuition-charging schools.
+            © {new Date().getFullYear()} · {AUTHOR} · Free for individual &amp; tuition-free use with
+            attribution · Commercial licence required for tuition-charging schools.
           </div>
         </footer>
 

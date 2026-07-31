@@ -1,92 +1,70 @@
 # Contributing
 
-Thanks for wanting to improve the EFL Lesson Framework.
-
-Corrections to the pedagogy, better handout tasks, additional activity options with
-real SLA grounding, accessibility fixes, and bug reports are all welcome.
+Corrections to the pedagogy, better handout tasks, additional activity options with real
+SLA grounding, accessibility fixes, and bug reports are all welcome.
 
 ---
 
-## Before you send code: the sign-off
+## The sign-off
 
-This project is **dual-licensed** — free for individual teachers and tuition-free
-institutions, paid for tuition-charging institutions (see [LICENSE.md](./LICENSE.md)).
-Selling commercial licences requires the copyright holder to be able to license
-*the whole work*, including your contribution.
+This project is [dual-licensed](./LICENSE.md), and selling commercial licences requires
+the copyright holder to be able to license *the whole work* — including your
+contribution. By default you would keep copyright in what you contribute, which would
+leave the commercial licence unable to cover it.
 
-By default, you would keep copyright in whatever you contribute — which would leave
-the commercial licence unable to cover it. So every contribution needs a sign-off.
-
-We use the [Developer Certificate of Origin](https://developercertificate.org/) (DCO),
-plus one additional clause covering the dual licence. Add a `Signed-off-by` line to
-each commit:
+So every commit needs a sign-off:
 
 ```
 git commit -s -m "Fix the B1 media handout for phase 4"
 ```
 
-which appends:
+which appends `Signed-off-by: Your Name <your.email@example.com>`.
 
-```
-Signed-off-by: Your Name <your.email@example.com>
-```
+**By signing off you certify the [Developer Certificate of Origin](https://developercertificate.org/),
+and additionally grant the copyright holder a perpetual, worldwide, non-exclusive,
+royalty-free right to license your contribution under both the free and the commercial
+terms in LICENSE.md, including in BRITX products.**
 
-**By signing off you certify the DCO, and additionally grant the copyright holder a
-perpetual, worldwide, non-exclusive, royalty-free right to license your contribution
-under both the free and the commercial terms in LICENSE.md, including in BRITX
-products.**
+You keep copyright. You are granting a licence, not assigning ownership.
 
-You keep copyright in your contribution. You are granting a licence, not assigning
-ownership.
-
-Pull requests without a sign-off can't be merged. If you forget, amend with
-`git commit --amend -s` and force-push.
-
----
+Pull requests without a sign-off cannot be merged; amend with `git commit --amend -s`.
 
 ## What makes a good contribution
 
-**Pedagogical content** — activity options, handout tasks, prompts — must be:
+Pedagogical content — activity options, handout tasks, prompts — must be:
 
-- **grounded**: name the SLA construct and a real citation. `sla: 'Nation — fluency
+- **Grounded.** Name the SLA construct and a real citation. `sla: 'Nation — fluency
   development strand'` is the bar. If you cannot cite it, it does not go in.
-- **specific**: "Watch *The Good Place* S1E2, note 3 character adjectives" beats
-  "watch something in English."
-- **level-calibrated**: check `src/data/levels.js` and the surrounding entries in the
+- **Specific.** "Watch *The Good Place* S1E2, note 3 character adjectives" beats "watch
+  something in English."
+- **Level-calibrated.** Check `src/data/levels.js` and the surrounding entries in the
   cell you are editing.
 
-**Do not invent citations.** A plausible-looking reference to a paper that does not
-say what is claimed is worse than no citation, because it survives review by looking
-right. If you are unsure a source supports the claim, say so in the PR.
+**Do not invent citations.** A plausible reference to a paper that does not say what is
+claimed is worse than no citation, because it survives review by looking right. If you
+are unsure a source supports the claim, say so in the pull request.
 
-**Data changes must validate.** Run:
+## Scope
 
-```
-npm run validate
-```
-
-This checks archetype budgets sum to 60, strand hours sum to 60, macro-grid and
-prompt-library completeness, and handout tier calibration.
-
----
-
-## What belongs here, and what does not
-
-This repository owns **the pedagogy**: what is true for every teacher.
-
-It does **not** own students, accounts, persistence, or delivery — those live in the
-Lexis platform. If your change assumes a specific learner exists, it belongs there,
-not here.
-
----
+This repository owns **the pedagogy**: what is true for every teacher. It does not own
+students, accounts, persistence, or delivery — those belong to the Lexis platform. If
+your change assumes a specific learner exists, it belongs there.
 
 ## Before opening a pull request
 
 ```
 npm ci
-npm run build       # must succeed
-npm run validate    # must pass
+npm run build        # must succeed
+npm run validate     # must pass
+npm run check-links  # must pass
 ```
 
-Then describe *why* the change is right pedagogically, not just what it does. For
-content changes, that reasoning is the review.
+`validate` checks archetype budgets sum to 60, strand hours sum to 60, macro-grid and
+prompt-library completeness, and one handout task per activity option.
+
+Then describe *why* the change is right pedagogically, not just what it does. For content
+changes, that reasoning is the review.
+
+---
+
+**Pedro Brito (BRITX)** · [LinkedIn](https://www.linkedin.com/in/pedrobritx/) · [GitHub](https://github.com/pedrobritx)
