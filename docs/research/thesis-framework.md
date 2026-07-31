@@ -597,7 +597,7 @@ If continuing this work in a new AI conversation, the user can paste this snippe
 I'm continuing a project on Brazilian EFL teaching and a Master's-level
 thesis framework. Context:
 
-- I'm Pedro, an ESL teacher in Brasília (brand: "English with Pedro")
+- Pedro Brito (BRITX), an ESL teacher in Brasília
   with a Letras-Inglês degree and ongoing CS/full-stack studies.
 
 - I've developed a thesis framework: Direction C — "I Learned English

@@ -6,7 +6,7 @@
     /* Per-page attribution watermark (Chromium honours margin boxes; other
        engines ignore them and fall back to the end-of-document footers below). */
     @bottom-center {
-      content: "Created with EFL Lesson Framework — by pedrobritx";
+      content: "Created with EFL Lesson Framework — by Pedro Brito (BRITX)";
       font-family: 'JetBrains Mono', monospace;
       font-size: 7.5pt;
       color: #8a6d3b;
@@ -68,5 +68,5 @@
   .lf-compose-evidence-item strong { font-size: 9pt !important; color: var(--ink) !important; margin-right: 6px !important; }
   .lf-compose-evidence-item span { font-size: 7.5pt !important; color: var(--wine) !important; }
   .lf-compose-evidence-item p { font-size: 8.5pt !important; color: var(--ink-soft) !important; line-height: 1.35 !important; margin-top: 2px !important; }
-  .lf-compose-plan::after { content: "Created with EFL Lesson Framework — by pedrobritx · pedrobritx.github.io/EwP"; display: block; margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-size: 9.5pt; color: var(--wine); text-align: center; }
+  .lf-compose-plan::after { content: "Created with EFL Lesson Framework — by Pedro Brito (BRITX) · lessonframework.britx.me"; display: block; margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--line); font-family: 'Fraunces', serif; font-style: italic; font-size: 9.5pt; color: var(--wine); text-align: center; }
 }

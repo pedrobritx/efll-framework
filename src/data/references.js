@@ -20,6 +20,20 @@ export const REFERENCE_GROUPS = [
         note: 'Affective filter (Phase 1) and comprehensible input at i+1 (Phase 2).',
       },
       {
+        authors: 'Anderson, R. C.',
+        year: 1977,
+        title: 'The notion of schemata and the educational enterprise',
+        venue: 'In Anderson, Spiro & Montague (eds.), Schooling and the Acquisition of Knowledge, Erlbaum',
+        note: 'Schema activation improves comprehension of subsequent input — the second half of Phase 1.',
+      },
+      {
+        authors: 'VanPatten, B.',
+        year: 1996,
+        title: 'Input Processing and Grammar Instruction in Second Language Acquisition',
+        venue: 'Norwood, NJ: Ablex',
+        note: 'Processing instruction: learners parse for meaning before form, so input tasks must sequence meaning first (Phase 2 activity option).',
+      },
+      {
         authors: 'Krashen, S. D.',
         year: 2004,
         title: 'The Power of Reading: Insights from the Research',

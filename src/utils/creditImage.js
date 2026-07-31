@@ -1,10 +1,9 @@
-import { CREDIT_LINE, CREDIT_URL } from '../data/credit.js';
+import { CREDIT_LINE, CREDIT_HOST } from '../data/credit.js';
 
 // Renders the required attribution credit onto a canvas and downloads it as a
 // PNG, so teachers can drop a tidy credit badge into their own materials. Drawn
-// from CREDIT_LINE / CREDIT_URL (data/credit.js) so it can never drift from the
-// text shown in the licence notice. Uses the app's paper/wine palette and a
-// 2× scale for crisp output on retina screens.
+// from data/credit.js so it cannot drift from the licence notice. Uses the app's
+// paper/wine palette at 2× scale for crisp output on retina screens.
 export function downloadCreditImage() {
   if (typeof document === 'undefined') return;
 
@@ -14,7 +13,7 @@ export function downloadCreditImage() {
   const lineGap = 16;
   const creditFont = '600 32px "Fraunces", Georgia, serif';
   const urlFont = '400 20px "JetBrains Mono", ui-monospace, monospace';
-  const url = CREDIT_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const url = CREDIT_HOST;
 
   // First pass measures the text so the canvas fits it snugly.
   const measure = document.createElement('canvas').getContext('2d');
