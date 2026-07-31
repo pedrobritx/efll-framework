@@ -1,6 +1,26 @@
 # EFLL Framework v2 — Full Specification
 *English with Pedro · Lesson Framework expansion*
-*Status: locked decisions, ready for implementation*
+*Status: **superseded — history, not a build queue.** See the banner below.*
+
+> **This spec was deliberately not implemented as written, and the substitutes are better fitted.**
+> It says "locked decisions, ready for implementation" because that was true when it was written;
+> it stopped being true once the workspace was built differently and shipped.
+>
+> | This spec | What was built |
+> |---|---|
+> | `HashRouter` with `/compose` and `/compose/library` routes | No router. A wizard: welcome → level → theme → build → compose |
+> | `lf-active` + `lf-library` in `localStorage` | `lf-selections` + `lf-wizard`. No saved-lesson library |
+> | Handouts as three authored tiers per phase (`note` / `brief` / `full`) with answer keys — 252 entries to write | One student task per *activity option*, `HANDOUTS[level][theme][phase][activityIdx]` — **2,160 written**, all 36 cells complete |
+> | Archetype minutes select a handout tier | Archetype minutes drive the plan, the arc, and export density ([`src/data/archetypes.js`](./src/data/archetypes.js)) |
+>
+> **Still worth reading** for the pedagogical justification behind exercise-type assignment per
+> level, which survived intact and is reproduced in
+> [`docs/handout-authoring.md`](./docs/handout-authoring.md).
+>
+> **Genuinely unbuilt from this spec:** the saved-lesson library and answer keys. Both are real
+> gaps, not rejected ideas.
+>
+> Where this document and [`docs/CANON.md`](./docs/CANON.md) disagree, CANON wins.
 
 ---
 

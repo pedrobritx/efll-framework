@@ -78,6 +78,11 @@ cleanest PDF; Safari and Firefox are close.
 This project is **dual-licensed** — see [LICENSE.md](./LICENSE.md) and
 [TERMS.md](./TERMS.md) for the full text.
 
+The source is public and the framework is free for the teachers it is built for, but
+because commercial use is restricted this is **source-available, not open source** in
+the OSI sense. Worth being precise about: "open source" is a defined term, and using it
+loosely invites arguments that the licence itself never intended.
+
 - ✅ **Free, with attribution** — individual teachers and tutors, public schools, and any
   institution that charges students **no tuition** may use, adapt, and share the framework
   and the lessons it produces.
@@ -106,10 +111,17 @@ Requires Node 20+.
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173/
-npm run build    # production bundle in dist/
-npm run preview  # preview the production build
+npm run dev       # http://localhost:5173/
+npm run build     # production bundle in dist/
+npm run preview   # preview the production build
+npm run validate     # check the framework data against schemas/
+npm run check-links  # check every relative markdown link resolves
 ```
+
+Both run in CI on every pull request.
+
+Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Note that the dual
+licence requires a sign-off on every commit.
 
 Lesson selections persist in `localStorage` under `lf-selections`; the wizard's
 current step persists under `lf-wizard`. Clear selections with **Reset** at the bottom of
@@ -128,23 +140,42 @@ rather than under a `/efl-lesson-framework/` path.
    project page, with no custom domain), set `VITE_BASE_PATH=/efl-lesson-framework/` when
    running `npm run build`.
 
+## Documentation
+
+| Document | What it covers |
+|---|---|
+| [`docs/framework-overview.md`](./docs/framework-overview.md) | The pedagogy in prose — macro grid, four-strand budgets, the seven phases, the eight archetypes |
+| [`docs/CANON.md`](./docs/CANON.md) | Normative decisions. Where prose and `src/data/` disagree, data wins |
+| [`docs/research/`](./docs/research/) | The evidence base: SLA reference, annotated bibliography, the thesis this framework derives from |
+| [`docs/handout-authoring.md`](./docs/handout-authoring.md) | Level-calibration reference for handout tasks (partly superseded — read its banner) |
+
 ## Project structure
 
 ```
 src/
 ├── App.jsx                  # the guided wizard + composer
 ├── components/              # diagrams, evidence panels, manifesto, licence notice
-├── data/
+├── data/                    # ← the single source of truth for framework data
 │   ├── themes.js            # 6 thematic units (+ rationale, evidence)
-│   ├── levels.js            # 6 CEFR levels (+ descriptor, evidence)
-│   ├── macro.js             # 6×6 can-do + bridge matrix
-│   ├── phases.js            # 7 phases + activity options
+│   ├── levels.js            # 6 CEFR levels (+ descriptor, four-strand budget)
+│   ├── macro.js             # 6×6 can-do + informal-input bridge matrix
+│   ├── phases.js            # 7 phases + 60 activity options
+│   ├── archetypes.js        # 8 lesson archetypes + per-phase minute budgets
+│   ├── examples.js          # 252 teacher prompts (6 levels × 6 themes × 7 phases)
+│   ├── handouts.js          # 2,160 student tasks, one per activity option
 │   ├── evidence.js          # SLA evidence model
 │   ├── references.js        # annotated bibliography (CEFR, thematic, SLA)
+│   ├── rationale.js         # design rationale behind the data
 │   └── credit.js            # attribution / licence strings
 ├── hooks/                   # selections + wizard state
 ├── styles/                  # editorial design system + @media print
 └── wizard/steps.js          # step model
+
+schemas/                     # JSON Schema (draft 2020-12) for the framework data
+tools/
+├── validate.mjs             # `npm run validate`    — data conformance + invariants
+└── check-links.mjs          # `npm run check-links` — relative markdown links resolve
+docs/                        # pedagogy, canon, research
 ```
 
 ## Credits

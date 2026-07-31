@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pedrobritx/efl-lesson-framework/schemas/clm.schema.json",
+  "title": "Canonical Lesson Model v0.1",
+  "description": "A vendor-independent, renderer-independent representation of one lesson. Derived from docs/platform/canonical-lesson-model.md; this is the first executable form of a model the project has described in prose since the beginning (CANON.md D4, D8).\n\nThe CLM MUST NOT contain presentation information. Fonts, colours, slide numbers and page breaks belong to renderers. `renderingPreferences` is the single deliberate exception, and it is explicitly advisory — a renderer may ignore it.\n\nThe §22 validation rules of the source specification are split by severity: rules marked Error are enforced here as `required` and type constraints; rules marked Warning are enforced by tools/validate.mjs, because JSON Schema has no notion of a warning. Both are listed under `$comment` on the relevant subschema so the mapping stays visible.",
+
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": ["id", "schemaVersion", "lessonVersion", "metadata", "context", "activities"],
+
+  "properties": {
+    "id": {
+      "$comment": "§22 Error: every lesson MUST have a unique ID. Uniqueness across a corpus is checked by the validator; the format is checked here.",
+      "description": "Immutable identifier. Never reused, never regenerated (§P4).",
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "description": "Version of this schema the lesson was authored against. Independent of lessonVersion (§23).",
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "lessonVersion": {
+      "description": "Version of the lesson content itself.",
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+
+    "metadata": {
+      "description": "Administrative information only. Never pedagogy (§5).",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["author", "created", "language"],
+      "properties": {
+        "author": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "created": { "type": "string", "format": "date-time" },
+        "modified": { "type": "string", "format": "date-time" },
+        "language": { "description": "Language of instruction, BCP 47.", "type": "string", "minLength": 2 },
+        "license": { "type": "string" },
+        "source": { "type": "string" },
+        "repository": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "generatedWith": {
+          "description": "Which prompts at which versions produced this lesson, for reproducibility (AI Prompt Library §20).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "unevaluatedProperties": false,
+            "required": ["promptId", "version"],
+            "properties": {
+              "promptId": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+              "version": { "type": "string" },
+              "model": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "context": {
+      "description": "Who, what, where, why (§6).",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["cefr", "duration", "deliveryMode"],
+      "properties": {
+        "cefr": { "$ref": "common.schema.json#/$defs/cefrLevel" },
+        "duration": {
+          "$comment": "§22 Warning: activity durations SHOULD sum to lesson duration — checked by tools/validate.mjs.",
+          "description": "Total lesson length in minutes.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "deliveryMode": { "type": "string", "enum": ["online", "hybrid", "face-to-face"] },
+        "student": { "type": "string" },
+        "course": { "type": "string" },
+        "unit": { "type": ["string", "integer"] },
+        "lesson": { "type": ["string", "integer"] },
+        "pattern": {
+          "description": "The Pedagogical Pattern Library pattern this lesson instantiates. Defaults to the canonical 7-phase EFLL template (CANON.md D1).",
+          "type": "string",
+          "default": "pattern.efll.v2"
+        },
+        "patternVersion": { "type": "string" },
+        "theme": { "$ref": "common.schema.json#/$defs/themeId" },
+        "archetype": { "$ref": "common.schema.json#/$defs/archetypeId" },
+        "classSize": { "type": "integer", "minimum": 1 }
+      }
+    },
+
+    "objectives": {
+      "description": "Atomic objectives, never paragraphs (§7).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["id", "description", "cefr"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "description": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "cefr": {
+            "$comment": "§22 Error: every objective MUST have a CEFR level.",
+            "$ref": "common.schema.json#/$defs/cefrLevel"
+          },
+          "bloom": { "$ref": "common.schema.json#/$defs/bloomLevel" },
+          "priority": { "type": "string", "enum": ["primary", "secondary", "optional"] },
+          "competencies": { "type": "array", "items": { "type": "string" } },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "competencies": {
+      "description": "Separate from objectives; each links to the objectives that serve it (§8).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "unevaluatedProperties": false,
+        "required": ["id", "skill"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+          "skill": { "$ref": "common.schema.json#/$defs/skill" },
+          "descriptor": { "type": "string" },
+          "objectives": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+
+    "languageFocus": {
+      "description": "References to canonical language objects. Definitions live once, in the Knowledge Graph; lessons reference them (§9, EDM §2.3).",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "grammar": { "type": "array", "items": { "$ref": "#/$defs/grammarRef" } },
+        "vocabulary": { "type": "array", "items": { "$ref": "#/$defs/vocabularyItem" } },
+        "pronunciation": { "type": "array", "items": { "type": "string" } },
+        "functions": { "type": "array", "items": { "type": "string" } },
+        "discourse": { "type": "array", "items": { "type": "string" } },
+        "culture": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "resources": {
+      "description": "Referenced, never embedded (§10).",
+      "type": "array",
+      "items": { "$ref": "#/$defs/resource" }
+    },
+
+    "activities": {
+      "$comment": "§11: the lesson is not a list, it is a graph. `dependencies` carries the edges; the linear phase order is only the most common traversal.",
+      "description": "The activity graph — the heart of the model.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/activity" }
+    },
+
+    "assessments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assessment" }
+    },
+
+    "homework": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["estimatedTime", "activities"],
+      "properties": {
+        "estimatedTime": { "type": "integer", "minimum": 0 },
+        "activities": { "type": "array", "items": { "type": "string" } },
+        "objectives": { "type": "array", "items": { "type": "string" } },
+        "resources": { "type": "array", "items": { "type": "string" } },
+        "submission": { "type": "string" }
+      }
+    },
+
+    "reflection": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "teacher": { "type": "string" },
+        "student": { "type": "string" },
+        "ai": { "type": "string" },
+        "futureRecommendations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "teacherNotes": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "preparation": { "type": "array", "items": { "type": "string" } },
+        "classroomSetup": { "type": "string" },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "possibleProblems": { "type": "array", "items": { "type": "string" } },
+        "solutions": { "type": "array", "items": { "type": "string" } },
+        "alternativeActivities": { "type": "array", "items": { "type": "string" } },
+        "differentiation": { "type": "string" },
+        "fastFinishers": { "type": "string" },
+        "backupPlan": { "type": "string" }
+      }
+    },
+
+    "renderingPreferences": {
+      "$comment": "§18: hints only. A renderer MAY ignore these. This is the one place presentation intent is tolerated, and it is never authoritative.",
+      "description": "Advisory rendering hints.",
+      "type": "object"
+    },
+
+    "analytics": {
+      "description": "Derived metrics (§19). Computed, not authored.",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "properties": {
+        "teacherTalkingTime": { "type": "number", "minimum": 0, "maximum": 1 },
+        "studentTalkingTime": { "type": "number", "minimum": 0, "maximum": 1 },
+        "skillDistribution": { "type": "object" },
+        "vocabularyCount": { "type": "integer", "minimum": 0 },
+        "grammarDensity": { "type": "number", "minimum": 0 },
+        "bloomDistribution": { "type": "object" },
+        "cefrCoverage": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/cefrLevel" } },
+        "interactionBalance": { "type": "object" }
+      }
+    },
+
+    "extensions": {
+      "$comment": "§20: new capabilities attach here without a schema change.",
+      "description": "Namespaced extension data.",
+      "type": "object"
+    }
+  },
+
+  "$defs": {
+    "grammarRef": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "description": "Canonical grammar id, e.g. grammar.present-perfect. Never free text (Resource Catalog §12).",
+          "type": "string",
+          "pattern": "^grammar\\.[a-z0-9-]+$"
+        },
+        "version": { "type": "string" },
+        "cefr": { "$ref": "common.schema.json#/$defs/cefrLevel" },
+        "role": { "type": "string", "enum": ["primary", "secondary", "recycled"] }
+      }
+    },
+
+    "vocabularyItem": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["lemma"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^vocab\\.[a-z0-9-]+$" },
+        "lemma": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "pos": { "type": "string" },
+        "ipa": { "type": "string" },
+        "cefr": {
+          "$comment": "§22 Warning: every vocabulary item SHOULD include CEFR metadata — checked by tools/validate.mjs.",
+          "$ref": "common.schema.json#/$defs/cefrLevel"
+        },
+        "definition": { "type": "string" },
+        "example": { "type": "string" },
+        "collocations": { "type": "array", "items": { "type": "string" } },
+        "register": { "type": "string" },
+        "frequency": { "type": ["string", "integer"] }
+      }
+    },
+
+    "resource": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "type": {
+          "type": "string",
+          "enum": ["video", "audio", "image", "article", "book", "website", "document", "podcast", "interactive", "dataset", "transcript", "dialogue"]
+        },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "license": {
+          "$comment": "§22 Warning: every resource SHOULD specify a license — checked by tools/validate.mjs.",
+          "type": "string"
+        },
+        "source": { "type": "string" },
+        "retrievedAt": { "type": "string", "format": "date-time" },
+        "duration": { "type": "integer", "minimum": 0 },
+        "start": { "type": "string" },
+        "end": { "type": "string" },
+        "language": { "type": "string" },
+        "accent": { "type": "string" },
+        "transcript": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "accessibility": { "type": "object" }
+      }
+    },
+
+    "activity": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["id", "phase", "title", "duration", "blocks"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "phase": {
+          "$comment": "§22 Error: every activity MUST belong to a phase.",
+          "$ref": "common.schema.json#/$defs/phaseId"
+        },
+        "type": { "type": "string" },
+        "title": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "duration": { "type": "integer", "minimum": 1 },
+        "interaction": { "$ref": "common.schema.json#/$defs/interaction" },
+        "difficulty": { "$ref": "common.schema.json#/$defs/cefrLevel" },
+        "objectives": { "type": "array", "items": { "type": "string" } },
+        "resources": { "type": "array", "items": { "type": "string" } },
+        "blocks": {
+          "description": "Activities contain blocks, never raw text (§12).",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/block" }
+        },
+        "outputs": { "type": "array", "items": { "type": "string" } },
+        "dependencies": {
+          "description": "Ids of activities that must precede this one. These are the edges of the activity graph.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "block": {
+      "$comment": "§13: every block implements the same interface regardless of type, which is what lets new block types be added without changing the lesson engine.",
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["id", "type", "content"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text", "image", "video", "audio", "transcript", "vocabulary", "grammar",
+            "question", "discussion", "exercise", "roleplay", "table", "diagram",
+            "timeline", "poll", "reflection", "assessment"
+          ]
+        },
+        "content": { "description": "Type-specific payload. Shape is governed by the block type's own contract." },
+        "properties": { "type": "object" },
+        "rendererHints": { "type": "object" },
+        "visibility": {
+          "description": "Conditional rendering audience (Renderer Specifications §17).",
+          "type": "array",
+          "items": { "type": "string", "enum": ["teacher", "student", "both", "assessment", "homework", "presentation"] }
+        },
+        "extensions": { "type": "object" }
+      }
+    },
+
+    "assessment": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "required": ["id", "type", "objectives"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/nonEmptyString" },
+        "type": {
+          "type": "string",
+          "enum": ["diagnostic", "placement", "formative", "summative", "practice", "mock-exam", "homework", "certification", "exit-test"]
+        },
+        "objectives": {
+          "$comment": "§22 Error: every assessment MUST reference at least one objective.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "competencies": { "type": "array", "items": { "type": "string" } },
+        "rubric": { "type": ["string", "object"] },
+        "questions": { "type": "array", "items": { "type": "object" } },
+        "scoring": { "type": "object" },
+        "passingCriteria": { "type": ["string", "object"] },
+        "feedback": { "type": ["string", "object"] }
+      }
+    }
+  }
+}

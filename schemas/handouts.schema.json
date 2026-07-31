@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pedrobritx/efl-lesson-framework/schemas/handouts.schema.json",
+  "title": "Student handout library",
+  "description": "src/data/handouts.js — HANDOUTS[level][theme][phase][activityIdx] → one student-facing task string.\n\nThe library is keyed by ACTIVITY, not by exercise tier: a teacher picks an activity for each phase and the matching student instruction follows automatically. Each phase's array must have exactly as many entries as that phase has activity options in phases.js, since the index is the join — a short array silently yields an undefined task for the last activities. That length check is a cross-reference and lives in tools/validate.mjs.\n\nCoverage: 6 levels × 6 themes × [8,8,8,8,12,8,8] activities = 2,160 strings.\n\nThese are student-voice instructions (\"Your task\", \"You\"), distinct from the teacher-voice prompts in examples.js.",
+
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["A1", "A2", "B1", "B2", "C1", "C2"],
+  "patternProperties": {
+    "^(A1|A2|B1|B2|C1|C2)$": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "daily", "work", "travel", "media", "society"],
+      "patternProperties": {
+        "^(identity|daily|work|travel|media|society)$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["1", "2", "3", "4", "5", "6", "7"],
+          "patternProperties": {
+            "^[1-7]$": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "description": "A concrete instruction a learner can act on without further explanation. No bracketed placeholders.",
+                "type": "string",
+                "minLength": 20
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
