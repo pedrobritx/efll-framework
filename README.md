@@ -137,23 +137,40 @@ rather than under a `/efl-lesson-framework/` path.
    project page, with no custom domain), set `VITE_BASE_PATH=/efl-lesson-framework/` when
    running `npm run build`.
 
+## Documentation
+
+| Document | What it covers |
+|---|---|
+| [`docs/framework-overview.md`](./docs/framework-overview.md) | The pedagogy in prose — macro grid, four-strand budgets, the seven phases, the eight archetypes |
+| [`docs/CANON.md`](./docs/CANON.md) | Normative decisions. Where prose and `src/data/` disagree, data wins |
+| [`docs/research/`](./docs/research/) | The evidence base: SLA reference, annotated bibliography, the thesis this framework derives from |
+| [`docs/handout-authoring.md`](./docs/handout-authoring.md) | Level-calibration reference for handout tasks (partly superseded — read its banner) |
+
 ## Project structure
 
 ```
 src/
 ├── App.jsx                  # the guided wizard + composer
 ├── components/              # diagrams, evidence panels, manifesto, licence notice
-├── data/
+├── data/                    # ← the single source of truth for framework data
 │   ├── themes.js            # 6 thematic units (+ rationale, evidence)
-│   ├── levels.js            # 6 CEFR levels (+ descriptor, evidence)
-│   ├── macro.js             # 6×6 can-do + bridge matrix
-│   ├── phases.js            # 7 phases + activity options
+│   ├── levels.js            # 6 CEFR levels (+ descriptor, four-strand budget)
+│   ├── macro.js             # 6×6 can-do + informal-input bridge matrix
+│   ├── phases.js            # 7 phases + 60 activity options
+│   ├── archetypes.js        # 8 lesson archetypes + per-phase minute budgets
+│   ├── examples.js          # 252 teacher prompts (6 levels × 6 themes × 7 phases)
+│   ├── handouts.js          # 2,160 student tasks, one per activity option
 │   ├── evidence.js          # SLA evidence model
 │   ├── references.js        # annotated bibliography (CEFR, thematic, SLA)
+│   ├── rationale.js         # design rationale behind the data
 │   └── credit.js            # attribution / licence strings
 ├── hooks/                   # selections + wizard state
 ├── styles/                  # editorial design system + @media print
 └── wizard/steps.js          # step model
+
+schemas/                     # JSON Schema (draft 2020-12) for the framework data
+tools/validate.mjs           # `npm run validate` — runs in CI on every PR
+docs/                        # pedagogy, canon, research
 ```
 
 ## Credits
